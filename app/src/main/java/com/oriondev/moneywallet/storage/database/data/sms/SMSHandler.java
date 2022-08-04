@@ -4,11 +4,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.oriondev.moneywallet.model.CurrencyUnit;
 import com.oriondev.moneywallet.storage.database.Contract;
@@ -33,7 +31,6 @@ import java.util.stream.Stream;
 
 public class SMSHandler {
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void handleSMS(Context context, String originatingAddress, String dispOriginatingAddress, String message, long timestampMillis) {
         Log.d("SMSHandler", "handleSMS");
         ContentResolver contentResolver = context.getContentResolver();
@@ -58,7 +55,6 @@ public class SMSHandler {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Nullable
     protected ParsedDetails getParsedDetails(ContentResolver contentResolver, String originatingAddress, String dispOriginatingAddress,
                                              String message, long timestampMillis) {
@@ -142,51 +138,16 @@ public class SMSHandler {
             }
         }
         Log.d("SMS Handler", "No Formatter Matched for Sender " + originatingAddress + " " + dispOriginatingAddress + " Message " + message);
-//        if (checkSenderIsValid(originatingAddress) || checkSenderIsValid(dispOriginatingAddress)) {
-//            ParsedDetails details = new ParsedDetails();
-//
-//            Pattern amountP = Pattern.compile("(?i)(?:(?:RS|INR|MRP)\\.?\\s?)(\\d+(:?\\,\\d+)?(\\,\\d+)?(\\.\\d{1,2})?)");
-//            Matcher amountM = amountP.matcher(message);
-//            if (amountM.find()) {
-//                String amount = amountM.group(1);
-//                Log.d("SMSHandler Amount", amount);
-//                details.setAmount(Double.parseDouble(amount));
-//            } else {
-//                return null;
-//            }
-//            Pattern accP = Pattern.compile("(?i)(?:\\smade on|ur|made a\\s|in\\*)([A-Za-z]*\\s?-?\\s[A-Za-z]*\\s?-?\\s[A-Za-z]*\\s?-?)");
-//            Matcher accM = accP.matcher(message);
-//            if (accM.find()) {
-//                String acc = accM.group(1);
-//                Log.d("SMSHandler acc", acc);
-//                details.setAccount(acc);
-//            } else {
-//                return null;
-//            }
-//
-//            Pattern merchantP = Pattern.compile("(?i)(?:\\sat\\s|in\\*)([A-Za-z0-9]*\\s?-?\\s?[A-Za-z0-9]*\\s?-?\\.?)");
-//            Matcher merchantM = merchantP.matcher(message);
-//            if (merchantM.find()) {
-//                String merchant = merchantM.group(1);
-//                Log.d("SMSHandler merchant", merchant);
-//                details.setOtherParty(merchant);
-//            } else {
-//                return null;
-//            }
-//            return details;
-//        }
         return null;
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private LocalDate getLocalDate(String date, long timestampMillis) {
         List<String> formats = Stream.of("dd-MMM-yyyy", "dd-MMM-yy").collect(Collectors.toList());
         return parseWithFormat(date, formats, 0, timestampMillis);
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private LocalDate parseWithFormat(String date, List<String> formats, int index, long timestampMillis) {
         if (index >= formats.size()) {
             Log.e("SMSParsing", "Handle Date format : " + date);

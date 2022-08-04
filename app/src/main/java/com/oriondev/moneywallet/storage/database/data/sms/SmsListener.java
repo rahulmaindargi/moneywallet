@@ -3,20 +3,16 @@ package com.oriondev.moneywallet.storage.database.data.sms;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-
 public class SmsListener extends BroadcastReceiver {
     public static final String SMS_INTENT_ACTION = "android.provider.Telephony.SMS_RECEIVED";
     SMSHandler smsHandler = new SMSHandler();
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("SmsListenerNew", "Received");

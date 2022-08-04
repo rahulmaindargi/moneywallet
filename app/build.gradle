@@ -21,6 +21,9 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdk 32
+    packagingOptions {
+        exclude '**/SMS_Transaction_Format.json'
+    }
     defaultConfig {
         applicationId "com.oriondev.moneywallet"
         minSdkVersion 30

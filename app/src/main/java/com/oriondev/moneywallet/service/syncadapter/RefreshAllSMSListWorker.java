@@ -3,12 +3,10 @@ package com.oriondev.moneywallet.service.syncadapter;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Build;
 import android.provider.Telephony;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -25,7 +23,7 @@ public class RefreshAllSMSListWorker extends Worker {
         contentResolver = context.getContentResolver();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.R)
+
     @NonNull
     @Override
     public Result doWork() {

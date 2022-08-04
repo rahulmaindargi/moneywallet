@@ -568,11 +568,11 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
             }
             long currentWalletId = PreferenceManager.getCurrentWallet();
             if (currentWalletId == PreferenceManager.NO_CURRENT_WALLET) {
-                // if no wallet is set as current wallet, let the drawer to select the first
+                // if no wallet is set as current wallet, let the drawer to select the (first changed) Last (i.e. Total Wallet)
                 // wallet found and then fire the onProfileChanged callback that will automatically
                 // register the id inside the PreferenceManager and notify the changed to all the
                 // observer registered at that uri.
-                IProfile profile = mAccountHeader.getProfiles().get(0);
+                IProfile profile = mAccountHeader.getProfiles().get(mAccountHeader.getProfiles().size() - 1);
                 mAccountHeader.setActiveProfile(profile, true);
             } else {
                 mAccountHeader.setActiveProfile(currentWalletId);

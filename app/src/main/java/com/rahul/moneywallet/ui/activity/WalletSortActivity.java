@@ -7,15 +7,16 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
+
 import androidx.annotation.MenuRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import android.view.MenuItem;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.storage.database.Contract;
@@ -113,7 +114,7 @@ public class WalletSortActivity extends SinglePanelSimpleListActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
         Uri uri = DataContentProvider.CONTENT_WALLETS;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Contract.Wallet.ID,
                 Contract.Wallet.NAME,
                 Contract.Wallet.ICON

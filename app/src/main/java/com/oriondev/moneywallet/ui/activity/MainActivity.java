@@ -19,6 +19,9 @@
 
 package com.oriondev.moneywallet.ui.activity;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,12 +32,17 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
@@ -42,12 +50,9 @@ import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -64,6 +69,8 @@ import com.oriondev.moneywallet.model.ColorIcon;
 import com.oriondev.moneywallet.model.Money;
 import com.oriondev.moneywallet.model.WalletAccount;
 import com.oriondev.moneywallet.service.BackupHandlerIntentService;
+import com.oriondev.moneywallet.service.syncadapter.RefreshAllSMSListWorker;
+import com.oriondev.moneywallet.service.syncadapter.RefreshSMSFormatsWorker;
 import com.oriondev.moneywallet.storage.database.Contract;
 import com.oriondev.moneywallet.storage.database.DataContentProvider;
 import com.oriondev.moneywallet.storage.preference.PreferenceManager;
@@ -89,7 +96,8 @@ import com.oriondev.moneywallet.utils.IconLoader;
 
 import java.util.Locale;
 
-public class MainActivity extends BaseActivity implements DrawerController, AccountHeader.OnAccountHeaderListener, Drawer.OnDrawerItemClickListener, LoaderManager.LoaderCallbacks<Cursor>  {
+public class MainActivity extends BaseActivity implements DrawerController, AccountHeader.OnAccountHeaderListener, Drawer.OnDrawerItemClickListener
+        , LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String SAVED_SELECTION = "MainActivity::current_selection";
 
@@ -113,24 +121,43 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
     private static final int ID_SECTION_SETTING = 15;
     private static final int ID_SECTION_SUPPORT_DEVELOPER = 16;
     private static final int ID_SECTION_ABOUT = 17;
+    private static final int ID_SECTION_REFRESH_SMS_FORMATS = 18;
+    private static final int ID_SECTION_REFRESH_ALL_SMS = 19;
 
     private final static int ID_ACTION_NEW_WALLET = 1;
     private final static int ID_ACTION_MANAGE_WALLET = 2;
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                int action = intent.getIntExtra(BackupHandlerIntentService.ACTION, 0);
+                if (action == BackupHandlerIntentService.ACTION_RESTORE) {
+                    getSupportLoaderManager().restartLoader(LOADER_WALLETS, null, MainActivity.this);
+                }
+            }
+        }
+
+    };
     private AccountHeader mAccountHeader;
     private Drawer mDrawer;
-
     private long mCurrentSelection;
     private Fragment mCurrentFragment;
-
     private Cursor mCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECEIVE_SMS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS},
+                    1);
+        }
         initializeUi();
         loadUi(savedInstanceState);
         registerReceiver();
+
     }
 
     /**
@@ -168,11 +195,13 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                         createDrawerItem(ID_SECTION_PEOPLE, R.drawable.ic_people_black_24dp, R.string.menu_people),
                         new DividerDrawerItem(),
                         createDrawerItem(ID_SECTION_CALCULATOR, R.drawable.ic_calculator_24dp, R.string.menu_calculator),
-                        createDrawerItem(ID_SECTION_CONVERTER, R.drawable.ic_converter_24dp,R.string.menu_converter),
+                        createDrawerItem(ID_SECTION_CONVERTER, R.drawable.ic_converter_24dp, R.string.menu_converter),
                         createDrawerItem(ID_SECTION_ATM, R.drawable.ic_credit_card_24dp, R.string.menu_search_atm),
                         createDrawerItem(ID_SECTION_BANK, R.drawable.ic_account_balance_24dp, R.string.menu_search_bank),
                         new DividerDrawerItem(),
                         createDrawerItem(ID_SECTION_SETTING, R.drawable.ic_settings_24dp, R.string.menu_setting),
+                        createDrawerItem(ID_SECTION_REFRESH_SMS_FORMATS, R.drawable.ic_settings_24dp, R.string.menu_refresh_sms_formats),
+                        createDrawerItem(ID_SECTION_REFRESH_ALL_SMS, R.drawable.ic_settings_24dp, R.string.menu_refresh_all_sms),
                         createDrawerItem(ID_SECTION_SUPPORT_DEVELOPER, R.drawable.ic_favorite_border_black_24dp, R.string.menu_support_developer),
                         createDrawerItem(ID_SECTION_ABOUT, R.drawable.ic_info_outline_24dp, R.string.menu_about)
                 )
@@ -182,9 +211,10 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * This method is responsible to create a new PrimaryDrawerItem entry for the navigation drawer.
+     *
      * @param identifier integer id of the item.
-     * @param icon drawable resource of the icon of the item.
-     * @param name string resource of the name of the item.
+     * @param icon       drawable resource of the icon of the item.
+     * @param name       string resource of the name of the item.
      * @return the created drawer item.
      */
     private IDrawerItem createDrawerItem(int identifier, @DrawableRes int icon, @StringRes int name) {
@@ -215,6 +245,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
      * Store all the instance information in order to restore them if the activity is recreated.
      * The only information to store here is the current section loaded. The fragment will manage
      * the lifecycle internally, no need to save his state here.
+     *
      * @param savedState of the current instance of the activity.
      */
     @Override
@@ -248,6 +279,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * Set toolbar for this activity.
+     *
      * @param toolbar to set as main toolbar.
      */
     @Override
@@ -257,6 +289,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * Set the lock mode for the activity drawer.
+     *
      * @param lockMode to set to the navigation drawer.
      */
     @Override
@@ -266,7 +299,8 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * This method is called by the navigation drawer whenever a profile is clicked.
-     * @param view of the clicked profile.
+     *
+     * @param view    of the clicked profile.
      * @param profile clicked.
      * @param current true if is the current profile.
      * @return always false.
@@ -290,8 +324,9 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * Callback when a drawer item is clicked.
-     * @param view of the drawer item.
-     * @param position of the drawer item.
+     *
+     * @param view       of the drawer item.
+     * @param position   of the drawer item.
      * @param drawerItem clicked.
      * @return true if the event was consumed.
      */
@@ -318,6 +353,20 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                 case ID_SECTION_ABOUT:
                     startActivity(new Intent(this, AboutActivity.class));
                     break;
+                case ID_SECTION_REFRESH_SMS_FORMATS:
+                    OneTimeWorkRequest getSmsFormatWorkRequest =
+                            new OneTimeWorkRequest.Builder(RefreshSMSFormatsWorker.class)
+                                    .build();
+
+                    WorkManager.getInstance(this).enqueue(getSmsFormatWorkRequest);
+                    break;
+                case ID_SECTION_REFRESH_ALL_SMS:
+                    OneTimeWorkRequest getAllSmsWorkRequest =
+                            new OneTimeWorkRequest.Builder(RefreshAllSMSListWorker.class)
+                                    .build();
+
+                    WorkManager.getInstance(this).enqueue(getAllSmsWorkRequest);
+                    break;
                 default:
                     mCurrentSelection = identifier;
                     loadSection(identifier);
@@ -332,38 +381,28 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
     private void showAtmSearchDialog() {
         ThemedDialog.buildMaterialDialog(this)
                 .title(R.string.title_atm_search)
-                .input(R.string.hint_atm_name, 0, false, new MaterialDialog.InputCallback() {
-
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        Uri mapUri = Uri.parse("geo:0,0?q=atm " + input);
-                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, mapUri);
-                        try {
-                            startActivity(mapIntent);
-                        } catch (ActivityNotFoundException ignore) {
-                            showActivityNotFoundDialog();
-                        }
+                .input(R.string.hint_atm_name, 0, false, (dialog, input) -> {
+                    Uri mapUri = Uri.parse("geo:0,0?q=atm " + input);
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, mapUri);
+                    try {
+                        startActivity(mapIntent);
+                    } catch (ActivityNotFoundException ignore) {
+                        showActivityNotFoundDialog();
                     }
-
                 }).show();
     }
 
     private void showBankSearchDialog() {
         ThemedDialog.buildMaterialDialog(this)
                 .title(R.string.title_bank_search)
-                .input(R.string.hint_bank_name, 0, false, new MaterialDialog.InputCallback() {
-
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        Uri mapUri = Uri.parse("geo:0,0?q=bank " + input);
-                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, mapUri);
-                        try {
-                            startActivity(mapIntent);
-                        } catch (ActivityNotFoundException ignore) {
-                            showActivityNotFoundDialog();
-                        }
+                .input(R.string.hint_bank_name, 0, false, (dialog, input) -> {
+                    Uri mapUri = Uri.parse("geo:0,0?q=bank " + input);
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, mapUri);
+                    try {
+                        startActivity(mapIntent);
+                    } catch (ActivityNotFoundException ignore) {
+                        showActivityNotFoundDialog();
                     }
-
                 }).show();
     }
 
@@ -379,6 +418,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
      * Load the fragment of the specified section inside the frame of the activity.
      * If the fragment is already in the stack of the fragment manager this method will
      * reuse it without spending time in recreating a new one.
+     *
      * @param identifier of the section.
      */
     private void loadSection(int identifier) {
@@ -393,6 +433,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * Generate a unique string as tag to identify every fragment into the fragment manager.
+     *
      * @param identifier of the drawer item.
      * @return a unique tag.
      */
@@ -402,10 +443,11 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * This method creates a new fragment of the specified section.
+     *
      * @param identifier of the section.
      * @return the new created fragment.
      * @throws IllegalArgumentException if the provided id is not a
-     * valid section identifier.
+     *                                  valid section identifier.
      */
     private Fragment buildFragmentById(int identifier) {
         switch (identifier) {
@@ -440,14 +482,15 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * Query content resolver to retrieve all wallets from the database.
-     * @param id of the loader.
+     *
+     * @param id   of the loader.
      * @param args bundle of arguments.
      * @return the cursor loader that will retrieve the content from the database.
      */
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Contract.Wallet.ID,
                 Contract.Wallet.NAME,
                 Contract.Wallet.ICON,
@@ -546,6 +589,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     /**
      * Create a total wallet profile from returned cursor.
+     *
      * @param cursor not null that contains all available wallets.
      * @return the total wallet profile if it can be created, null otherwise.
      */
@@ -605,8 +649,12 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         TextView nameTextView = headerView.findViewById(com.mikepenz.materialdrawer.R.id.material_drawer_account_header_name);
         TextView emailTextView = headerView.findViewById(com.mikepenz.materialdrawer.R.id.material_drawer_account_header_email);
         ImageView switcherImageView = headerView.findViewById(com.mikepenz.materialdrawer.R.id.material_drawer_account_header_text_switcher);
-        if (nameTextView != null) {nameTextView.setTextColor(textColor);}
-        if (emailTextView != null) {emailTextView.setTextColor(textColor);}
+        if (nameTextView != null) {
+            nameTextView.setTextColor(textColor);
+        }
+        if (emailTextView != null) {
+            emailTextView.setTextColor(textColor);
+        }
         if (switcherImageView != null) {
             switcherImageView.setColorFilter(textColor, PorterDuff.Mode.SRC_ATOP);
         }
@@ -644,22 +692,8 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         recyclerView.getAdapter().notifyDataSetChanged();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    //  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     protected void onThemeStatusBar(ITheme theme) {
         mDrawer.getDrawerLayout().setStatusBarBackgroundColor(theme.getColorPrimaryDark());
     }
-
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null) {
-                int action = intent.getIntExtra(BackupHandlerIntentService.ACTION, 0);
-                if (action == BackupHandlerIntentService.ACTION_RESTORE) {
-                    getSupportLoaderManager().restartLoader(LOADER_WALLETS, null, MainActivity.this);
-                }
-            }
-        }
-
-    };
 }

@@ -448,4 +448,15 @@ import java.util.Map;
         transferAttachment.mDeleted = object.optBoolean(JSONDatabase.TransferAttachment.DELETED, false);
         return transferAttachment;
     }
+
+    /*package-local*/ SMSFormat getSMSFormat(JSONObject object) {
+        SMSFormat transferAttachment = new SMSFormat();
+        transferAttachment.mSender = object.optString(JSONDatabase.SMSFormat.SENDER, null);
+        transferAttachment.mType = object.optString(JSONDatabase.SMSFormat.TYPE, null);
+        transferAttachment.regexFormat = object.optString(JSONDatabase.SMSFormat.REGEX, null);
+        transferAttachment.mUUID = object.optString(JSONDatabase.SMSFormat.ID, null);
+        transferAttachment.mLastEdit = object.optLong(JSONDatabase.SMSFormat.LAST_EDIT, 0L);
+        transferAttachment.mDeleted = object.optBoolean(JSONDatabase.SMSFormat.DELETED, false);
+        return transferAttachment;
+    }
 }

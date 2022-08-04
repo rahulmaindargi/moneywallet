@@ -36,6 +36,8 @@ import com.oriondev.moneywallet.storage.database.model.Person;
 import com.oriondev.moneywallet.storage.database.model.Place;
 import com.oriondev.moneywallet.storage.database.model.RecurrentTransaction;
 import com.oriondev.moneywallet.storage.database.model.RecurrentTransfer;
+import com.oriondev.moneywallet.storage.database.model.SMSFormat;
+import com.oriondev.moneywallet.storage.database.model.SMSMessage;
 import com.oriondev.moneywallet.storage.database.model.Saving;
 import com.oriondev.moneywallet.storage.database.model.Transaction;
 import com.oriondev.moneywallet.storage.database.model.TransactionAttachment;
@@ -88,7 +90,8 @@ public class SQLDatabaseExporter {
         object.mName = cursor.getString(cursor.getColumnIndex(Schema.Category.NAME));
         object.mIcon = cursor.getString(cursor.getColumnIndex(Schema.Category.ICON));
         object.mType = cursor.getInt(cursor.getColumnIndex(Schema.Category.TYPE));
-        object.mParent = cursor.isNull(cursor.getColumnIndex(Schema.Category.PARENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Category.PARENT));
+        object.mParent = cursor.isNull(cursor.getColumnIndex(Schema.Category.PARENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Category.PARENT));
         object.mShowReport = cursor.getInt(cursor.getColumnIndex(Schema.Category.SHOW_REPORT)) == 1;
         object.mIndex = cursor.getInt(cursor.getColumnIndex(Schema.Category.INDEX));
         object.mTag = cursor.getString(cursor.getColumnIndex(Schema.Category.TAG));
@@ -148,8 +151,10 @@ public class SQLDatabaseExporter {
 
     public static EventPerson getEventPerson(Cursor cursor) {
         EventPerson object = new EventPerson();
-        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.EventPeople.EVENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.EventPeople.EVENT));
-        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.EventPeople.PERSON)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.EventPeople.PERSON));
+        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.EventPeople.EVENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.EventPeople.EVENT));
+        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.EventPeople.PERSON)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.EventPeople.PERSON));
         object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.EventPeople.UUID));
         object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.EventPeople.LAST_EDIT));
         object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.EventPeople.DELETED)) == 1;
@@ -178,8 +183,10 @@ public class SQLDatabaseExporter {
 
     public static DebtPerson getDebtPerson(Cursor cursor) {
         DebtPerson object = new DebtPerson();
-        object.mDebt = cursor.isNull(cursor.getColumnIndex(Schema.DebtPeople.DEBT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.DebtPeople.DEBT));
-        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.DebtPeople.PERSON)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.DebtPeople.PERSON));
+        object.mDebt = cursor.isNull(cursor.getColumnIndex(Schema.DebtPeople.DEBT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.DebtPeople.DEBT));
+        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.DebtPeople.PERSON)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.DebtPeople.PERSON));
         object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.DebtPeople.UUID));
         object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.DebtPeople.LAST_EDIT));
         object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.DebtPeople.DELETED)) == 1;
@@ -190,7 +197,8 @@ public class SQLDatabaseExporter {
         Budget object = new Budget();
         object.mId = cursor.getLong(cursor.getColumnIndex(Schema.Budget.ID));
         object.mType = cursor.getInt(cursor.getColumnIndex(Schema.Budget.TYPE));
-        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.Budget.CATEGORY)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Budget.CATEGORY));
+        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.Budget.CATEGORY)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Budget.CATEGORY));
         object.mStartDate = cursor.getString(cursor.getColumnIndex(Schema.Budget.START_DATE));
         object.mEndDate = cursor.getString(cursor.getColumnIndex(Schema.Budget.END_DATE));
         object.mMoney = cursor.getLong(cursor.getColumnIndex(Schema.Budget.MONEY));
@@ -204,8 +212,10 @@ public class SQLDatabaseExporter {
 
     public static BudgetWallet getBudgetWallet(Cursor cursor) {
         BudgetWallet object = new BudgetWallet();
-        object.mBudget = cursor.isNull(cursor.getColumnIndex(Schema.BudgetWallet.BUDGET)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.BudgetWallet.BUDGET));
-        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.BudgetWallet.WALLET)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.BudgetWallet.WALLET));
+        object.mBudget = cursor.isNull(cursor.getColumnIndex(Schema.BudgetWallet.BUDGET)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.BudgetWallet.BUDGET));
+        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.BudgetWallet.WALLET)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.BudgetWallet.WALLET));
         object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.BudgetWallet.UUID));
         object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.BudgetWallet.LAST_EDIT));
         object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.BudgetWallet.DELETED)) == 1;
@@ -219,7 +229,8 @@ public class SQLDatabaseExporter {
         object.mIcon = cursor.getString(cursor.getColumnIndex(Schema.Saving.ICON));
         object.mStartMoney = cursor.getLong(cursor.getColumnIndex(Schema.Saving.START_MONEY));
         object.mEndMoney = cursor.getLong(cursor.getColumnIndex(Schema.Saving.END_MONEY));
-        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.Saving.WALLET)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Saving.WALLET));
+        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.Saving.WALLET)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Saving.WALLET));
         object.mEndDate = cursor.getString(cursor.getColumnIndex(Schema.Saving.END_DATE));
         object.mComplete = cursor.getInt(cursor.getColumnIndex(Schema.Saving.COMPLETE)) == 1;
         object.mNote = cursor.getString(cursor.getColumnIndex(Schema.Saving.NOTE));
@@ -235,12 +246,16 @@ public class SQLDatabaseExporter {
         object.mId = cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.ID));
         object.mMoney = cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.MONEY));
         object.mDescription = cursor.getString(cursor.getColumnIndex(Schema.RecurrentTransaction.DESCRIPTION));
-        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.CATEGORY)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.CATEGORY));
+        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.CATEGORY)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.CATEGORY));
         object.mDirection = cursor.getInt(cursor.getColumnIndex(Schema.RecurrentTransaction.DIRECTION));
-        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.WALLET)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.WALLET));
-        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.PLACE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.PLACE));
+        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.WALLET)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.WALLET));
+        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.PLACE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.PLACE));
         object.mNote = cursor.getString(cursor.getColumnIndex(Schema.RecurrentTransaction.NOTE));
-        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.EVENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.EVENT));
+        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransaction.EVENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransaction.EVENT));
         object.mConfirmed = cursor.getInt(cursor.getColumnIndex(Schema.RecurrentTransaction.CONFIRMED)) == 1;
         object.mCountInTotal = cursor.getInt(cursor.getColumnIndex(Schema.RecurrentTransaction.COUNT_IN_TOTAL)) == 1;
         object.mStartDate = cursor.getString(cursor.getColumnIndex(Schema.RecurrentTransaction.START_DATE));
@@ -258,14 +273,18 @@ public class SQLDatabaseExporter {
         RecurrentTransfer object = new RecurrentTransfer();
         object.mId = cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.ID));
         object.mDescription = cursor.getString(cursor.getColumnIndex(Schema.RecurrentTransfer.DESCRIPTION));
-        object.mFromWallet = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_FROM)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_FROM));
-        object.mToWallet = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_TO)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_TO));
+        object.mFromWallet = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_FROM)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_FROM));
+        object.mToWallet = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_TO)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.WALLET_TO));
         object.mFromMoney = cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.MONEY_FROM));
         object.mToMoney = cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.MONEY_TO));
         object.mTaxMoney = cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.MONEY_TAX));
         object.mNote = cursor.getString(cursor.getColumnIndex(Schema.RecurrentTransfer.NOTE));
-        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.PLACE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.PLACE));
-        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.EVENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.EVENT));
+        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.PLACE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.PLACE));
+        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.RecurrentTransfer.EVENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.RecurrentTransfer.EVENT));
         object.mConfirmed = cursor.getInt(cursor.getColumnIndex(Schema.RecurrentTransfer.CONFIRMED)) == 1;
         object.mCountInTotal = cursor.getInt(cursor.getColumnIndex(Schema.RecurrentTransfer.COUNT_IN_TOTAL)) == 1;
         object.mStartDate = cursor.getString(cursor.getColumnIndex(Schema.RecurrentTransfer.START_DATE));
@@ -285,16 +304,23 @@ public class SQLDatabaseExporter {
         object.mMoney = cursor.getLong(cursor.getColumnIndex(Schema.Transaction.MONEY));
         object.mDate = cursor.getString(cursor.getColumnIndex(Schema.Transaction.DATE));
         object.mDescription = cursor.getString(cursor.getColumnIndex(Schema.Transaction.DESCRIPTION));
-        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.CATEGORY)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transaction.CATEGORY));
+        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.CATEGORY)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transaction.CATEGORY));
         object.mDirection = cursor.getInt(cursor.getColumnIndex(Schema.Transaction.DIRECTION));
         object.mType = cursor.getInt(cursor.getColumnIndex(Schema.Transaction.TYPE));
-        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.WALLET)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transaction.WALLET));
-        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.PLACE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transaction.PLACE));
+        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.WALLET)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transaction.WALLET));
+        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.PLACE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transaction.PLACE));
         object.mNote = cursor.getString(cursor.getColumnIndex(Schema.Transaction.NOTE));
-        object.mSaving = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.SAVING)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transaction.SAVING));
-        object.mDebt = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.DEBT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transaction.DEBT));
-        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.EVENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transaction.EVENT));
-        object.mRecurrence = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.RECURRENCE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transaction.RECURRENCE));
+        object.mSaving = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.SAVING)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transaction.SAVING));
+        object.mDebt = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.DEBT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transaction.DEBT));
+        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.EVENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transaction.EVENT));
+        object.mRecurrence = cursor.isNull(cursor.getColumnIndex(Schema.Transaction.RECURRENCE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transaction.RECURRENCE));
         object.mConfirmed = cursor.getInt(cursor.getColumnIndex(Schema.Transaction.CONFIRMED)) == 1;
         object.mCountInTotal = cursor.getInt(cursor.getColumnIndex(Schema.Transaction.COUNT_IN_TOTAL)) == 1;
         object.mTag = cursor.getString(cursor.getColumnIndex(Schema.Transaction.TAG));
@@ -306,8 +332,10 @@ public class SQLDatabaseExporter {
 
     public static TransactionPerson getTransactionPerson(Cursor cursor) {
         TransactionPerson object = new TransactionPerson();
-        object.mTransaction = cursor.isNull(cursor.getColumnIndex(Schema.TransactionPeople.TRANSACTION)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionPeople.TRANSACTION));
-        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.TransactionPeople.PERSON)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionPeople.PERSON));
+        object.mTransaction = cursor.isNull(cursor.getColumnIndex(Schema.TransactionPeople.TRANSACTION)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionPeople.TRANSACTION));
+        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.TransactionPeople.PERSON)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionPeople.PERSON));
         object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.TransactionPeople.UUID));
         object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.TransactionPeople.LAST_EDIT));
         object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.TransactionPeople.DELETED)) == 1;
@@ -319,12 +347,16 @@ public class SQLDatabaseExporter {
         object.mId = cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.ID));
         object.mMoney = cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.MONEY));
         object.mDescription = cursor.getString(cursor.getColumnIndex(Schema.TransactionModel.DESCRIPTION));
-        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.CATEGORY)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.CATEGORY));
+        object.mCategory = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.CATEGORY)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.CATEGORY));
         object.mDirection = cursor.getInt(cursor.getColumnIndex(Schema.TransactionModel.DIRECTION));
-        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.WALLET)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.WALLET));
-        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.PLACE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.PLACE));
+        object.mWallet = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.WALLET)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.WALLET));
+        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.PLACE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.PLACE));
         object.mNote = cursor.getString(cursor.getColumnIndex(Schema.TransactionModel.NOTE));
-        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.EVENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.EVENT));
+        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.TransactionModel.EVENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionModel.EVENT));
         object.mConfirmed = cursor.getInt(cursor.getColumnIndex(Schema.TransactionModel.CONFIRMED)) == 1;
         object.mCountInTotal = cursor.getInt(cursor.getColumnIndex(Schema.TransactionModel.COUNT_IN_TOTAL)) == 1;
         object.mTag = cursor.getString(cursor.getColumnIndex(Schema.TransactionModel.TAG));
@@ -339,13 +371,19 @@ public class SQLDatabaseExporter {
         object.mId = cursor.getLong(cursor.getColumnIndex(Schema.Transfer.ID));
         object.mDescription = cursor.getString(cursor.getColumnIndex(Schema.Transfer.DESCRIPTION));
         object.mDate = cursor.getString(cursor.getColumnIndex(Schema.Transfer.DATE));
-        object.mTransactionFrom = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_FROM)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_FROM));
-        object.mTransactionTo = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TO)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TO));
-        object.mTransactionTax = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TAX)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TAX));
+        object.mTransactionFrom = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_FROM)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_FROM));
+        object.mTransactionTo = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TO)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TO));
+        object.mTransactionTax = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TAX)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transfer.TRANSACTION_TAX));
         object.mNote = cursor.getString(cursor.getColumnIndex(Schema.Transfer.NOTE));
-        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.PLACE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transfer.PLACE));
-        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.EVENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transfer.EVENT));
-        object.mRecurrence = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.RECURRENCE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.Transfer.RECURRENCE));
+        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.PLACE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transfer.PLACE));
+        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.EVENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transfer.EVENT));
+        object.mRecurrence = cursor.isNull(cursor.getColumnIndex(Schema.Transfer.RECURRENCE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.Transfer.RECURRENCE));
         object.mConfirmed = cursor.getInt(cursor.getColumnIndex(Schema.Transfer.CONFIRMED)) == 1;
         object.mCountInTotal = cursor.getInt(cursor.getColumnIndex(Schema.Transfer.COUNT_IN_TOTAL)) == 1;
         object.mTag = cursor.getString(cursor.getColumnIndex(Schema.Transfer.TAG));
@@ -357,8 +395,10 @@ public class SQLDatabaseExporter {
 
     public static TransferPerson getTransferPerson(Cursor cursor) {
         TransferPerson object = new TransferPerson();
-        object.mTransfer = cursor.isNull(cursor.getColumnIndex(Schema.TransferPeople.TRANSFER)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferPeople.TRANSFER));
-        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.TransferPeople.PERSON)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferPeople.PERSON));
+        object.mTransfer = cursor.isNull(cursor.getColumnIndex(Schema.TransferPeople.TRANSFER)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferPeople.TRANSFER));
+        object.mPerson = cursor.isNull(cursor.getColumnIndex(Schema.TransferPeople.PERSON)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferPeople.PERSON));
         object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.TransferPeople.UUID));
         object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.TransferPeople.LAST_EDIT));
         object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.TransferPeople.DELETED)) == 1;
@@ -369,14 +409,18 @@ public class SQLDatabaseExporter {
         TransferModel object = new TransferModel();
         object.mId = cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.ID));
         object.mDescription = cursor.getString(cursor.getColumnIndex(Schema.TransferModel.DESCRIPTION));
-        object.mFromWallet = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.WALLET_FROM)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.WALLET_FROM));
-        object.mToWallet = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.WALLET_TO)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.WALLET_TO));
+        object.mFromWallet = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.WALLET_FROM)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.WALLET_FROM));
+        object.mToWallet = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.WALLET_TO)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.WALLET_TO));
         object.mFromMoney = cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.MONEY_FROM));
         object.mToMoney = cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.MONEY_TO));
         object.mTaxMoney = cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.MONEY_TAX));
         object.mNote = cursor.getString(cursor.getColumnIndex(Schema.TransferModel.NOTE));
-        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.PLACE)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.PLACE));
-        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.EVENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.EVENT));
+        object.mPlace = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.PLACE)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.PLACE));
+        object.mEvent = cursor.isNull(cursor.getColumnIndex(Schema.TransferModel.EVENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferModel.EVENT));
         object.mConfirmed = cursor.getInt(cursor.getColumnIndex(Schema.TransferModel.CONFIRMED)) == 1;
         object.mCountInTotal = cursor.getInt(cursor.getColumnIndex(Schema.TransferModel.COUNT_IN_TOTAL)) == 1;
         object.mTag = cursor.getString(cursor.getColumnIndex(Schema.TransferModel.TAG));
@@ -402,8 +446,10 @@ public class SQLDatabaseExporter {
 
     public static TransactionAttachment getTransactionAttachment(Cursor cursor) {
         TransactionAttachment object = new TransactionAttachment();
-        object.mTransaction = cursor.isNull(cursor.getColumnIndex(Schema.TransactionAttachment.TRANSACTION)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionAttachment.TRANSACTION));
-        object.mAttachment = cursor.isNull(cursor.getColumnIndex(Schema.TransactionAttachment.ATTACHMENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransactionAttachment.ATTACHMENT));
+        object.mTransaction = cursor.isNull(cursor.getColumnIndex(Schema.TransactionAttachment.TRANSACTION)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionAttachment.TRANSACTION));
+        object.mAttachment = cursor.isNull(cursor.getColumnIndex(Schema.TransactionAttachment.ATTACHMENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransactionAttachment.ATTACHMENT));
         object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.TransactionAttachment.UUID));
         object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.TransactionAttachment.LAST_EDIT));
         object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.TransactionAttachment.DELETED)) == 1;
@@ -412,11 +458,33 @@ public class SQLDatabaseExporter {
 
     public static TransferAttachment getTransferAttachment(Cursor cursor) {
         TransferAttachment object = new TransferAttachment();
-        object.mTransfer = cursor.isNull(cursor.getColumnIndex(Schema.TransferAttachment.TRANSFER)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferAttachment.TRANSFER));
-        object.mAttachment = cursor.isNull(cursor.getColumnIndex(Schema.TransferAttachment.ATTACHMENT)) ? null : cursor.getLong(cursor.getColumnIndex(Schema.TransferAttachment.ATTACHMENT));
+        object.mTransfer = cursor.isNull(cursor.getColumnIndex(Schema.TransferAttachment.TRANSFER)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferAttachment.TRANSFER));
+        object.mAttachment = cursor.isNull(cursor.getColumnIndex(Schema.TransferAttachment.ATTACHMENT)) ? null :
+                cursor.getLong(cursor.getColumnIndex(Schema.TransferAttachment.ATTACHMENT));
         object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.TransferAttachment.UUID));
         object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.TransferAttachment.LAST_EDIT));
         object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.TransferAttachment.DELETED)) == 1;
+        return object;
+    }
+
+    public static SMSFormat getSMSFormat(Cursor cursor) {
+        SMSFormat object = new SMSFormat();
+        object.mSender = cursor.getString(cursor.getColumnIndex(Schema.SMSFormat.SENDER));
+        object.mType = cursor.getString(cursor.getColumnIndex(Schema.SMSFormat.TYPE));
+        object.regexFormat = cursor.getString(cursor.getColumnIndex(Schema.SMSFormat.REGEX_FORMAT));
+        object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.SMSFormat.UUID));
+        object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.SMSFormat.LAST_EDIT));
+        object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.SMSFormat.DELETED)) == 1;
+        return object;
+    }
+
+    public static SMSMessage getSMSMessage(Cursor cursor) {
+        SMSMessage object = new SMSMessage();
+        object.mMessage = cursor.getString(cursor.getColumnIndex(Schema.SMSMessage.MESSAGE));
+        object.mUUID = cursor.getString(cursor.getColumnIndex(Schema.SMSMessage.UUID));
+        object.mLastEdit = cursor.getLong(cursor.getColumnIndex(Schema.SMSMessage.LAST_EDIT));
+        object.mDeleted = cursor.getInt(cursor.getColumnIndex(Schema.SMSMessage.DELETED)) == 1;
         return object;
     }
 
@@ -573,5 +641,18 @@ public class SQLDatabaseExporter {
         String selection = Schema.TransferAttachment.DELETED + " = 0";
         return contentResolver.query(uri, null, selection, null, null);
     }
+
+    public static Cursor getAllSMSFormats(ContentResolver contentResolver) {
+        Uri uri = SyncContentProvider.CONTENT_SMS_FORMAT;
+        String selection = Schema.SMSFormat.DELETED + " = 0";
+        return contentResolver.query(uri, null, selection, null, null);
+    }
+
+    public static Cursor getAllSMSMessages(ContentResolver contentResolver) {
+        Uri uri = SyncContentProvider.CONTENT_SMS_MESSAGE;
+        String selection = Schema.SMSMessage.DELETED + " = 0";
+        return contentResolver.query(uri, null, selection, null, null);
+    }
+    
 
 }

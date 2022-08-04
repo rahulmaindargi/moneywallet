@@ -76,4 +76,6 @@ public interface DatabaseExporter {
     void exportTransferAttachments(Cursor cursor) throws ExportException;
 
     void close() throws ExportException;
+
+    void exportSmsFormats(Cursor allSMSFormats)throws ExportException;
 }

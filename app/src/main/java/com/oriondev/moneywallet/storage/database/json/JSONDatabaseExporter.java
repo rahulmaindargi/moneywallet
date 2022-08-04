@@ -440,4 +440,23 @@ public class JSONDatabaseExporter implements DatabaseExporter {
             throw new ExportException(e.getMessage());
         }
     }
+    @Override
+    public void exportSmsFormats(Cursor cursor) throws ExportException {
+        try {
+            mWriter.writeName(JSONDatabase.SMSFormat.ARRAY);
+            mWriter.beginArray();
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    SMSFormat smsFormat = SQLDatabaseExporter.getSMSFormat(cursor);
+                    JSONObject object = mFactory.getObject(smsFormat);
+                    mWriter.writeJSONObject(object);
+                }
+                cursor.close();
+            }
+            mWriter.endArray();
+        } catch (IOException | JSONException e) {
+            throw new ExportException(e.getMessage());
+        }
+    }
+
 }

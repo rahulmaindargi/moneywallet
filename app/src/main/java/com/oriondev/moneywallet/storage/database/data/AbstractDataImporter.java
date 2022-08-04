@@ -17,7 +17,6 @@ import com.oriondev.moneywallet.storage.database.DataContentProvider;
 import com.oriondev.moneywallet.utils.DateUtils;
 import com.oriondev.moneywallet.utils.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +30,7 @@ public abstract class AbstractDataImporter {
 
     private final Context mContext;
 
-    public AbstractDataImporter(Context context, File file) throws IOException {
+    public AbstractDataImporter(Context context) {
         mContext = context;
     }
 
@@ -75,11 +74,11 @@ public abstract class AbstractDataImporter {
         contentResolver.insert(DataContentProvider.CONTENT_TRANSACTIONS, contentValues);
     }
 
-    private long getOrCreateWallet(ContentResolver contentResolver, String name, CurrencyUnit currencyUnit) {
+    protected long getOrCreateWallet(ContentResolver contentResolver, String name, CurrencyUnit currencyUnit) {
         Uri uri = DataContentProvider.CONTENT_WALLETS;
-        String[] projection = new String[] {Contract.Wallet.ID};
+        String[] projection = new String[]{Contract.Wallet.ID};
         String selection = Contract.Wallet.NAME + " = ? AND " + Contract.Wallet.CURRENCY + " = ?";
-        String[] selectionArgs = new String[] {name, currencyUnit.getIso()};
+        String[] selectionArgs = new String[]{name, currencyUnit.getIso()};
         String sortOrder = Contract.Wallet.ID + " DESC";
         Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder);
         if (cursor != null) {
@@ -109,9 +108,9 @@ public abstract class AbstractDataImporter {
     private long getOrCreateCategory(ContentResolver contentResolver, String name, int direction) {
         Uri uri = DataContentProvider.CONTENT_CATEGORIES;
         Contract.CategoryType type = direction == Contract.Direction.INCOME ? Contract.CategoryType.INCOME : Contract.CategoryType.EXPENSE;
-        String[] projection = new String[] {Contract.Category.ID};
+        String[] projection = new String[]{Contract.Category.ID};
         String selection = Contract.Category.NAME + " = ? AND (" + Contract.Category.TYPE + " = ? OR " + Contract.Category.TYPE + " = ?)";
-        String[] selectionArgs = new String[] {name,
+        String[] selectionArgs = new String[]{name,
                 String.valueOf(type.getValue()),
                 String.valueOf(Contract.CategoryType.SYSTEM)
         };
@@ -143,9 +142,9 @@ public abstract class AbstractDataImporter {
     private Long getEvent(ContentResolver contentResolver, String name) {
         if (!TextUtils.isEmpty(name)) {
             Uri uri = DataContentProvider.CONTENT_EVENTS;
-            String[] projection = new String[] {Contract.Event.ID};
+            String[] projection = new String[]{Contract.Event.ID};
             String selection = Contract.Event.NAME + " = ?";
-            String[] selectionArgs = new String[] {name};
+            String[] selectionArgs = new String[]{name};
             String sortOrder = Contract.Event.ID + " DESC";
             Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder);
             if (cursor != null) {
@@ -164,9 +163,9 @@ public abstract class AbstractDataImporter {
     private Long getOrCreatePlace(ContentResolver contentResolver, String name) {
         if (!TextUtils.isEmpty(name)) {
             Uri uri = DataContentProvider.CONTENT_PLACES;
-            String[] projection = new String[] {Contract.Place.ID};
+            String[] projection = new String[]{Contract.Place.ID};
             String selection = Contract.Place.NAME + " = ?";
-            String[] selectionArgs = new String[] {name};
+            String[] selectionArgs = new String[]{name};
             String sortOrder = Contract.Place.ID + " DESC";
             Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder);
             if (cursor != null) {
@@ -202,9 +201,9 @@ public abstract class AbstractDataImporter {
                 if (!TextUtils.isEmpty(name)) {
                     boolean personFound = false;
                     Uri uri = DataContentProvider.CONTENT_PEOPLE;
-                    String[] projection = new String[] {Contract.Person.ID};
+                    String[] projection = new String[]{Contract.Person.ID};
                     String selection = Contract.Person.NAME + " = ?";
-                    String[] selectionArgs = new String[] {name};
+                    String[] selectionArgs = new String[]{name};
                     String sortOrder = Contract.Person.ID + " DESC";
                     Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder);
                     if (cursor != null) {
@@ -244,7 +243,7 @@ public abstract class AbstractDataImporter {
         return null;
     }
 
-    private String generateRandomIcon(String name) {
+    protected String generateRandomIcon(String name) {
         int randomColor = Utils.getRandomMDColor();
         String iconText = IconPicker.getColorIconString(name);
         Icon icon = new ColorIcon(randomColor, iconText);

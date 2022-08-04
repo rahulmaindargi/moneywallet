@@ -20,11 +20,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdk 32
     defaultConfig {
         applicationId "com.oriondev.moneywallet"
-        minSdkVersion 21
-        targetSdkVersion 29
+        minSdkVersion 30
+        targetSdk 32
         versionCode 75
         versionName "4.0.5.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -77,6 +77,8 @@ configurations {
 }
 
 dependencies {
+    def work_version = "2.7.1"
+
     // common dependencies
     implementation supportDependencies.appcompat
     implementation supportDependencies.constraintlayout
@@ -116,6 +118,9 @@ dependencies {
     implementation 'com.itextpdf:itextpdf:5.5.13'
     implementation 'me.weishu:free_reflection:2.2.0'
     implementation 'com.github.bumptech.glide:glide:4.8.0'
+    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-multiprocess:$work_version"
+
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     // google play dependencies
     proprietaryImplementation('com.dropbox.core:dropbox-core-sdk:3.0.8')
@@ -135,4 +140,5 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestUtil "androidx.test:orchestrator:1.2.0"
+
 }

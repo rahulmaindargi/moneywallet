@@ -35,6 +35,138 @@ import java.util.Locale;
  */
 public class Contract {
 
+    public static List<Long> parseObjectIds(String encodedIds) {
+        if (!TextUtils.isEmpty(encodedIds)) {
+            List<Long> objectIds = new ArrayList<>();
+            String[] parts = encodedIds.split(",");
+            for (String part : parts) {
+                if (part.startsWith("<") && part.endsWith(">")) {
+                    String encodedId = part.substring(1, part.length() - 1);
+                    try {
+                        objectIds.add(Long.parseLong(encodedId));
+                    } catch (NumberFormatException ignore) {
+                        // do nothing
+                    }
+                }
+            }
+            return objectIds;
+        }
+        return null;
+    }
+
+    public static <T extends Identifiable> String getObjectIds(T[] objects) {
+        if (objects != null && objects.length > 0) {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < objects.length; i++) {
+                if (i != 0) {
+                    builder.append(",");
+                }
+                builder.append(String.format(Locale.ENGLISH, "<%d>", objects[i].getId()));
+            }
+            return builder.toString();
+        }
+        return null;
+    }
+
+    public static <T extends Identifiable> String getObjectIds(List<T> objects) {
+        if (objects != null && objects.size() > 0) {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < objects.size(); i++) {
+                if (i != 0) {
+                    builder.append(",");
+                }
+                builder.append(String.format(Locale.ENGLISH, "<%d>", objects.get(i).getId()));
+            }
+            return builder.toString();
+        }
+        return null;
+    }
+
+    public enum CategoryType {
+
+        INCOME(Schema.CategoryType.INCOME),
+        EXPENSE(Schema.CategoryType.EXPENSE),
+        SYSTEM(Schema.CategoryType.SYSTEM);
+
+        private final int mValue;
+
+        CategoryType(int value) {
+            mValue = value;
+        }
+
+        public static CategoryType fromValue(int value) {
+            switch (value) {
+                case Schema.CategoryType.INCOME:
+                    return INCOME;
+                case Schema.CategoryType.EXPENSE:
+                    return EXPENSE;
+                case Schema.CategoryType.SYSTEM:
+                    return SYSTEM;
+            }
+            return null;
+        }
+
+        public int getValue() {
+            return mValue;
+        }
+    }
+
+    public enum DebtType {
+
+        DEBT(0), CREDIT(1);
+
+        private final int mValue;
+
+        DebtType(int value) {
+            mValue = value;
+        }
+
+        public static DebtType fromValue(int value) {
+            switch (value) {
+                case 0:
+                    return DEBT;
+                case 1:
+                    return CREDIT;
+                default:
+                    throw new IllegalArgumentException("Invalid debt type");
+            }
+        }
+
+        public int getValue() {
+            return mValue;
+        }
+    }
+
+    public enum BudgetType {
+
+        EXPENSES(Schema.BudgetType.EXPENSES),
+        INCOMES(Schema.BudgetType.INCOMES),
+        CATEGORY(Schema.BudgetType.CATEGORY);
+
+        private final int mValue;
+
+        BudgetType(int value) {
+            mValue = value;
+        }
+
+        public static BudgetType fromValue(int value) {
+            switch (value) {
+                case Schema.BudgetType.EXPENSES:
+                    return EXPENSES;
+                case Schema.BudgetType.INCOMES:
+                    return INCOMES;
+                case Schema.BudgetType.CATEGORY:
+                    return CATEGORY;
+                default:
+                    return null;
+            }
+        }
+
+        public int getValue() {
+            return mValue;
+        }
+    }
+
     public static final class Currency {
         public static final String NAME = Schema.Currency.NAME;
         public static final String ISO = Schema.Currency.ISO;
@@ -450,33 +582,20 @@ public class Contract {
         public static final String TAG = Schema.Attachment.TAG;
     }
 
-    public enum CategoryType {
+    public static final class SMSFormat {
+        public static final String ID = Schema.SMSFormat.UUID;
+        public static final String TYPE = Schema.SMSFormat.TYPE;
+        public static final String REGEX = Schema.SMSFormat.REGEX_FORMAT;
+        public static final String SENDER = Schema.SMSFormat.SENDER;
+        public static final String DELETED = Schema.SMSFormat.DELETED;
 
-        INCOME(Schema.CategoryType.INCOME),
-        EXPENSE(Schema.CategoryType.EXPENSE),
-        SYSTEM(Schema.CategoryType.SYSTEM);
+    }
 
-        private final int mValue;
+    public static final class SMSMessage {
+        public static final String ID = Schema.SMSMessage.UUID;
+        public static final String MESSAGE = Schema.SMSMessage.MESSAGE;
+        public static final String DELETED = Schema.SMSFormat.DELETED;
 
-        CategoryType(int value) {
-            mValue = value;
-        }
-
-        public static CategoryType fromValue(int value) {
-            switch (value) {
-                case Schema.CategoryType.INCOME:
-                    return INCOME;
-                case Schema.CategoryType.EXPENSE:
-                    return EXPENSE;
-                case Schema.CategoryType.SYSTEM:
-                    return SYSTEM;
-            }
-            return null;
-        }
-
-        public int getValue() {
-            return mValue;
-        }
     }
 
     public static final class CategoryTag {
@@ -489,62 +608,6 @@ public class Contract {
         public static final String TAX = Schema.CategoryTag.TAX;
         public static final String SAVING_DEPOSIT = Schema.CategoryTag.SAVING_DEPOSIT;
         public static final String SAVING_WITHDRAW = Schema.CategoryTag.SAVING_WITHDRAW;
-    }
-
-    public enum DebtType {
-
-        DEBT(0), CREDIT(1);
-
-        private final int mValue;
-
-        DebtType(int value) {
-            mValue = value;
-        }
-
-        public static DebtType fromValue(int value) {
-            switch (value) {
-                case 0:
-                    return DEBT;
-                case 1:
-                    return CREDIT;
-                default:
-                    throw new IllegalArgumentException("Invalid debt type");
-            }
-        }
-
-        public int getValue() {
-            return mValue;
-        }
-    }
-
-    public enum BudgetType {
-
-        EXPENSES(Schema.BudgetType.EXPENSES),
-        INCOMES(Schema.BudgetType.INCOMES),
-        CATEGORY(Schema.BudgetType.CATEGORY);
-
-        private final int mValue;
-
-        BudgetType(int value) {
-            mValue = value;
-        }
-
-        public static BudgetType fromValue(int value) {
-            switch (value) {
-                case Schema.BudgetType.EXPENSES:
-                    return EXPENSES;
-                case Schema.BudgetType.INCOMES:
-                    return INCOMES;
-                case Schema.BudgetType.CATEGORY:
-                    return CATEGORY;
-                default:
-                    return null;
-            }
-        }
-
-        public int getValue() {
-            return mValue;
-        }
     }
 
     public static class Direction {
@@ -572,52 +635,5 @@ public class Contract {
         public static final int SYSTEM_CATEGORY_NOT_MODIFIABLE = 4543;
         public static final int TRANSACTION_USED_IN_TRANSFER = 4544;
         public static final int INVALID_RECURRENCE_RULE = 4545;
-    }
-
-    public static List<Long> parseObjectIds(String encodedIds) {
-        if (!TextUtils.isEmpty(encodedIds)) {
-            List<Long> objectIds = new ArrayList<>();
-            String[] parts = encodedIds.split(",");
-            for (String part : parts) {
-                if (part.startsWith("<") && part.endsWith(">")) {
-                    String encodedId = part.substring(1, part.length() - 1);
-                    try {
-                        objectIds.add(Long.parseLong(encodedId));
-                    } catch (NumberFormatException ignore) {
-                        // do nothing
-                    }
-                }
-            }
-            return objectIds;
-        }
-        return null;
-    }
-
-    public static <T extends Identifiable> String getObjectIds(T[] objects) {
-        if (objects != null && objects.length > 0) {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < objects.length; i++) {
-                if (i != 0) {
-                    builder.append(",");
-                }
-                builder.append(String.format(Locale.ENGLISH, "<%d>", objects[i].getId()));
-            }
-            return builder.toString();
-        }
-        return null;
-    }
-
-    public static <T extends Identifiable> String getObjectIds(List<T> objects) {
-        if (objects != null && objects.size() > 0) {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < objects.size(); i++) {
-                if (i != 0) {
-                    builder.append(",");
-                }
-                builder.append(String.format(Locale.ENGLISH, "<%d>", objects.get(i).getId()));
-            }
-            return builder.toString();
-        }
-        return null;
     }
 }

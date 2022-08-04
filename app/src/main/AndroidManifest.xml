@@ -29,6 +29,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -40,7 +42,8 @@
         android:requestLegacyExternalStorage="true"
         android:fullBackupContent="@xml/backup_rules"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activity.LauncherActivity">
+        <activity android:name=".ui.activity.LauncherActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -55,7 +58,8 @@
         <activity android:name=".ui.activity.BackupListActivity" />
         <activity android:name=".ui.activity.NewEditCurrencyActivity" />
         <activity android:name=".ui.activity.NewEditWalletActivity" />
-        <activity android:name=".ui.activity.NewEditTransactionActivity">
+        <activity android:name=".ui.activity.NewEditTransactionActivity"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -132,9 +136,18 @@
         <receiver android:name=".broadcast.RecurrenceBroadcastReceiver" />
         <receiver android:name=".broadcast.AutoBackupBroadcastReceiver" />
         <receiver android:name=".broadcast.NotificationBroadcastReceiver" />
-        <receiver android:name=".broadcast.BootBroadcastReceiver">
+        <receiver android:name=".broadcast.BootBroadcastReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".storage.database.data.sms.SmsListener"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 

@@ -24,7 +24,31 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
 
-import com.oriondev.moneywallet.storage.database.model.*;
+import com.oriondev.moneywallet.storage.database.model.Attachment;
+import com.oriondev.moneywallet.storage.database.model.Budget;
+import com.oriondev.moneywallet.storage.database.model.BudgetWallet;
+import com.oriondev.moneywallet.storage.database.model.Category;
+import com.oriondev.moneywallet.storage.database.model.Currency;
+import com.oriondev.moneywallet.storage.database.model.Debt;
+import com.oriondev.moneywallet.storage.database.model.DebtPerson;
+import com.oriondev.moneywallet.storage.database.model.Event;
+import com.oriondev.moneywallet.storage.database.model.EventPerson;
+import com.oriondev.moneywallet.storage.database.model.Person;
+import com.oriondev.moneywallet.storage.database.model.Place;
+import com.oriondev.moneywallet.storage.database.model.RecurrentTransaction;
+import com.oriondev.moneywallet.storage.database.model.RecurrentTransfer;
+import com.oriondev.moneywallet.storage.database.model.SMSFormat;
+import com.oriondev.moneywallet.storage.database.model.SMSMessage;
+import com.oriondev.moneywallet.storage.database.model.Saving;
+import com.oriondev.moneywallet.storage.database.model.Transaction;
+import com.oriondev.moneywallet.storage.database.model.TransactionAttachment;
+import com.oriondev.moneywallet.storage.database.model.TransactionModel;
+import com.oriondev.moneywallet.storage.database.model.TransactionPerson;
+import com.oriondev.moneywallet.storage.database.model.Transfer;
+import com.oriondev.moneywallet.storage.database.model.TransferAttachment;
+import com.oriondev.moneywallet.storage.database.model.TransferModel;
+import com.oriondev.moneywallet.storage.database.model.TransferPerson;
+import com.oriondev.moneywallet.storage.database.model.Wallet;
 
 /**
  * Created by andrea on 27/10/18.
@@ -424,6 +448,30 @@ public class SQLDatabaseImporter {
         contentValues.put(Schema.TransferAttachment.LAST_EDIT, transferAttachment.mLastEdit);
         contentValues.put(Schema.TransferAttachment.DELETED, transferAttachment.mDeleted);
         Uri uri = SyncContentProvider.CONTENT_TRANSFER_ATTACHMENT;
+        uri = contentResolver.insert(uri, contentValues);
+        return ContentUris.parseId(uri);
+    }
+
+    public static long insert(ContentResolver contentResolver, SMSFormat smsFormat) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Schema.SMSFormat.TYPE, smsFormat.mType);
+        contentValues.put(Schema.SMSFormat.SENDER, smsFormat.mSender);
+        contentValues.put(Schema.SMSFormat.REGEX_FORMAT, smsFormat.regexFormat);
+        contentValues.put(Schema.SMSFormat.UUID, smsFormat.mUUID);
+        contentValues.put(Schema.SMSFormat.LAST_EDIT, smsFormat.mLastEdit);
+        contentValues.put(Schema.SMSFormat.DELETED, smsFormat.mDeleted);
+        Uri uri = SyncContentProvider.CONTENT_SMS_FORMAT;
+        uri = contentResolver.insert(uri, contentValues);
+        return ContentUris.parseId(uri);
+    }
+
+    public static long insert(ContentResolver contentResolver, SMSMessage smsMessage) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Schema.SMSMessage.MESSAGE, smsMessage.mMessage);
+        contentValues.put(Schema.SMSMessage.UUID, smsMessage.mUUID);
+        contentValues.put(Schema.SMSMessage.LAST_EDIT, smsMessage.mLastEdit);
+        contentValues.put(Schema.SMSMessage.DELETED, smsMessage.mDeleted);
+        Uri uri = SyncContentProvider.CONTENT_SMS_MESSAGE;
         uri = contentResolver.insert(uri, contentValues);
         return ContentUris.parseId(uri);
     }

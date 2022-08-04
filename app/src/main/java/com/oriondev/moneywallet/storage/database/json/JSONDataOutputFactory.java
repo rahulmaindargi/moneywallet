@@ -32,6 +32,7 @@ import com.oriondev.moneywallet.storage.database.model.Person;
 import com.oriondev.moneywallet.storage.database.model.Place;
 import com.oriondev.moneywallet.storage.database.model.RecurrentTransaction;
 import com.oriondev.moneywallet.storage.database.model.RecurrentTransfer;
+import com.oriondev.moneywallet.storage.database.model.SMSFormat;
 import com.oriondev.moneywallet.storage.database.model.Saving;
 import com.oriondev.moneywallet.storage.database.model.Transaction;
 import com.oriondev.moneywallet.storage.database.model.TransactionAttachment;
@@ -425,6 +426,17 @@ import java.util.HashMap;
         object.put(JSONDatabase.TransferAttachment.ID, transferAttachment.mUUID);
         object.put(JSONDatabase.TransferAttachment.LAST_EDIT, transferAttachment.mLastEdit);
         object.put(JSONDatabase.TransferAttachment.DELETED, transferAttachment.mDeleted);
+        return object;
+    }
+
+    /*package-local*/ JSONObject getObject(SMSFormat smsFormat) throws JSONException {
+        JSONObject object = new JSONObject();
+        object.put(JSONDatabase.SMSFormat.TYPE, smsFormat.mType);
+        object.put(JSONDatabase.SMSFormat.SENDER, smsFormat.mSender);
+        object.put(JSONDatabase.SMSFormat.REGEX, smsFormat.regexFormat);
+        object.put(JSONDatabase.SMSFormat.ID, smsFormat.mUUID);
+        object.put(JSONDatabase.SMSFormat.LAST_EDIT, smsFormat.mLastEdit);
+        object.put(JSONDatabase.SMSFormat.DELETED, smsFormat.mDeleted);
         return object;
     }
 }

@@ -358,4 +358,14 @@ package com.oriondev.moneywallet.storage.database.json;
         /*package-local*/ static final String LAST_EDIT = "last_edit";
         /*package-local*/ static final String DELETED = "deleted";
     }
+
+    /*package-local*/ static final class SMSFormat {
+        /*package-local*/ static final String ARRAY = "smsFormat";
+        /*package-local*/ static final String ID = "id";
+        /*package-local*/ static final String SENDER = "sender";
+        /*package-local*/ static final String TYPE = "type";
+        /*package-local*/ static final String REGEX = "regex_Format";
+        /*package-local*/ static final String LAST_EDIT = "last_edit";
+        /*package-local*/ static final String DELETED = "deleted";
+    }
 }

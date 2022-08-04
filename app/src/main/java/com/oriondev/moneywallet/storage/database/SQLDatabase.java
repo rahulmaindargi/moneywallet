@@ -27,10 +27,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.SparseLongArray;
 
-import com.oriondev.moneywallet.model.CurrencyUnit;
-import com.oriondev.moneywallet.utils.CurrencyManager;
 import com.oriondev.moneywallet.utils.DateUtils;
 import com.oriondev.moneywallet.utils.MoneyFormatter;
 
@@ -38,20 +35,11 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -61,7 +49,7 @@ import java.util.UUID;
 /*package-local*/ class SQLDatabase extends SQLiteOpenHelper {
 
     /*package-local*/ static final String DATABASE_NAME = "database.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     private static final String ENABLE_FOREIGN_KEYS = "PRAGMA foreign_keys=ON";
 
@@ -78,6 +66,7 @@ import java.util.UUID;
      * The delete cache is used to correctly sync deleted objects with a remote backend.
      * If the sync is not enabled, the database will permanently remove deleted objects
      * and not simply flag them as deleted.
+     *
      * @param cacheEnabled true if cache is enabled, false otherwise.
      */
     /*package-local*/ void setDeletedObjectCacheEnabled(boolean cacheEnabled) {
@@ -110,6 +99,8 @@ import java.util.UUID;
         db.execSQL(Schema.CREATE_TABLE_ATTACHMENT);
         db.execSQL(Schema.CREATE_TABLE_TRANSACTION_ATTACHMENT);
         db.execSQL(Schema.CREATE_TABLE_TRANSFER_ATTACHMENT);
+        db.execSQL(Schema.CREATE_TABLE_SMS_FORMAT);
+        db.execSQL(Schema.CREATE_TABLE_SMS_MESSAGE);
         // create all triggers to ensure data consistency
         // TODO [low] create triggers
         // insert default items
@@ -145,6 +136,12 @@ import java.util.UUID;
             // to let the user sort the items inside these tables of the database.
             db.execSQL(Schema.CREATE_WALLET_INDEX_COLUMN);
             db.execSQL(Schema.CREATE_CATEGORY_INDEX_COLUMN);
+        }
+        if (oldVersion < 4) {
+            // we need to add a new column to the wallet and the category table in order
+            // to let the user sort the items inside these tables of the database.
+            db.execSQL(Schema.CREATE_TABLE_SMS_FORMAT);
+            db.execSQL(Schema.CREATE_TABLE_SMS_MESSAGE);
         }
     }
 
@@ -183,9 +180,9 @@ import java.util.UUID;
      * @return the id of the system category if found, null otherwise.
      */
     private Long getSystemCategoryId(String tag) {
-        String[] projection = new String[] {Schema.Category.ID};
+        String[] projection = new String[]{Schema.Category.ID};
         String selection = Schema.Category.TAG + " = ?";
-        String[] selectionArgs = new String[] {tag};
+        String[] selectionArgs = new String[]{tag};
         Cursor cursor = getCategories(projection, selection, selectionArgs, null);
         if (cursor != null) {
             Long categoryId = null;
@@ -202,7 +199,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying a specific currency
      * from the database.
      *
-     * @param iso of the requested currency.
+     * @param iso        of the requested currency.
      * @param projection of the currency table.
      * @return the cursor that contains the requested data.
      */
@@ -270,17 +267,17 @@ import java.util.UUID;
      * This method is called by the content provider when the user is updating an existing
      * currency in the database.
      *
-     * @param iso id of the currency to update.
+     * @param iso           id of the currency to update.
      * @param contentValues bundle that contains the data from the content provider.
      * @return the number of row updated inside the database.
      */
     /*package-local*/ int updateCurrency(String iso, ContentValues contentValues) {
         int oldDecimals = 0;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Schema.Currency.DECIMALS
         };
         String selection = Schema.Currency.ISO + " = ?";
-        String[] selectionArgs = new String[] {iso};
+        String[] selectionArgs = new String[]{iso};
         Cursor cursor = getReadableDatabase().query(Schema.Currency.TABLE, projection, selection, selectionArgs, null, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -328,7 +325,7 @@ import java.util.UUID;
      * @throws SQLiteDataException if the currency is in use.
      */
     /*package-local*/ int deleteCurrency(String iso) {
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Schema.Wallet.ID
         };
         String where = Schema.Wallet.CURRENCY + " = ?";
@@ -339,7 +336,8 @@ import java.util.UUID;
                 if (cursor.moveToFirst()) {
                     long walletId = cursor.getLong(cursor.getColumnIndex(Schema.Wallet.ID));
                     throw new SQLiteDataException(Contract.ErrorCode.CURRENCY_IN_USE,
-                            String.format(Locale.ENGLISH, "The currency (iso: %s) cannot be deleted because is in use in wallet (id: %d)", iso, walletId));
+                            String.format(Locale.ENGLISH, "The currency (iso: %s) cannot be deleted because is in use in wallet (id: %d)", iso,
+                                    walletId));
                 }
             } finally {
                 cursor.close();
@@ -360,7 +358,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying a specific wallet from
      * the database.
      *
-     * @param id of the requested wallet.
+     * @param id         of the requested wallet.
      * @param projection of the wallet table.
      * @return the cursor that contains the requested data.
      */
@@ -374,10 +372,10 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the wallets from
      * the database.
      *
-     * @param projection column names to include in the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names to include in the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments of the selection string.
-     * @param sortOrder string that may contains column names to use to sort the cursor.
+     * @param sortOrder     string that may contains column names to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getWallets(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -434,7 +432,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is updating an existing wallet in
      * the database.
      *
-     * @param walletId id of the wallet to update.
+     * @param walletId      id of the wallet to update.
      * @param contentValues bundle that contains the data from the content provider.
      * @return the number of row updated inside the database.
      */
@@ -495,14 +493,15 @@ import java.util.UUID;
                 Schema.Transaction.ID + " AND t3." + Schema.Transaction.DELETED + " = 0 WHERE t1." +
                 Schema.Transaction.WALLET + " = ? OR t2." + Schema.Transaction.WALLET + " = ? OR t3." +
                 Schema.Transaction.WALLET + " = ?";
-        String[] args = new String[] {String.valueOf(walletId), String.valueOf(walletId), String.valueOf(walletId)};
+        String[] args = new String[]{String.valueOf(walletId), String.valueOf(walletId), String.valueOf(walletId)};
         Cursor cursor = getReadableDatabase().rawQuery(query, args);
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
                     long transferId = cursor.getLong(cursor.getColumnIndex(Schema.Transfer.ID));
                     throw new SQLiteDataException(Contract.ErrorCode.WALLET_USED_IN_TRANSFER,
-                            String.format(Locale.ENGLISH, "The wallet (id: %d) cannot be deleted because is in use in a transfer (id: %d)", walletId, transferId));
+                            String.format(Locale.ENGLISH, "The wallet (id: %d) cannot be deleted because is in use in a transfer (id: %d)",
+                                    walletId, transferId));
                 }
             } finally {
                 cursor.close();
@@ -615,7 +614,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying the database for a
      * specific id.
      *
-     * @param id of the transaction to retrieve.
+     * @param id         of the transaction to retrieve.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one rows.
      */
@@ -629,10 +628,10 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying the database for all
      * the transactions.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransactions(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -710,9 +709,9 @@ import java.util.UUID;
         if (contentValues.containsKey(Contract.Transaction.RECURRENCE_ID)) {
             long recurrenceId = contentValues.getAsLong(Contract.Transaction.RECURRENCE_ID);
             String table = Schema.RecurrentTransaction.TABLE;
-            String[] projection = new String[] {Schema.RecurrentTransaction.UUID};
+            String[] projection = new String[]{Schema.RecurrentTransaction.UUID};
             String selection = Schema.RecurrentTransaction.ID + " = ?";
-            String[] selectionArgs = new String[] {String.valueOf(recurrenceId)};
+            String[] selectionArgs = new String[]{String.valueOf(recurrenceId)};
             Cursor cursor = getReadableDatabase().query(table, projection, selection, selectionArgs, null, null, null);
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
@@ -781,11 +780,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the attachments
      * of a specific transaction.
      *
-     * @param id of the transaction.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param id            of the transaction.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransactionAttachments(long id, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -799,7 +798,7 @@ import java.util.UUID;
                 "FROM " + Schema.TransactionAttachment.TABLE + " AS ta JOIN " + Schema.Attachment.TABLE + " AS a " +
                 "ON ta." + Schema.TransactionAttachment.ATTACHMENT + " = a." + Schema.Attachment.ID + " AND ta." +
                 Schema.TransactionAttachment.DELETED + " = 0 AND a." + Schema.Attachment.DELETED + " = 0 AND " +
-                Schema.TransactionAttachment.TRANSACTION + " = " + String.valueOf(id);
+                Schema.TransactionAttachment.TRANSACTION + " = " + id;
         return queryFrom(subQuery, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -807,11 +806,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the people
      * of a specific transaction.
      *
-     * @param id of the transaction.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param id            of the transaction.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransactionPeople(long id, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -824,7 +823,7 @@ import java.util.UUID;
                 "FROM " + Schema.TransactionPeople.TABLE + " AS dp JOIN " + Schema.Person.TABLE + " AS p " +
                 "ON dp." + Schema.TransactionPeople.PERSON + " = p." + Schema.Person.ID + " AND dp." +
                 Schema.TransactionPeople.DELETED + " = 0 AND p." + Schema.Person.DELETED + " = 0 AND " +
-                Schema.TransactionPeople.TRANSACTION + " = " + String.valueOf(id);
+                Schema.TransactionPeople.TRANSACTION + " = " + id;
         return queryFrom(subQuery, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -850,7 +849,8 @@ import java.util.UUID;
                 if (cursor.moveToFirst()) {
                     long transferId = cursor.getLong(cursor.getColumnIndex(Schema.Transfer.ID));
                     throw new SQLiteDataException(Contract.ErrorCode.TRANSACTION_USED_IN_TRANSFER,
-                            String.format(Locale.ENGLISH, "The transaction (id: %d) cannot be updated because it is part of a transfer (id: %d)", transactionId, transferId));
+                            String.format(Locale.ENGLISH, "The transaction (id: %d) cannot be updated because it is part of a transfer (id: %d)",
+                                    transactionId, transferId));
                 }
             } finally {
                 cursor.close();
@@ -927,7 +927,8 @@ import java.util.UUID;
                         cv.put(Schema.TransactionPeople.UUID, UUID.randomUUID().toString());
                         cv.put(Schema.TransactionPeople.LAST_EDIT, System.currentTimeMillis());
                         cv.put(Schema.TransactionPeople.DELETED, false);
-                        long newId = getWritableDatabase().insertWithOnConflict(Schema.TransactionPeople.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+                        long newId = getWritableDatabase().insertWithOnConflict(Schema.TransactionPeople.TABLE, null, cv,
+                                SQLiteDatabase.CONFLICT_IGNORE);
                         if (newId == -1L) {
                             // In this case the tuple <transactionId,personId> already exists inside the table!
                             // We have to simply update the deleted flag and the update timestamp.
@@ -959,7 +960,8 @@ import java.util.UUID;
                         cv.put(Schema.TransactionAttachment.UUID, UUID.randomUUID().toString());
                         cv.put(Schema.TransactionAttachment.LAST_EDIT, System.currentTimeMillis());
                         cv.put(Schema.TransactionAttachment.DELETED, false);
-                        long newId = getWritableDatabase().insertWithOnConflict(Schema.TransactionAttachment.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+                        long newId = getWritableDatabase().insertWithOnConflict(Schema.TransactionAttachment.TABLE, null, cv,
+                                SQLiteDatabase.CONFLICT_IGNORE);
                         if (newId == -1L) {
                             // In this case the tuple <transactionId,attachmentId> already exists inside the table!
                             // We have to simply update the deleted flag and the update timestamp.
@@ -990,6 +992,7 @@ import java.util.UUID;
     /**
      * Delete a transaction from the database. If the 'mCacheDeletedObjects' flag is enabled the data
      * is not removed but simply flagged as deleted. The transaction is NOT removed if part of a transfer.
+     *
      * @param transactionId id of the transaction to remove.
      * @return the number of rows affected by the deletion (must be 1 for success).
      * @throws SQLiteDataException if the transaction is part of a transfer.
@@ -1006,7 +1009,8 @@ import java.util.UUID;
                 if (cursor.moveToFirst()) {
                     long transferId = cursor.getLong(cursor.getColumnIndex(Schema.Transfer.ID));
                     throw new SQLiteDataException(Contract.ErrorCode.TRANSACTION_USED_IN_TRANSFER,
-                            String.format(Locale.ENGLISH, "The transaction (id: %d) cannot be deleted because it is part of a transfer (id: %d)", transactionId, transferId));
+                            String.format(Locale.ENGLISH, "The transaction (id: %d) cannot be deleted because it is part of a transfer (id: %d)",
+                                    transactionId, transferId));
                 }
             } finally {
                 cursor.close();
@@ -1081,7 +1085,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying for a specific transfer
      * id from the database.
      *
-     * @param id of the transfer.
+     * @param id         of the transfer.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -1095,10 +1099,10 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transfers from
      * the database.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransfers(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -1183,13 +1187,13 @@ import java.util.UUID;
      */
     private Long[] getTransferTransactionIds(long transferId) {
         Long[] transactionIds = new Long[3];
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Schema.Transfer.TRANSACTION_FROM,
                 Schema.Transfer.TRANSACTION_TO,
                 Schema.Transfer.TRANSACTION_TAX
         };
         String selection = Schema.Transfer.ID + " = ?";
-        String[] selectionArgs = new String[] {String.valueOf(transferId)};
+        String[] selectionArgs = new String[]{String.valueOf(transferId)};
         Cursor cursor = getTransfers(projection, selection, selectionArgs, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -1210,11 +1214,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the attachments of
      * a given transfer.
      *
-     * @param id of the transfer.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param id            of the transfer.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransferAttachments(long id, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -1228,7 +1232,7 @@ import java.util.UUID;
                 "FROM " + Schema.TransferAttachment.TABLE + " AS ta JOIN " + Schema.Attachment.TABLE + " AS a " +
                 "ON ta." + Schema.TransferAttachment.ATTACHMENT + " = a." + Schema.Attachment.ID + " AND ta." +
                 Schema.TransferAttachment.DELETED + " = 0 AND a." + Schema.Attachment.DELETED + " = 0 AND " +
-                Schema.TransferAttachment.TRANSFER + " = " + String.valueOf(id);
+                Schema.TransferAttachment.TRANSFER + " = " + id;
         return queryFrom(subQuery, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -1236,11 +1240,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the people of
      * a given transfer.
      *
-     * @param id of the transfer.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param id            of the transfer.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransferPeople(long id, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -1253,7 +1257,7 @@ import java.util.UUID;
                 "FROM " + Schema.TransferPeople.TABLE + " AS dp JOIN " + Schema.Person.TABLE + " AS p " +
                 "ON dp." + Schema.TransferPeople.PERSON + " = p." + Schema.Person.ID + " AND dp." +
                 Schema.TransferPeople.DELETED + " = 0 AND p." + Schema.Person.DELETED + " = 0 AND " +
-                Schema.TransferPeople.TRANSFER + " = " + String.valueOf(id);
+                Schema.TransferPeople.TRANSFER + " = " + id;
         return queryFrom(subQuery, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -1274,9 +1278,9 @@ import java.util.UUID;
         if (contentValues.containsKey(Contract.Transfer.RECURRENCE_ID)) {
             long recurrenceId = contentValues.getAsLong(Contract.Transfer.RECURRENCE_ID);
             String table = Schema.RecurrentTransfer.TABLE;
-            String[] projection = new String[] {Schema.RecurrentTransfer.UUID};
+            String[] projection = new String[]{Schema.RecurrentTransfer.UUID};
             String selection = Schema.RecurrentTransfer.ID + " = ?";
-            String[] selectionArgs = new String[] {String.valueOf(recurrenceId)};
+            String[] selectionArgs = new String[]{String.valueOf(recurrenceId)};
             Cursor cursor = getReadableDatabase().query(table, projection, selection, selectionArgs, null, null, null);
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
@@ -1402,7 +1406,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is updating an existing transfer
      * from the database.
      *
-     * @param transferId id of the transfer to update.
+     * @param transferId    id of the transfer to update.
      * @param contentValues bundle that contains the values to update.
      * @return the the number of row affected by the update.
      */
@@ -1471,11 +1475,11 @@ import java.util.UUID;
                 cv.put(Schema.Transaction.COUNT_IN_TOTAL, contentValues.getAsBoolean(Contract.Transfer.COUNT_IN_TOTAL));
                 cv.put(Schema.Transaction.LAST_EDIT, System.currentTimeMillis());
                 where = Schema.Transaction.ID + " = ?";
-                whereArgs = new String[] {String.valueOf(transactionIds[2])};
+                whereArgs = new String[]{String.valueOf(transactionIds[2])};
                 getWritableDatabase().update(Schema.Transaction.TABLE, cv, where, whereArgs);
             } else {
                 where = Schema.Transaction.ID + " = ?";
-                whereArgs = new String[] {String.valueOf(transactionIds[2])};
+                whereArgs = new String[]{String.valueOf(transactionIds[2])};
                 if (mCacheDeletedObjects) {
                     cv = new ContentValues();
                     cv.put(Schema.Transaction.LAST_EDIT, System.currentTimeMillis());
@@ -1578,7 +1582,8 @@ import java.util.UUID;
                     cv.put(Schema.TransferAttachment.UUID, UUID.randomUUID().toString());
                     cv.put(Schema.TransferAttachment.LAST_EDIT, System.currentTimeMillis());
                     cv.put(Schema.TransferAttachment.DELETED, false);
-                    long newId = getWritableDatabase().insertWithOnConflict(Schema.TransferAttachment.TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+                    long newId = getWritableDatabase().insertWithOnConflict(Schema.TransferAttachment.TABLE, null, cv,
+                            SQLiteDatabase.CONFLICT_IGNORE);
                     if (newId == -1L) {
                         // In this case the tuple <transferId,attachmentId> already exists inside the table!
                         // We have to simply update the deleted flag and the update timestamp.
@@ -1657,7 +1662,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying a specific category
      * from the database.
      *
-     * @param id of the category.
+     * @param id         of the category.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -1671,10 +1676,10 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the categories
      * from the database.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getCategories(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -1705,14 +1710,15 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transactions
      * related to a given category.
      *
-     * @param categoryId id of the category.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param categoryId    id of the category.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
-    /*package-local*/ Cursor getCategoryTransactions(long categoryId, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    /*package-local*/ Cursor getCategoryTransactions(long categoryId, String[] projection, String selection, String[] selectionArgs,
+                                                     String sortOrder) {
         String _selection = "(" + Contract.Transaction.CATEGORY_ID + " = ? OR " +
                 Contract.Transaction.CATEGORY_PARENT_ID + " = ?)";
         if (!TextUtils.isEmpty(selection)) {
@@ -1741,7 +1747,7 @@ import java.util.UUID;
         // before inserting the category, checks if it is valid
         if (contentValues.containsKey(Contract.Category.PARENT)) {
             // query the parent category
-            String[] projection = new String[] {Schema.Category.ID, Schema.Category.TYPE, Schema.Category.PARENT};
+            String[] projection = new String[]{Schema.Category.ID, Schema.Category.TYPE, Schema.Category.PARENT};
             String where = Schema.Category.ID + " = ?";
             String[] whereArgs = new String[]{String.valueOf(contentValues.getAsLong(Contract.Category.PARENT))};
             Cursor cursor = getReadableDatabase().query(Schema.Category.TABLE, projection, where, whereArgs, null, null, null);
@@ -1785,7 +1791,7 @@ import java.util.UUID;
      * Some data consistency check is done before the update. If an error is detected an exception
      * is thrown with an {@link com.oriondev.moneywallet.storage.database.Contract.ErrorCode}.
      *
-     * @param categoryId id of the category to update.
+     * @param categoryId    id of the category to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected by the update.
      * @throws SQLiteDataException if the category cannot be updated.
@@ -1794,7 +1800,7 @@ import java.util.UUID;
         // check if category is a system category: only the flag SHOW_REPORT can be changed
         boolean isSystemCategory = false;
         boolean isChildCategory = false;
-        String[] projection = new String[] {Schema.Category.TYPE, Schema.Category.PARENT};
+        String[] projection = new String[]{Schema.Category.TYPE, Schema.Category.PARENT};
         String where = Schema.Category.ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(categoryId)};
         Cursor cursor = getReadableDatabase().query(Schema.Category.TABLE, projection, where, whereArgs, null, null, null);
@@ -1815,7 +1821,7 @@ import java.util.UUID;
         boolean isValidParentSet = contentValues.containsKey(Contract.Category.PARENT) && contentValues.getAsLong(Contract.Category.PARENT) != null;
         if (isValidParentSet) {
             // check if category that has a parent id set has already some children
-            projection = new String[] {Schema.Category.ID};
+            projection = new String[]{Schema.Category.ID};
             where = Schema.Category.PARENT + " = ?";
             whereArgs = new String[]{String.valueOf(categoryId)};
             cursor = getReadableDatabase().query(Schema.Category.TABLE, projection, where, whereArgs, null, null, null);
@@ -1823,14 +1829,15 @@ import java.util.UUID;
                 try {
                     if (cursor.moveToFirst()) {
                         throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_HIERARCHY_NOT_SUPPORTED,
-                                String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because nested relations are not supported", categoryId));
+                                String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because nested relations are not supported",
+                                        categoryId));
                     }
                 } finally {
                     cursor.close();
                 }
             }
             // query the parent category
-            projection = new String[] {Schema.Category.ID, Schema.Category.TYPE, Schema.Category.PARENT};
+            projection = new String[]{Schema.Category.ID, Schema.Category.TYPE, Schema.Category.PARENT};
             where = Schema.Category.ID + " = ?";
             whereArgs = new String[]{String.valueOf(contentValues.getAsLong(Contract.Category.PARENT))};
             cursor = getReadableDatabase().query(Schema.Category.TABLE, projection, where, whereArgs, null, null, null);
@@ -1840,12 +1847,14 @@ import java.util.UUID;
                         // check if category that is set has parent is already a child category
                         if (cursor.getLong(cursor.getColumnIndex(Schema.Category.PARENT)) > 0L) {
                             throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_HIERARCHY_NOT_SUPPORTED,
-                                    String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because nested relations are not supported", categoryId));
+                                    String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because nested relations are not " +
+                                            "supported", categoryId));
                         }
                         // check if parent category is consistent with the type of the category
                         if (cursor.getInt(cursor.getColumnIndex(Schema.Category.TYPE)) != contentValues.getAsInteger(Contract.Category.TYPE)) {
                             throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_NOT_CONSISTENT,
-                                    String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because is not consistent with the parent category", categoryId));
+                                    String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because is not consistent with the " +
+                                            "parent category", categoryId));
                         }
                     }
                 } finally {
@@ -1855,7 +1864,7 @@ import java.util.UUID;
         } else {
             // check if category has some children and if the type is consistent
             if (contentValues.containsKey(Contract.Category.TYPE)) {
-                projection = new String[] {Schema.Category.ID};
+                projection = new String[]{Schema.Category.ID};
                 where = Schema.Category.PARENT + " = ? AND " + Schema.Category.TYPE + " != ?";
                 whereArgs = new String[]{String.valueOf(categoryId), String.valueOf(contentValues.getAsInteger(Contract.Category.TYPE))};
                 cursor = getReadableDatabase().query(Schema.Category.TABLE, projection, where, whereArgs, null, null, null);
@@ -1863,7 +1872,8 @@ import java.util.UUID;
                     try {
                         if (cursor.moveToFirst()) {
                             throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_NOT_CONSISTENT,
-                                    String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because is not consistent with the children categories", categoryId));
+                                    String.format(Locale.ENGLISH, "The category (id: %d) cannot be updated because is not consistent with the " +
+                                            "children categories", categoryId));
                         }
                     } finally {
                         cursor.close();
@@ -1924,7 +1934,7 @@ import java.util.UUID;
                 whereArgs = new String[]{String.valueOf(categoryId)};
                 cv = new ContentValues();
                 cv.put(Schema.Transaction.DIRECTION, type == Schema.CategoryType.INCOME ?
-                                        Schema.Direction.INCOME : Schema.Direction.EXPENSE);
+                        Schema.Direction.INCOME : Schema.Direction.EXPENSE);
                 cv.put(Schema.Transaction.LAST_EDIT, System.currentTimeMillis());
                 getWritableDatabase().update(Schema.Transaction.TABLE, cv, where, whereArgs);
             }
@@ -1942,7 +1952,7 @@ import java.util.UUID;
      */
     /*package-local*/ int deleteCategory(long categoryId) {
         // check if category has some sub-category
-        String[] projection = new String[] {Schema.Category.ID};
+        String[] projection = new String[]{Schema.Category.ID};
         String where = Schema.Category.PARENT + " = ? AND " + Schema.Category.DELETED + " = 0";
         String[] whereArgs = new String[]{String.valueOf(categoryId)};
         Cursor cursor = getReadableDatabase().query(Schema.Category.TABLE, projection, where, whereArgs, null, null, null);
@@ -1950,14 +1960,15 @@ import java.util.UUID;
             try {
                 if (cursor.moveToFirst()) {
                     throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_HAS_CHILDREN,
-                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is parent of %d categories", categoryId, cursor.getCount()));
+                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is parent of %d categories",
+                                    categoryId, cursor.getCount()));
                 }
             } finally {
                 cursor.close();
             }
         }
         // check if category is a system category
-        projection = new String[] {Schema.Category.TYPE};
+        projection = new String[]{Schema.Category.TYPE};
         where = Schema.Category.ID + " = ?";
         whereArgs = new String[]{String.valueOf(categoryId)};
         cursor = getReadableDatabase().query(Schema.Category.TABLE, projection, where, whereArgs, null, null, null);
@@ -1972,7 +1983,7 @@ import java.util.UUID;
             }
         }
         // check if category is in use in some transaction
-        projection = new String[] {Schema.Transaction.ID};
+        projection = new String[]{Schema.Transaction.ID};
         where = Schema.Transaction.CATEGORY + " = ? AND " + Schema.Transaction.DELETED + " = 0";
         whereArgs = new String[]{String.valueOf(categoryId)};
         cursor = getReadableDatabase().query(Schema.Transaction.TABLE, projection, where, whereArgs, null, null, null);
@@ -1980,14 +1991,15 @@ import java.util.UUID;
             try {
                 if (cursor.moveToFirst()) {
                     throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_IN_USE,
-                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d transactions", categoryId, cursor.getCount()));
+                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d transactions",
+                                    categoryId, cursor.getCount()));
                 }
             } finally {
                 cursor.close();
             }
         }
         // check if category is in use in some transaction model
-        projection = new String[] {Schema.TransactionModel.ID};
+        projection = new String[]{Schema.TransactionModel.ID};
         where = Schema.TransactionModel.CATEGORY + " = ? AND " + Schema.TransactionModel.DELETED + " = 0";
         whereArgs = new String[]{String.valueOf(categoryId)};
         cursor = getReadableDatabase().query(Schema.TransactionModel.TABLE, projection, where, whereArgs, null, null, null);
@@ -1995,14 +2007,15 @@ import java.util.UUID;
             try {
                 if (cursor.moveToFirst()) {
                     throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_IN_USE,
-                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d transaction-models", categoryId, cursor.getCount()));
+                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d transaction-models",
+                                    categoryId, cursor.getCount()));
                 }
             } finally {
                 cursor.close();
             }
         }
         // check if category is in use in some recurrent transaction
-        projection = new String[] {Schema.RecurrentTransaction.ID};
+        projection = new String[]{Schema.RecurrentTransaction.ID};
         where = Schema.RecurrentTransaction.CATEGORY + " = ? AND " + Schema.RecurrentTransaction.DELETED + " = 0";
         whereArgs = new String[]{String.valueOf(categoryId)};
         cursor = getReadableDatabase().query(Schema.RecurrentTransaction.TABLE, projection, where, whereArgs, null, null, null);
@@ -2010,14 +2023,15 @@ import java.util.UUID;
             try {
                 if (cursor.moveToFirst()) {
                     throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_IN_USE,
-                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d recurrent-transactions", categoryId, cursor.getCount()));
+                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d " +
+                                    "recurrent-transactions", categoryId, cursor.getCount()));
                 }
             } finally {
                 cursor.close();
             }
         }
         // check if category is in use in some budget
-        projection = new String[] {Schema.Budget.ID};
+        projection = new String[]{Schema.Budget.ID};
         where = Schema.Budget.CATEGORY + " = ? AND " + Schema.Budget.DELETED + " = 0";
         whereArgs = new String[]{String.valueOf(categoryId)};
         cursor = getReadableDatabase().query(Schema.Budget.TABLE, projection, where, whereArgs, null, null, null);
@@ -2025,7 +2039,8 @@ import java.util.UUID;
             try {
                 if (cursor.moveToFirst()) {
                     throw new SQLiteDataException(Contract.ErrorCode.CATEGORY_IN_USE,
-                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d budgets", categoryId, cursor.getCount()));
+                            String.format(Locale.ENGLISH, "The category (id: %d) cannot be deleted because it is in use in %d budgets", categoryId,
+                                    cursor.getCount()));
                 }
             } finally {
                 cursor.close();
@@ -2047,7 +2062,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying a specific debt.
      *
-     * @param id of the debt.
+     * @param id         of the debt.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -2060,10 +2075,10 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying all the debts.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getDebts(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -2124,11 +2139,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the people
      * related to a given debt.
      *
-     * @param id of the debt.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param id            of the debt.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getDebtPeople(long id, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -2141,7 +2156,7 @@ import java.util.UUID;
                 "FROM " + Schema.DebtPeople.TABLE + " AS dp JOIN " + Schema.Person.TABLE + " AS p " +
                 "ON dp." + Schema.DebtPeople.PERSON + " = p." + Schema.Person.ID + " AND dp." +
                 Schema.DebtPeople.DELETED + " = 0 AND p." + Schema.Person.DELETED + " = 0 AND " +
-                Schema.DebtPeople.DEBT + " = " + String.valueOf(id);
+                Schema.DebtPeople.DEBT + " = " + id;
         return queryFrom(subQuery, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -2149,11 +2164,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transactions
      * related to a given debt.
      *
-     * @param debtId id of the debt.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param debtId        id of the debt.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getDebtTransactions(long debtId, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -2172,8 +2187,9 @@ import java.util.UUID;
 
     /**
      * This method is called by the content provider when the user is inserting a new debt.
-     *
+     * <p>
      * contentValues bundle that contains the data from the content provider.
+     *
      * @return the id of the new item if inserted, -1 if an error occurs.
      */
     /*package-local*/ long insertDebt(ContentValues contentValues) {
@@ -2215,11 +2231,14 @@ import java.util.UUID;
                 cv.put(Contract.Transaction.MONEY, contentValues.getAsLong(Contract.Debt.MONEY));
                 cv.put(Contract.Transaction.DATE, DateUtils.getSQLDateTimeString(System.currentTimeMillis()));
                 cv.put(Contract.Transaction.DESCRIPTION, contentValues.getAsString(Contract.Debt.DESCRIPTION));
-                cv.put(Contract.Transaction.CATEGORY_ID, getSystemCategoryId((type == Contract.DebtType.DEBT) ? Schema.CategoryTag.DEBT : Schema.CategoryTag.CREDIT));
+                cv.put(Contract.Transaction.CATEGORY_ID, getSystemCategoryId((type == Contract.DebtType.DEBT) ? Schema.CategoryTag.DEBT :
+                        Schema.CategoryTag.CREDIT));
                 cv.put(Contract.Transaction.DIRECTION, (type == Contract.DebtType.CREDIT) ? Contract.Direction.EXPENSE : Contract.Direction.INCOME);
                 cv.put(Contract.Transaction.TYPE, Contract.TransactionType.DEBT);
-                cv.put(Contract.Transaction.WALLET_ID, contentValues.containsKey(Contract.Debt.WALLET_ID) ? contentValues.getAsLong(Contract.Debt.WALLET_ID) : null);
-                cv.put(Contract.Transaction.PLACE_ID, contentValues.containsKey(Contract.Debt.PLACE_ID) ? contentValues.getAsLong(Contract.Debt.PLACE_ID) : null);
+                cv.put(Contract.Transaction.WALLET_ID, contentValues.containsKey(Contract.Debt.WALLET_ID) ?
+                        contentValues.getAsLong(Contract.Debt.WALLET_ID) : null);
+                cv.put(Contract.Transaction.PLACE_ID, contentValues.containsKey(Contract.Debt.PLACE_ID) ?
+                        contentValues.getAsLong(Contract.Debt.PLACE_ID) : null);
                 cv.put(Contract.Transaction.NOTE, contentValues.getAsString(Contract.Debt.NOTE));
                 cv.putNull(Contract.Transaction.EVENT_ID);
                 cv.putNull(Contract.Transaction.SAVING_ID);
@@ -2237,7 +2256,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is updating an existing debt.
      *
-     * @param debtId id of the debt to update.
+     * @param debtId        id of the debt to update.
      * @param contentValues bundle that contains the data from the content provider.
      * @return the number of row affected.
      */
@@ -2326,14 +2345,14 @@ import java.util.UUID;
             // check if exists a master transaction for this debt and update it
             Long debtCategoryId = getSystemCategoryId(Schema.CategoryTag.DEBT);
             Long creditCategoryId = getSystemCategoryId(Schema.CategoryTag.CREDIT);
-            String[] projection = new String[] {
+            String[] projection = new String[]{
                     Contract.Transaction.ID
             };
             String selection = Contract.Transaction.TYPE + " = ? AND " +
                     Contract.Transaction.DEBT_ID + " = ? AND (" +
                     Contract.Transaction.CATEGORY_ID + " = ? OR " +
                     Contract.Transaction.CATEGORY_ID + " = ?)";
-            String[] selectionArgs = new String[] {
+            String[] selectionArgs = new String[]{
                     String.valueOf(Contract.TransactionType.DEBT),
                     String.valueOf(debtId),
                     String.valueOf(debtCategoryId),
@@ -2389,7 +2408,7 @@ import java.util.UUID;
      */
     /*package-local*/ int deleteDebt(long debtId) {
         // remove all the transactions of this debt
-        deleteTransactionItems(getDebtTransactions(debtId, new String[] {Contract.Transaction.ID}, null, null, null));
+        deleteTransactionItems(getDebtTransactions(debtId, new String[]{Contract.Transaction.ID}, null, null, null));
         // remove all DebtPeople
         String where = Schema.DebtPeople.DEBT + " = ?";
         String[] whereArgs = new String[]{String.valueOf(debtId)};
@@ -2417,7 +2436,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying a specific budget.
      *
-     * @param id of the budget.
+     * @param id         of the budget.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -2430,10 +2449,10 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying all the budgets.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getBudgets(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -2556,11 +2575,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the wallets
      * related to a given budget.
      *
-     * @param id of the budget.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param id            of the budget.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getBudgetWallets(long id, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -2576,7 +2595,7 @@ import java.util.UUID;
                 "FROM " + Schema.BudgetWallet.TABLE + " AS bw JOIN " + Schema.Wallet.TABLE + " AS w " +
                 "ON bw." + Schema.BudgetWallet.WALLET + " = w." + Schema.Wallet.ID + " AND bw." +
                 Schema.BudgetWallet.DELETED + " = 0 AND w." + Schema.Wallet.DELETED + " = 0 AND " +
-                Schema.BudgetWallet.BUDGET + " = " + String.valueOf(id);
+                Schema.BudgetWallet.BUDGET + " = " + id;
         return queryFrom(subQuery, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -2584,11 +2603,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transactions
      * related to a given budget.
      *
-     * @param budgetId id of the budget.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param budgetId      id of the budget.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getBudgetTransactions(long budgetId, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -2706,7 +2725,7 @@ import java.util.UUID;
                 Schema.Category.TABLE + " AS tc ON t." + Schema.Transaction.CATEGORY + " = tc." +
                 Schema.Category.ID + " AND tc." + Schema.Category.DELETED + " = 0 WHERE (b." +
                 Schema.Budget.CATEGORY + " = " + Schema.Transaction.CATEGORY + " OR b." +
-                Schema.Budget.CATEGORY + " = tc."+ Schema.Category.PARENT + ") " +
+                Schema.Budget.CATEGORY + " = tc." + Schema.Category.PARENT + ") " +
                 "AND DATETIME(t." + Schema.Transaction.DATE + ") <= DATETIME('now', 'localtime') " +
                 "AND DATE(t." + Schema.Transaction.DATE + ") >= DATE(b." +
                 Schema.Budget.START_DATE + ") AND DATE(t." + Schema.Transaction.DATE +
@@ -2779,7 +2798,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is updating an existing budget.
      *
-     * @param budgetId id of the budget to update.
+     * @param budgetId      id of the budget to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -2842,12 +2861,13 @@ import java.util.UUID;
     /**
      * This method is used internally to check if the given array of wallet ids is consistent.
      * If two or more different currencies are found, an exception is thrown.
+     *
      * @param walletIds array of wallet id.
      * @throws SQLiteDataException if one of the id is not found or wallets are not consistent.
      */
     private void checkWalletsConsistency(long[] walletIds) {
         String savedCurrency = null;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Contract.Wallet.CURRENCY
         };
         for (long walletId : walletIds) {
@@ -2857,7 +2877,8 @@ import java.util.UUID;
                     String currency = cursor.getString(cursor.getColumnIndex(Contract.Wallet.CURRENCY));
                     if (savedCurrency != null) {
                         if (!TextUtils.equals(savedCurrency, currency)) {
-                            String message = String.format(Locale.ENGLISH, "Wallet currency is not consistent (found %s and %s)", savedCurrency, currency);
+                            String message = String.format(Locale.ENGLISH, "Wallet currency is not consistent (found %s and %s)", savedCurrency,
+                                    currency);
                             throw new SQLiteDataException(Contract.ErrorCode.WALLETS_NOT_CONSISTENT, message);
                         }
                     } else {
@@ -2906,7 +2927,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying a specific saving.
      *
-     * @param id of the saving.
+     * @param id         of the saving.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -2919,10 +2940,10 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying all the savings.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getSavings(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -2961,11 +2982,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transactions
      * related to a given saving.
      *
-     * @param savingId id of the saving.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param savingId      id of the saving.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getSavingTransactions(long savingId, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -3008,7 +3029,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is updating an existing saving.
      *
-     * @param savingId id of the saving to update.
+     * @param savingId      id of the saving to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -3056,7 +3077,7 @@ import java.util.UUID;
      */
     /*package-local*/ int deleteSaving(long savingId) {
         // remove all the transactions of this saving
-        deleteTransactionItems(getSavingTransactions(savingId, new String[] {Contract.Transaction.ID}, null, null, null));
+        deleteTransactionItems(getSavingTransactions(savingId, new String[]{Contract.Transaction.ID}, null, null, null));
         // delete the saving item
         String where = Schema.Saving.ID + " = ?";
         String[] whereArgs = new String[]{String.valueOf(savingId)};
@@ -3073,7 +3094,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying a specific event.
      *
-     * @param id of the event.
+     * @param id         of the event.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -3086,10 +3107,10 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying all the events.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getEvents(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -3119,11 +3140,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transactions
      * related to a given event.
      *
-     * @param eventId id of the event.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param eventId       id of the event.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getEventTransactions(long eventId, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -3163,7 +3184,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is updating an existing event.
      *
-     * @param eventId id of the event to update.
+     * @param eventId       id of the event to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -3393,9 +3414,10 @@ import java.util.UUID;
             // in order to correctly use the recurrence task to add transactions on the fly
             ContentValues cvu = new ContentValues();
             cvu.put(Schema.RecurrentTransaction.LAST_OCCURRENCE, DateUtils.getSQLDateString(DateUtils.getFixedDate(lastOccurrence)));
-            cvu.put(Schema.RecurrentTransaction.NEXT_OCCURRENCE, nextOccurrence != null ? DateUtils.getSQLDateString(DateUtils.getFixedDate(nextOccurrence)) : null);
+            cvu.put(Schema.RecurrentTransaction.NEXT_OCCURRENCE, nextOccurrence != null ?
+                    DateUtils.getSQLDateString(DateUtils.getFixedDate(nextOccurrence)) : null);
             String selection = Schema.RecurrentTransaction.ID + " = ?";
-            String[] selectionArgs = new String[] {String.valueOf(id)};
+            String[] selectionArgs = new String[]{String.valueOf(id)};
             getWritableDatabase().update(Schema.RecurrentTransaction.TABLE, cvu, selection, selectionArgs);
         }
         return id;
@@ -3409,7 +3431,7 @@ import java.util.UUID;
             cv.put(Schema.RecurrentTransaction.NEXT_OCCURRENCE, contentValues.getAsString(Contract.RecurrentTransaction.NEXT_OCCURRENCE));
             cv.put(Schema.RecurrentTransaction.LAST_EDIT, System.currentTimeMillis());
             String where = Schema.RecurrentTransaction.ID + " = ?";
-            String[] selectionArgs = new String[] {String.valueOf(transactionId)};
+            String[] selectionArgs = new String[]{String.valueOf(transactionId)};
             return getWritableDatabase().update(Schema.RecurrentTransaction.TABLE, cv, where, selectionArgs);
         }
         return 0;
@@ -3430,7 +3452,7 @@ import java.util.UUID;
         contentValues.putNull(Schema.Transaction.RECURRENCE);
         contentValues.put(Schema.Transaction.LAST_EDIT, System.currentTimeMillis());
         String selection = Schema.Transaction.RECURRENCE + " = ?";
-        String[] selectionArgs = new String[] {String.valueOf(transactionId)};
+        String[] selectionArgs = new String[]{String.valueOf(transactionId)};
         getWritableDatabase().update(Schema.Transaction.TABLE, contentValues, selection, selectionArgs);
         // now is possible to remove the recurrent transaction itself
         selection = Schema.RecurrentTransaction.ID + " = ?";
@@ -3648,9 +3670,10 @@ import java.util.UUID;
             // in order to correctly use the recurrence task to add transfers on the fly
             ContentValues cvu = new ContentValues();
             cvu.put(Schema.RecurrentTransfer.LAST_OCCURRENCE, DateUtils.getSQLDateString(DateUtils.getFixedDate(lastOccurrence)));
-            cvu.put(Schema.RecurrentTransfer.NEXT_OCCURRENCE, nextOccurrence != null ? DateUtils.getSQLDateString(DateUtils.getFixedDate(nextOccurrence)) : null);
+            cvu.put(Schema.RecurrentTransfer.NEXT_OCCURRENCE, nextOccurrence != null ?
+                    DateUtils.getSQLDateString(DateUtils.getFixedDate(nextOccurrence)) : null);
             String selection = Schema.RecurrentTransfer.ID + " = ?";
-            String[] selectionArgs = new String[] {String.valueOf(id)};
+            String[] selectionArgs = new String[]{String.valueOf(id)};
             getWritableDatabase().update(Schema.RecurrentTransfer.TABLE, cvu, selection, selectionArgs);
         }
         return id;
@@ -3664,7 +3687,7 @@ import java.util.UUID;
             cv.put(Schema.RecurrentTransfer.NEXT_OCCURRENCE, contentValues.getAsString(Contract.RecurrentTransfer.NEXT_OCCURRENCE));
             cv.put(Schema.RecurrentTransfer.LAST_EDIT, System.currentTimeMillis());
             String where = Schema.RecurrentTransfer.ID + " = ?";
-            String[] selectionArgs = new String[] {String.valueOf(transferId)};
+            String[] selectionArgs = new String[]{String.valueOf(transferId)};
             return getWritableDatabase().update(Schema.RecurrentTransfer.TABLE, cv, where, selectionArgs);
         }
         return 0;
@@ -3685,7 +3708,7 @@ import java.util.UUID;
         contentValues.putNull(Schema.Transfer.RECURRENCE);
         contentValues.put(Schema.Transfer.LAST_EDIT, System.currentTimeMillis());
         String selection = Schema.Transfer.RECURRENCE + " = ?";
-        String[] selectionArgs = new String[] {String.valueOf(transferId)};
+        String[] selectionArgs = new String[]{String.valueOf(transferId)};
         getWritableDatabase().update(Schema.Transfer.TABLE, contentValues, selection, selectionArgs);
         // now is possible to remove the recurrent transfer itself
         selection = Schema.RecurrentTransfer.ID + " = ?";
@@ -3708,7 +3731,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying a specific
      * transaction model.
      *
-     * @param modelId id of the transaction model.
+     * @param modelId    id of the transaction model.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -3722,10 +3745,10 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transaction
      * models.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransactionModels(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -3807,7 +3830,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is updating an existing
      * transaction model.
      *
-     * @param modelId id of the transaction model to update.
+     * @param modelId       id of the transaction model to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -3856,7 +3879,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying a specific transfer
      * model.
      *
-     * @param modelId id of the transfer model.
+     * @param modelId    id of the transfer model.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -3870,10 +3893,10 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transfer
      * models.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getTransferModels(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -3957,7 +3980,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is updating an existing transfer
      * model.
      *
-     * @param modelId id of the transfer model to update.
+     * @param modelId       id of the transfer model to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -4006,7 +4029,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying a specific place.
      *
-     * @param placeId id of the place.
+     * @param placeId    id of the place.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -4019,10 +4042,10 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying all the places.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getPlaces(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -4042,11 +4065,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transactions
      * related to a given place.
      *
-     * @param placeId id of the place.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param placeId       id of the place.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getPlaceTransactions(long placeId, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -4086,7 +4109,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is updating an existing place.
      *
-     * @param placeId id of the place to update.
+     * @param placeId       id of the place to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -4179,7 +4202,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying a specific person.
      *
-     * @param personId id of the person.
+     * @param personId   id of the person.
      * @param projection column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
@@ -4192,10 +4215,10 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying all the people.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getPeople(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -4213,11 +4236,11 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying all the transactions
      * related to a given person.
      *
-     * @param personId id of the person.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param personId      id of the person.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getPeopleTransactions(long personId, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -4229,7 +4252,7 @@ import java.util.UUID;
         }
         int size = selectionArgs != null ? selectionArgs.length : 0;
         String[] _selectionArgs = new String[size + 1];
-        _selectionArgs[0] = "%<" + String.valueOf(personId) + ">%";
+        _selectionArgs[0] = "%<" + personId + ">%";
         if (selectionArgs != null) {
             System.arraycopy(selectionArgs, 0, _selectionArgs, 1, size);
         }
@@ -4257,7 +4280,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is updating an existing person.
      *
-     * @param personId id of the person to update.
+     * @param personId      id of the person to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -4344,7 +4367,7 @@ import java.util.UUID;
      * This method is called by the content provider when the user is querying a specific attachment.
      *
      * @param attachmentId id of the attachment.
-     * @param projection column names that are requested to be part of the cursor.
+     * @param projection   column names that are requested to be part of the cursor.
      * @return a cursor with zero or one row.
      */
     /*package-local*/ Cursor getAttachment(long attachmentId, String[] projection) {
@@ -4356,10 +4379,10 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is querying all the attachments.
      *
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     /*package-local*/ Cursor getAttachments(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -4396,7 +4419,7 @@ import java.util.UUID;
     /**
      * This method is called by the content provider when the user is updating an existing attachment.
      *
-     * @param attachmentId id of the attachment to update.
+     * @param attachmentId  id of the attachment to update.
      * @param contentValues bundle that contains the values to update.
      * @return the number of row affected.
      */
@@ -4438,11 +4461,11 @@ import java.util.UUID;
     /**
      * This is an internal method used to prepare a query over an existing sub query as table.
      *
-     * @param subQuery query that acts as a table.
-     * @param projection column names that are requested to be part of the cursor.
-     * @param selection string that may contains additional filters for the query.
+     * @param subQuery      query that acts as a table.
+     * @param projection    column names that are requested to be part of the cursor.
+     * @param selection     string that may contains additional filters for the query.
      * @param selectionArgs string array that may contains the arguments for the selection string.
-     * @param sortOrder string that may contains column name to use to sort the cursor.
+     * @param sortOrder     string that may contains column name to use to sort the cursor.
      * @return a cursor with zero or more rows.
      */
     private Cursor queryFrom(String subQuery, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -4482,8 +4505,9 @@ import java.util.UUID;
      * across different devices. This is not needed today but, if server sync will be introduced
      * in future, this will be necessary to avoid that, different devices adds the same transaction
      * using different UUIDs (this will lead to multiple instances of the same occurrence).
+     *
      * @param recurrenceUUID uuid of the recurrence entity.
-     * @param date of the occurrence.
+     * @param date           of the occurrence.
      * @return a uniquely identified UUID to use when inserting the occurrence.
      */
     private String getRecurrentItemUUID(String recurrenceUUID, Date date) {
@@ -4492,8 +4516,9 @@ import java.util.UUID;
 
     /**
      * This method will update all the amounts of a given currency using the provided multiplicand
-     * @param db instance of a writable database
-     * @param iso of the currency to update
+     *
+     * @param db            instance of a writable database
+     * @param iso           of the currency to update
      * @param decimalOffset offset of the decimals position
      */
     private void fixCurrencyAmounts(SQLiteDatabase db, String iso, int decimalOffset) {
@@ -4502,12 +4527,12 @@ import java.util.UUID;
             // the first step consists into searching for all the wallets that are using this
             // currency and to collect their id inside a list. To speedup the process, we can
             // update immediately the start money value of each wallet.
-            String[] projections = new String[] {
+            String[] projections = new String[]{
                     Contract.Wallet.ID,
                     Contract.Wallet.START_MONEY
             };
             String selection = Contract.Wallet.CURRENCY + " = ?";
-            String[] selectionArgs = new String[] {iso};
+            String[] selectionArgs = new String[]{iso};
             Cursor cursor = getWallets(projections, selection, selectionArgs, null);
             if (cursor != null) {
                 int indexId = cursor.getColumnIndex(Contract.Wallet.ID);
@@ -4520,7 +4545,7 @@ import java.util.UUID;
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(Schema.Wallet.START_MONEY, fixedStartMoney);
                     String whereClause = Schema.Wallet.ID + " = ?";
-                    String[] whereArgs = new String[] {String.valueOf(walletId)};
+                    String[] whereArgs = new String[]{String.valueOf(walletId)};
                     db.update(Schema.Wallet.TABLE, contentValues, whereClause, whereArgs);
                     // cache the wallet id inside the local list
                     walletIds.add(walletId);
@@ -4531,12 +4556,12 @@ import java.util.UUID;
             // update all the items that are linked within this wallet id
             for (Long walletId : walletIds) {
                 // fix the debt table
-                String[] projection = new String[] {
+                String[] projection = new String[]{
                         Schema.Debt.ID,
                         Schema.Debt.MONEY
                 };
                 selection = Schema.Debt.WALLET + " = ?";
-                selectionArgs = new String[] {String.valueOf(walletId)};
+                selectionArgs = new String[]{String.valueOf(walletId)};
                 cursor = db.query(Schema.Debt.TABLE, projection, selection, selectionArgs, null, null, null);
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
@@ -4548,13 +4573,13 @@ import java.util.UUID;
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Schema.Debt.MONEY, fixedMoney);
                         String whereClause = Schema.Debt.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.Debt.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the saving table
-                projection = new String[] {
+                projection = new String[]{
                         Schema.Saving.ID,
                         Schema.Saving.START_MONEY,
                         Schema.Saving.END_MONEY
@@ -4574,13 +4599,13 @@ import java.util.UUID;
                         contentValues.put(Schema.Saving.START_MONEY, fixedStartMoney);
                         contentValues.put(Schema.Saving.END_MONEY, fixedEndMoney);
                         String whereClause = Schema.Saving.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.Saving.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the transaction table
-                projection = new String[] {
+                projection = new String[]{
                         Schema.Transaction.ID,
                         Schema.Transaction.MONEY
                 };
@@ -4596,13 +4621,13 @@ import java.util.UUID;
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Schema.Transaction.MONEY, fixedMoney);
                         String whereClause = Schema.Transaction.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.Transaction.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the transaction model table
-                projection = new String[] {
+                projection = new String[]{
                         Schema.TransactionModel.ID,
                         Schema.TransactionModel.MONEY
                 };
@@ -4618,13 +4643,13 @@ import java.util.UUID;
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Schema.TransactionModel.MONEY, fixedMoney);
                         String whereClause = Schema.TransactionModel.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.TransactionModel.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the recurrent transfer table (FROM)
-                projection = new String[] {
+                projection = new String[]{
                         Schema.TransferModel.ID,
                         Schema.TransferModel.MONEY_FROM,
                         Schema.TransferModel.MONEY_TAX
@@ -4649,13 +4674,13 @@ import java.util.UUID;
                             }
                         }
                         String whereClause = Schema.TransferModel.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.TransferModel.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the recurrent transfer table (TO)
-                projection = new String[] {
+                projection = new String[]{
                         Schema.TransferModel.ID,
                         Schema.TransferModel.MONEY_TO
                 };
@@ -4671,13 +4696,13 @@ import java.util.UUID;
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Schema.TransferModel.MONEY_TO, fixedMoney);
                         String whereClause = Schema.TransferModel.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.TransferModel.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the recurrent transaction table
-                projection = new String[] {
+                projection = new String[]{
                         Schema.RecurrentTransaction.ID,
                         Schema.RecurrentTransaction.MONEY
                 };
@@ -4693,13 +4718,13 @@ import java.util.UUID;
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Schema.RecurrentTransaction.MONEY, fixedMoney);
                         String whereClause = Schema.RecurrentTransaction.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.RecurrentTransaction.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the recurrent transfer table (FROM)
-                projection = new String[] {
+                projection = new String[]{
                         Schema.RecurrentTransfer.ID,
                         Schema.RecurrentTransfer.MONEY_FROM,
                         Schema.RecurrentTransfer.MONEY_TAX
@@ -4724,13 +4749,13 @@ import java.util.UUID;
                             }
                         }
                         String whereClause = Schema.RecurrentTransfer.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.RecurrentTransfer.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
                 // fix the recurrent transfer table (TO)
-                projection = new String[] {
+                projection = new String[]{
                         Schema.RecurrentTransfer.ID,
                         Schema.RecurrentTransfer.MONEY_TO
                 };
@@ -4746,19 +4771,19 @@ import java.util.UUID;
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(Schema.RecurrentTransfer.MONEY_TO, fixedMoney);
                         String whereClause = Schema.RecurrentTransfer.ID + " = ?";
-                        String[] whereArgs = new String[] {String.valueOf(id)};
+                        String[] whereArgs = new String[]{String.valueOf(id)};
                         db.update(Schema.RecurrentTransfer.TABLE, contentValues, whereClause, whereArgs);
                     }
                     cursor.close();
                 }
             }
             // fix the budget table (this must be done differently)
-            String[] projection = new String[] {
+            String[] projection = new String[]{
                     Schema.Budget.ID,
                     Schema.Budget.MONEY
             };
             selection = Schema.Budget.CURRENCY + " = ?";
-            selectionArgs = new String[] {iso};
+            selectionArgs = new String[]{iso};
             cursor = db.query(Schema.Budget.TABLE, projection, selection, selectionArgs, null, null, null);
             if (cursor != null) {
                 while (cursor.moveToNext()) {
@@ -4770,7 +4795,7 @@ import java.util.UUID;
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(Schema.Budget.MONEY, fixedMoney);
                     String whereClause = Schema.Budget.ID + " = ?";
-                    String[] whereArgs = new String[] {String.valueOf(id)};
+                    String[] whereArgs = new String[]{String.valueOf(id)};
                     db.update(Schema.Budget.TABLE, contentValues, whereClause, whereArgs);
                 }
                 cursor.close();

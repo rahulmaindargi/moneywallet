@@ -36,6 +36,8 @@
     <string name="menu_search_atm">"Search atm"</string>
     <string name="menu_search_bank">"Search bank"</string>
     <string name="menu_setting">"Settings"</string>
+    <string name="menu_refresh_sms_formats">"SMS Formats"</string>
+    <string name="menu_refresh_all_sms">"Refresh SMS"</string>
     <string name="menu_support_developer">"Support developer"</string>
     <string name="menu_about">"About"</string>
 

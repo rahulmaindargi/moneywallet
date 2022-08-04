@@ -76,4 +76,6 @@ public interface DatabaseImporter {
     void importTransferAttachments(ContentResolver contentResolver) throws ImportException;
 
     void close() throws ImportException;
+
+    void importSMSFormats(ContentResolver contentResolver) throws ImportException;
 }

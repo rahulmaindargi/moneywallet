@@ -95,6 +95,7 @@ public class DefaultBackupImporter extends AbstractBackupImporter {
             importer.importAttachments(contentResolver);
             importer.importTransactionAttachments(contentResolver);
             importer.importTransferAttachments(contentResolver);
+            importer.importSMSFormats(contentResolver);
         } catch (ZipException e) {
             throw new ImportException(e.getMessage());
         } finally {

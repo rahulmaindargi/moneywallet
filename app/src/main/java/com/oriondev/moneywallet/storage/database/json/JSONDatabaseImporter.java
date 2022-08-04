@@ -37,6 +37,7 @@ import com.oriondev.moneywallet.storage.database.model.Person;
 import com.oriondev.moneywallet.storage.database.model.Place;
 import com.oriondev.moneywallet.storage.database.model.RecurrentTransaction;
 import com.oriondev.moneywallet.storage.database.model.RecurrentTransfer;
+import com.oriondev.moneywallet.storage.database.model.SMSFormat;
 import com.oriondev.moneywallet.storage.database.model.Saving;
 import com.oriondev.moneywallet.storage.database.model.Transaction;
 import com.oriondev.moneywallet.storage.database.model.TransactionAttachment;
@@ -553,6 +554,24 @@ public class JSONDatabaseImporter implements DatabaseImporter {
         try {
             mReader.close();
         } catch (IOException e) {
+            throw new ImportException(e.getMessage());
+        }
+    }
+
+    public void importSMSFormats(ContentResolver contentResolver) throws ImportException{
+        try {
+            if (JSONDatabase.SMSFormat.ARRAY.equals(mReader.readName())) {
+                mReader.beginArray();
+                while (mReader.hasArrayAnotherObject()) {
+                    JSONObject object = mReader.readObject();
+                    SMSFormat transferAttachment = mFactory.getSMSFormat(object);
+                    long id = SQLDatabaseImporter.insert(contentResolver, transferAttachment);
+                }
+                mReader.endArray();
+            } else {
+                throw new ImportException("Wrong array name (expected = 'SMSFormats')");
+            }
+        } catch (IOException | JSONException e) {
             throw new ImportException(e.getMessage());
         }
     }

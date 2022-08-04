@@ -30,6 +30,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -41,7 +42,7 @@ import com.oriondev.moneywallet.BuildConfig;
  */
 public class SyncContentProvider extends ContentProvider {
 
-    private static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".storage.sync";
+    public static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".storage.sync";
 
     public static final Uri CONTENT_CURRENCIES = Uri.parse("content://" + AUTHORITY + "/currencies");
     public static final Uri CONTENT_WALLETS = Uri.parse("content://" + AUTHORITY + "/wallets");
@@ -66,6 +67,8 @@ public class SyncContentProvider extends ContentProvider {
     public static final Uri CONTENT_ATTACHMENT = Uri.parse("content://" + AUTHORITY + "/attachments");
     public static final Uri CONTENT_TRANSACTION_ATTACHMENT = Uri.parse("content://" + AUTHORITY + "/transaction_attachments");
     public static final Uri CONTENT_TRANSFER_ATTACHMENT = Uri.parse("content://" + AUTHORITY + "/transfer_attachments");
+    public static final Uri CONTENT_SMS_FORMAT = Uri.parse("content://" + AUTHORITY + "/sms_formats");
+    public static final Uri CONTENT_SMS_MESSAGE = Uri.parse("content://" + AUTHORITY + "/sms_messages");
 
     private static final int TABLE_CURRENCIES = 1;
     private static final int TABLE_WALLETS = 2;
@@ -90,8 +93,11 @@ public class SyncContentProvider extends ContentProvider {
     private static final int TABLE_ATTACHMENTS = 21;
     private static final int TABLE_TRANSACTION_ATTACHMENTS = 22;
     private static final int TABLE_TRANSFER_ATTACHMENTS = 23;
+    private static final int TABLE_SMS_FORMATS = 24;
+    private static final int TABLE_SMS_MESSAGES = 25;
 
     private static final UriMatcher mUriMatcher = createUriMatcher();
+    private SQLDatabase mDatabase;
 
     private static UriMatcher createUriMatcher() {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -118,10 +124,26 @@ public class SyncContentProvider extends ContentProvider {
         matcher.addURI(AUTHORITY, "attachments", TABLE_ATTACHMENTS);
         matcher.addURI(AUTHORITY, "transaction_attachments", TABLE_TRANSACTION_ATTACHMENTS);
         matcher.addURI(AUTHORITY, "transfer_attachments", TABLE_TRANSFER_ATTACHMENTS);
+        matcher.addURI(AUTHORITY, "sms_formats", TABLE_SMS_FORMATS);
+        matcher.addURI(AUTHORITY, "sms_messages", TABLE_SMS_MESSAGES);
         return matcher;
     }
 
-    private SQLDatabase mDatabase;
+    @SuppressLint("Recycle")
+    public static void notifyDatabaseIsChanged(Context context) {
+        ContentResolver contentResolver = context.getContentResolver();
+        ContentProviderClient client = contentResolver.acquireContentProviderClient(AUTHORITY);
+        if (client != null) {
+            ContentProvider contentProvider = client.getLocalContentProvider();
+            if (contentProvider instanceof SyncContentProvider) {
+                if (((SyncContentProvider) contentProvider).mDatabase != null) {
+                    ((SyncContentProvider) contentProvider).mDatabase.close();
+                }
+                ((SyncContentProvider) contentProvider).mDatabase = new SQLDatabase(context);
+            }
+            client.close();
+        }
+    }
 
     @Override
     public boolean onCreate() {
@@ -178,6 +200,10 @@ public class SyncContentProvider extends ContentProvider {
                 return Schema.TransactionAttachment.TABLE;
             case TABLE_TRANSFER_ATTACHMENTS:
                 return Schema.TransferAttachment.TABLE;
+            case TABLE_SMS_FORMATS:
+                return Schema.SMSFormat.TABLE;
+            case TABLE_SMS_MESSAGES:
+                return Schema.SMSMessage.TABLE;
             default:
                 return null;
         }
@@ -185,7 +211,8 @@ public class SyncContentProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs,
+                        @Nullable String sortOrder) {
         String table = getTable(uri);
         if (table != null) {
             return mDatabase.getReadableDatabase().query(table, projection, selection, selectionArgs, null, null, sortOrder);
@@ -226,21 +253,5 @@ public class SyncContentProvider extends ContentProvider {
             return mDatabase.getWritableDatabase().update(table, values, selection, selectionArgs);
         }
         return 0;
-    }
-
-    @SuppressLint("Recycle")
-    public static void notifyDatabaseIsChanged(Context context) {
-        ContentResolver contentResolver = context.getContentResolver();
-        ContentProviderClient client = contentResolver.acquireContentProviderClient(AUTHORITY);
-        if (client != null) {
-            ContentProvider contentProvider = client.getLocalContentProvider();
-            if (contentProvider instanceof SyncContentProvider) {
-                if (((SyncContentProvider) contentProvider).mDatabase != null) {
-                    ((SyncContentProvider) contentProvider).mDatabase.close();
-                }
-                ((SyncContentProvider) contentProvider).mDatabase = new SQLDatabase(context);
-            }
-            client.close();
-        }
     }
 }

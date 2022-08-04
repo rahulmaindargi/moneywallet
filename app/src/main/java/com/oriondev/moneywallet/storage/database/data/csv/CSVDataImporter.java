@@ -25,7 +25,7 @@ public class CSVDataImporter extends AbstractDataImporter {
     private final CSVReaderHeaderAware mReader;
 
     public CSVDataImporter(Context context, File file) throws IOException {
-        super(context, file);
+        super(context);
         mReader = new CSVReaderHeaderAware(new FileReader(file));
     }
 

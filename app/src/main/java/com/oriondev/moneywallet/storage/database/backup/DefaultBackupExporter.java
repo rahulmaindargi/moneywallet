@@ -88,6 +88,7 @@ public class DefaultBackupExporter extends AbstractBackupExporter {
             exporter.exportAttachments(SQLDatabaseExporter.getAllAttachments(contentResolver));
             exporter.exportTransactionAttachments(SQLDatabaseExporter.getAllTransactionAttachments(contentResolver));
             exporter.exportTransferAttachments(SQLDatabaseExporter.getAllTransferAttachments(contentResolver));
+            exporter.exportSmsFormats(SQLDatabaseExporter.getAllSMSFormats(contentResolver));
         } catch (IOException e) {
             e.printStackTrace();
             throw new ExportException(e.getMessage());

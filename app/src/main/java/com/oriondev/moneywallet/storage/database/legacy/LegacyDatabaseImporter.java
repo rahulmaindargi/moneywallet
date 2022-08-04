@@ -45,6 +45,7 @@ import com.oriondev.moneywallet.storage.database.model.Debt;
 import com.oriondev.moneywallet.storage.database.model.Event;
 import com.oriondev.moneywallet.storage.database.model.Place;
 import com.oriondev.moneywallet.storage.database.model.RecurrentTransaction;
+import com.oriondev.moneywallet.storage.database.model.SMSFormat;
 import com.oriondev.moneywallet.storage.database.model.Saving;
 import com.oriondev.moneywallet.storage.database.model.Transaction;
 import com.oriondev.moneywallet.storage.database.model.Transfer;
@@ -836,6 +837,11 @@ public class LegacyDatabaseImporter implements DatabaseImporter {
     @Override
     public void close() throws ImportException {
         mDatabase.close();
+    }
+
+    @Override
+    public void importSMSFormats(ContentResolver contentResolver) throws ImportException {
+        // not supported in legacy database
     }
 
     private static long normalize(String currency, long money) {

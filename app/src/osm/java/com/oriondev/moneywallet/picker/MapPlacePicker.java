@@ -17,7 +17,7 @@
  * along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.oriondev.moneywallet.picker;
+package com.rahul.moneywallet.picker;
 
 import android.app.Activity;
 import android.content.Context;
@@ -28,8 +28,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.oriondev.moneywallet.model.Place;
-import com.oriondev.moneywallet.ui.activity.PlacePickerActivity;
+import com.rahul.moneywallet.model.Place;
+import com.rahul.moneywallet.ui.activity.PlacePickerActivity;
 
 /**
  * Created by andrea on 16/10/18.

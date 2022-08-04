@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedAppBarLayout
+        <com.rahul.moneywallet.ui.view.theme.ThemedAppBarLayout
             android:id="@+id/primary_app_bar_container"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
 
             <!-- TODO: set min height for the appbar -->
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedToolbar
+            <com.rahul.moneywallet.ui.view.theme.ThemedToolbar
                 android:id="@+id/primary_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,9 +50,9 @@
 
             <!-- In this area will be placed the primary panel layout -->
 
-        </com.oriondev.moneywallet.ui.view.theme.ThemedAppBarLayout>
+        </com.rahul.moneywallet.ui.view.theme.ThemedAppBarLayout>
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedForegroundCardView
+        <com.rahul.moneywallet.ui.view.theme.ThemedForegroundCardView
             android:id="@+id/primary_panel_body_container_card_view"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
@@ -68,9 +68,9 @@
 
             <!-- In this area will be placed the primary panel layout -->
 
-        </com.oriondev.moneywallet.ui.view.theme.ThemedForegroundCardView>
+        </com.rahul.moneywallet.ui.view.theme.ThemedForegroundCardView>
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedFloatingActionButton
+        <com.rahul.moneywallet.ui.view.theme.ThemedFloatingActionButton
             android:id="@+id/floating_action_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

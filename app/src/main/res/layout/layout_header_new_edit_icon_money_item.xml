@@ -39,7 +39,7 @@
             tools:src="@mipmap/ic_launcher"
             tools:ignore="ContentDescription" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@+id/currency_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             app:theme_textColor="textOverColorPrimary"
             tools:text="€" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@+id/money_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

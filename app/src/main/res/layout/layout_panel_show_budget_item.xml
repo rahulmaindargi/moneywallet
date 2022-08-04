@@ -25,7 +25,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedProgressWheel
+    <com.rahul.moneywallet.ui.view.theme.ThemedProgressWheel
         android:id="@+id/secondary_panel_progress_wheel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/type_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
             app:mtv_bottomLineEnabled="true"
             tools:text="Budget type here" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/category_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
             app:mtv_bottomLineEnabled="true"
             tools:text="Category name here" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/start_date_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
             app:mtv_bottomLineEnabled="true"
             tools:text="Start date here" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/end_date_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
             app:mtv_bottomLineEnabled="true"
             tools:text="End date here" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/wallets_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

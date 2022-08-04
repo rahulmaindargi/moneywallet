@@ -17,7 +17,7 @@
  * along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.oriondev.moneywallet.api.dropbox;
+package com.rahul.moneywallet.api.dropbox;
 
 import android.app.Activity;
 import android.content.Context;
@@ -29,12 +29,12 @@ import androidx.annotation.NonNull;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.dropbox.core.android.Auth;
-import com.oriondev.moneywallet.BuildConfig;
-import com.oriondev.moneywallet.R;
-import com.oriondev.moneywallet.api.BackendException;
-import com.oriondev.moneywallet.api.AbstractBackendServiceDelegate;
-import com.oriondev.moneywallet.api.BackendServiceFactory;
-import com.oriondev.moneywallet.ui.view.theme.ThemedDialog;
+import com.rahul.moneywallet.BuildConfig;
+import com.rahul.moneywallet.R;
+import com.rahul.moneywallet.api.BackendException;
+import com.rahul.moneywallet.api.AbstractBackendServiceDelegate;
+import com.rahul.moneywallet.api.BackendServiceFactory;
+import com.rahul.moneywallet.ui.view.theme.ThemedDialog;
 
 /**
  * Created by andrea on 21/11/18.

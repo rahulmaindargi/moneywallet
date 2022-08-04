@@ -45,7 +45,7 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="36dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/primary_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
         app:theme_textColor="textColorPrimary"
         tools:text="This is the primary text" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/money_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
         app:theme_textColor="textColorPrimary"
         tools:text="€ 500.00" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/secondary_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -91,7 +91,7 @@
         app:theme_textColor="textColorSecondary"
         tools:text="This is the secondary text" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/date_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

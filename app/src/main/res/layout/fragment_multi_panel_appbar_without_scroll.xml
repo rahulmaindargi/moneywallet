@@ -25,28 +25,28 @@
     android:layout_height="match_parent" >
 
     <!-- This is the layout of the main panel -->
-    <com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout
+    <com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout
         android:id="@+id/primary_panel_constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         app:theme_backgroundColor="colorWindowForeground">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedAppBarLayout
+        <com.rahul.moneywallet.ui.view.theme.ThemedAppBarLayout
             android:id="@+id/primary_app_bar_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:theme_backgroundColor="colorPrimary" >
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedToolbar
+            <com.rahul.moneywallet.ui.view.theme.ThemedToolbar
                 android:id="@+id/primary_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:theme_backgroundColor="colorPrimary" />
 
-        </com.oriondev.moneywallet.ui.view.theme.ThemedAppBarLayout>
+        </com.rahul.moneywallet.ui.view.theme.ThemedAppBarLayout>
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedFrameLayout
+        <com.rahul.moneywallet.ui.view.theme.ThemedFrameLayout
             android:id="@+id/primary_panel_body_container_frame_layout"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -58,9 +58,9 @@
 
             <!-- In this area will be placed the primary panel layout -->
 
-        </com.oriondev.moneywallet.ui.view.theme.ThemedFrameLayout>
+        </com.rahul.moneywallet.ui.view.theme.ThemedFrameLayout>
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedFloatingActionButton
+        <com.rahul.moneywallet.ui.view.theme.ThemedFloatingActionButton
             android:id="@+id/floating_action_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-    </com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout>
+    </com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout>
 
     <FrameLayout
         android:id="@+id/secondary_panel_frame_layout"

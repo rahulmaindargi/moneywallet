@@ -21,29 +21,29 @@
 <androidx.preference.PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory
+    <com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory
         android:title="@string/setting_category_database_backup" >
 
-        <com.oriondev.moneywallet.ui.preference.ThemedPreference
+        <com.rahul.moneywallet.ui.preference.ThemedPreference
             android:key="backup_services"
             android:title="@string/setting_title_database_backup_services"
             android:summary="@string/setting_summary_database_backup_services"/>
 
-    </com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory>
+    </com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory>
 
-    <com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory
+    <com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory
         android:title="@string/setting_category_database_import_export" >
 
-        <com.oriondev.moneywallet.ui.preference.ThemedPreference
+        <com.rahul.moneywallet.ui.preference.ThemedPreference
             android:key="import_data"
             android:title="@string/setting_title_import_data"
             android:summary="@string/setting_summary_import_data"/>
 
-        <com.oriondev.moneywallet.ui.preference.ThemedPreference
+        <com.rahul.moneywallet.ui.preference.ThemedPreference
             android:key="export_data"
             android:title="@string/setting_title_export_data"
             android:summary="@string/setting_summary_export_data"/>
 
-    </com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory>
+    </com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

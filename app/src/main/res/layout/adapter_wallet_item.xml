@@ -45,7 +45,7 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="36dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/name_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
         app:theme_textColor="textColorPrimary"
         tools:text="PayPal Account" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/money_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

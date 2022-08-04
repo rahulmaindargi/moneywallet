@@ -33,7 +33,7 @@
         android:layout_marginTop="@dimen/material_activity_body_edit_text_margin_top"
         android:layout_marginBottom="@dimen/material_activity_body_edit_text_margin_bottom" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
             android:id="@+id/address_edit_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/place_picker_image_view"/>
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedImageView
+        <com.rahul.moneywallet.ui.view.theme.ThemedImageView
             android:id="@+id/place_picker_image_view"
             android:layout_width="@dimen/material_component_button_with_image_width"
             android:layout_height="@dimen/material_component_button_with_image_height"
@@ -60,7 +60,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedCardView
+    <com.rahul.moneywallet.ui.view.theme.ThemedCardView
         android:id="@+id/map_card_view"
         android:layout_gravity="center"
         android:layout_width="match_parent"
@@ -84,7 +84,7 @@
                 android:gravity="end"
                 style="?android:attr/buttonBarStyle" >
 
-                <com.oriondev.moneywallet.ui.view.theme.ThemedCardButton
+                <com.rahul.moneywallet.ui.view.theme.ThemedCardButton
                     android:id="@+id/remove_button"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -98,6 +98,6 @@
 
         </LinearLayout>
 
-    </com.oriondev.moneywallet.ui.view.theme.ThemedCardView>
+    </com.rahul.moneywallet.ui.view.theme.ThemedCardView>
 
 </merge>

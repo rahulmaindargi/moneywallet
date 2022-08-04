@@ -24,21 +24,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedCardView
+    <com.rahul.moneywallet.ui.view.theme.ThemedCardView
         android:id="@+id/timeline_card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="0dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTimelineView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTimelineView
             android:id="@+id/timeline_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-    </com.oriondev.moneywallet.ui.view.theme.ThemedCardView>
+    </com.rahul.moneywallet.ui.view.theme.ThemedCardView>
 
-    <com.oriondev.moneywallet.ui.view.AdvancedRecyclerView
+    <com.rahul.moneywallet.ui.view.AdvancedRecyclerView
         android:id="@+id/advanced_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"

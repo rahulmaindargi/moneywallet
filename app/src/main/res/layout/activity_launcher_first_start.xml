@@ -18,14 +18,14 @@
   ~ along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout
+<com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:theme_backgroundColor="colorWindowForeground" >
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedScrollView
+    <com.rahul.moneywallet.ui.view.theme.ThemedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -49,7 +49,7 @@
                 android:src="@drawable/ic_app_icon_200dp"
                 android:contentDescription="@string/app_name" />
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+            <com.rahul.moneywallet.ui.view.theme.ThemedTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/activity_launcher_first_start_title"
@@ -57,7 +57,7 @@
                 android:gravity="center"
                 app:theme_textColor="textColorPrimary" />
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+            <com.rahul.moneywallet.ui.view.theme.ThemedTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -81,6 +81,6 @@
 
         </LinearLayout>
 
-    </com.oriondev.moneywallet.ui.view.theme.ThemedScrollView>
+    </com.rahul.moneywallet.ui.view.theme.ThemedScrollView>
 
-</com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout>
+</com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout>

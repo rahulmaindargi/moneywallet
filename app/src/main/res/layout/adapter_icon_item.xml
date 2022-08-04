@@ -24,7 +24,7 @@
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground">
 
-    <com.oriondev.moneywallet.ui.view.SquaredImageView
+    <com.rahul.moneywallet.ui.view.SquaredImageView
         android:id="@+id/icon_image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

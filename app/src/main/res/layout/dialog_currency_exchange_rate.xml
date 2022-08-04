@@ -25,7 +25,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedEditText
         android:id="@+id/exchange_rate_edit_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         app:layout_constraintEnd_toStartOf="@+id/refresh_button"
         app:theme_backgroundColor="colorWindowBackground" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedImageView
+    <com.rahul.moneywallet.ui.view.theme.ThemedImageView
         android:id="@+id/refresh_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

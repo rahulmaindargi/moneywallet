@@ -24,7 +24,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedProgressWheel
+    <com.rahul.moneywallet.ui.view.theme.ThemedProgressWheel
         android:id="@+id/secondary_panel_progress_wheel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/start_date_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
             app:mtv_leftIcon="@drawable/ic_today_black_24dp"
             app:mtv_bottomLineEnabled="true" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/end_date_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
             app:mtv_leftIcon="@drawable/ic_calendar_black_24dp"
             app:mtv_bottomLineEnabled="true" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
             android:id="@+id/note_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

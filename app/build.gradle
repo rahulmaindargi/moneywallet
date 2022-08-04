@@ -25,7 +25,7 @@ android {
         exclude '**/SMS_Transaction_Format.json'
     }
     defaultConfig {
-        applicationId "com.oriondev.moneywallet"
+        applicationId "com.rahul.moneywallet"
         minSdkVersion 30
         targetSdk 32
         versionCode 75

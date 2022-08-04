@@ -39,7 +39,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@mipmap/ic_launcher" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
             android:id="@+id/name_edit_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

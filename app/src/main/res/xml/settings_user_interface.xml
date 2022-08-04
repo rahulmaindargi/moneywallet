@@ -21,60 +21,60 @@
 <androidx.preference.PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory
+    <com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory
         android:title="@string/setting_category_ui_appearance" >
 
-        <com.oriondev.moneywallet.ui.preference.ColorPreference
+        <com.rahul.moneywallet.ui.preference.ColorPreference
             android:key="income_color"
             android:title="@string/setting_title_ui_income_color" />
 
-        <com.oriondev.moneywallet.ui.preference.ColorPreference
+        <com.rahul.moneywallet.ui.preference.ColorPreference
             android:key="expense_color"
             android:title="@string/setting_title_ui_expense_color" />
 
-        <com.oriondev.moneywallet.ui.preference.ThemedPreference
+        <com.rahul.moneywallet.ui.preference.ThemedPreference
             android:key="custom_digits"
             android:title="@string/setting_title_ui_custom_digits"
             android:summary="@string/setting_summary_ui_custom_digits" />
 
-        <com.oriondev.moneywallet.ui.preference.ThemedListPreference
+        <com.rahul.moneywallet.ui.preference.ThemedListPreference
             android:key="date_format"
             android:title="@string/setting_title_ui_date_format"
             android:persistent="false" />
 
-        <com.oriondev.moneywallet.ui.preference.ThemedListPreference
+        <com.rahul.moneywallet.ui.preference.ThemedListPreference
             android:key="first_day_week"
             android:title="@string/setting_title_ui_first_day_week"
             android:persistent="false" />
 
-        <com.oriondev.moneywallet.ui.preference.ThemedListPreference
+        <com.rahul.moneywallet.ui.preference.ThemedListPreference
             android:key="first_day_month"
             android:title="@string/setting_title_ui_first_day_month"
             android:persistent="false" />
 
-        <com.oriondev.moneywallet.ui.preference.ThemedListPreference
+        <com.rahul.moneywallet.ui.preference.ThemedListPreference
             android:key="group_type"
             android:title="@string/setting_title_ui_group_type"
             android:persistent="false" />
 
-    </com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory>
+    </com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory>
 
-    <com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory
+    <com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory
         android:title="@string/setting_category_ui_theme" >
 
-        <com.oriondev.moneywallet.ui.preference.ColorPreference
+        <com.rahul.moneywallet.ui.preference.ColorPreference
             android:key="theme_color_primary"
             android:title="@string/setting_title_ui_theme_color_primary" />
 
-        <com.oriondev.moneywallet.ui.preference.ColorPreference
+        <com.rahul.moneywallet.ui.preference.ColorPreference
             android:key="theme_color_accent"
             android:title="@string/setting_title_ui_theme_color_accent" />
 
-        <com.oriondev.moneywallet.ui.preference.ThemedListPreference
+        <com.rahul.moneywallet.ui.preference.ThemedListPreference
             android:key="theme_type"
             android:title="@string/setting_title_ui_theme_type"
             android:persistent="false" />
 
-    </com.oriondev.moneywallet.ui.preference.ThemedPreferenceCategory>
+    </com.rahul.moneywallet.ui.preference.ThemedPreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

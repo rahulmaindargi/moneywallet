@@ -33,7 +33,7 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="30dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/primary_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
         app:theme_textColor="textColorPrimary"
         tools:text="Library" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/secondary_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

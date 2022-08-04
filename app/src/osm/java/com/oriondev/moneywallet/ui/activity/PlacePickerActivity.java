@@ -17,7 +17,7 @@
  * along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.oriondev.moneywallet.ui.activity;
+package com.rahul.moneywallet.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,11 +27,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.oriondev.moneywallet.R;
-import com.oriondev.moneywallet.model.Coordinates;
-import com.oriondev.moneywallet.model.Place;
-import com.oriondev.moneywallet.ui.activity.base.SinglePanelActivity;
-import com.oriondev.moneywallet.view.MapViewWrapper;
+import com.rahul.moneywallet.R;
+import com.rahul.moneywallet.model.Coordinates;
+import com.rahul.moneywallet.model.Place;
+import com.rahul.moneywallet.ui.activity.base.SinglePanelActivity;
+import com.rahul.moneywallet.view.MapViewWrapper;
 
 /**
  * Created by andrea on 02/11/18.

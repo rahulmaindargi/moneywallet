@@ -19,8 +19,8 @@
     }
   },
   "non-monetary": {
-    "share_link": "http://play.google.com/store/apps/details?id=com.oriondev.moneywallet",
-    "rate_link": "http://play.google.com/store/apps/details?id=com.oriondev.moneywallet",
+    "share_link": "http://play.google.com/store/apps/details?id=com.rahul.moneywallet",
+    "rate_link": "http://play.google.com/store/apps/details?id=com.rahul.moneywallet",
     "translate_link": "https://github.com/AndreAle94/moneywallet/blob/master/app/src/main/res/values/strings.xml",
     "contribute_link": "https://github.com/AndreAle94/moneywallet"
   }

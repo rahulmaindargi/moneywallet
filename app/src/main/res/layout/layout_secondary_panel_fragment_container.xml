@@ -24,7 +24,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedFrameLayout
+    <com.rahul.moneywallet.ui.view.theme.ThemedFrameLayout
         android:id="@+id/secondary_panel_cover_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -38,13 +38,13 @@
             android:layout_gravity="center"
             android:padding="@dimen/layout_multi_panel_secondary_panel_empty_screen_padding">
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedImageView
+            <com.rahul.moneywallet.ui.view.theme.ThemedImageView
                 android:layout_width="@dimen/layout_multi_panel_secondary_panel_empty_screen_icon_width"
                 android:layout_height="@dimen/layout_multi_panel_secondary_panel_empty_screen_icon_height"
                 android:src="@drawable/ic_package_variant_24dp"
                 app:theme_backgroundColor="colorPrimary" />
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+            <com.rahul.moneywallet.ui.view.theme.ThemedTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/empty_message_backup_cover"
@@ -54,7 +54,7 @@
 
         </LinearLayout>
 
-    </com.oriondev.moneywallet.ui.view.theme.ThemedFrameLayout>
+    </com.rahul.moneywallet.ui.view.theme.ThemedFrameLayout>
 
     <FrameLayout
         android:id="@+id/secondary_panel_fragment_container"

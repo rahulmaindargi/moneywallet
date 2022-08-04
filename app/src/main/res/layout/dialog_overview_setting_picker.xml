@@ -24,34 +24,34 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialSpinner
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialSpinner
         android:id="@+id/start_date_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialSpinner
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialSpinner
         android:id="@+id/end_date_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialSpinner
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialSpinner
         android:id="@+id/group_type_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialSpinner
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialSpinner
         android:id="@+id/overview_type_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialSpinner
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialSpinner
         android:id="@+id/cash_flow_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialSpinner
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialSpinner
         android:id="@+id/category_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

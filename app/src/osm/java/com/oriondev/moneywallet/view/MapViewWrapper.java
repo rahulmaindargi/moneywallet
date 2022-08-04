@@ -17,7 +17,7 @@
  * along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.oriondev.moneywallet.view;
+package com.rahul.moneywallet.view;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -26,9 +26,9 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.oriondev.moneywallet.R;
-import com.oriondev.moneywallet.model.Coordinates;
-import com.oriondev.moneywallet.model.Place;
+import com.rahul.moneywallet.R;
+import com.rahul.moneywallet.model.Coordinates;
+import com.rahul.moneywallet.model.Place;
 
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.config.Configuration;

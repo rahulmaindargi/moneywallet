@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/material_activity_header_layout_height">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
             android:id="@+id/name_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

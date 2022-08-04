@@ -26,7 +26,7 @@
     app:contentInsetStart="0dp"
     app:contentInsetLeft="0dp">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedEditText
         android:id="@+id/search_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

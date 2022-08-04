@@ -18,7 +18,7 @@
   ~ along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.oriondev.moneywallet.ui.view.theme.ThemedNestedScrollView
+<com.rahul.moneywallet.ui.view.theme.ThemedNestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -30,14 +30,14 @@
         android:orientation="vertical"
         android:descendantFocusability="blocksDescendants">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedViewPager
+        <com.rahul.moneywallet.ui.view.theme.ThemedViewPager
             android:id="@+id/chart_view_pager"
             android:layout_width="match_parent"
             android:layout_height="@dimen/view_pie_chart_height"
             android:layout_marginTop="@dimen/view_pie_chart_margin_top"
             android:layout_marginBottom="@dimen/view_pie_chart_margin_bottom">
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedViewPagerIndicator
+            <com.rahul.moneywallet.ui.view.theme.ThemedViewPagerIndicator
                 android:id="@+id/view_pager_indicator"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -45,9 +45,9 @@
                 android:gravity="center_vertical"
                 app:dotRadius="@dimen/view_pie_chart_indicator_radius" />
 
-        </com.oriondev.moneywallet.ui.view.theme.ThemedViewPager>
+        </com.rahul.moneywallet.ui.view.theme.ThemedViewPager>
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedRecyclerView
+        <com.rahul.moneywallet.ui.view.theme.ThemedRecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -57,4 +57,4 @@
 
     </LinearLayout>
 
-</com.oriondev.moneywallet.ui.view.theme.ThemedNestedScrollView>
+</com.rahul.moneywallet.ui.view.theme.ThemedNestedScrollView>

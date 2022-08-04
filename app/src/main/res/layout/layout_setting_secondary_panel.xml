@@ -25,18 +25,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedAppBarLayout
+    <com.rahul.moneywallet.ui.view.theme.ThemedAppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:theme_backgroundColor="colorPrimary" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedToolbar
+        <com.rahul.moneywallet.ui.view.theme.ThemedToolbar
             android:id="@+id/secondary_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:theme_backgroundColor="colorPrimary" />
 
-    </com.oriondev.moneywallet.ui.view.theme.ThemedAppBarLayout>
+    </com.rahul.moneywallet.ui.view.theme.ThemedAppBarLayout>
 
     <FrameLayout
         android:id="@+id/secondary_panel_fragment_container"

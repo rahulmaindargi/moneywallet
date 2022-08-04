@@ -26,7 +26,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedSwitchCompat
+    <com.rahul.moneywallet.ui.view.theme.ThemedSwitchCompat
         android:id="@+id/auto_backup_enable_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         android:text="@string/hint_auto_backup_enabled"
         android:textSize="@dimen/material_dialog_switch_text_size"/>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedCheckBox
+    <com.rahul.moneywallet.ui.view.theme.ThemedCheckBox
         android:id="@+id/auto_backup_wifi_check_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
         android:textSize="@dimen/material_dialog_check_box_text_size"
         android:checked="false" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedCheckBox
+    <com.rahul.moneywallet.ui.view.theme.ThemedCheckBox
         android:id="@+id/auto_backup_data_change_check_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
         android:textSize="@dimen/material_dialog_check_box_text_size"
         android:checked="true" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/auto_backup_offset_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,14 +66,14 @@
         app:theme_textColor="textColorPrimary"
         tools:text="Every 48 hours" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedSeekBar
+    <com.rahul.moneywallet.ui.view.theme.ThemedSeekBar
         android:id="@+id/auto_backup_offset_seek_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/material_dialog_seek_bar_top_bottom_margin"
         android:layout_marginBottom="@dimen/material_dialog_seek_bar_top_bottom_margin"/>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialTextView
         android:id="@+id/auto_backup_folder_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -82,7 +82,7 @@
         app:mtv_bottomLineEnabled="true"
         tools:text="Folder name here" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/auto_backup_password_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

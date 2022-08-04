@@ -42,7 +42,7 @@
         android:layout_marginBottom="12dip"
         android:layout_weight="1">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
             android:fadingEdge="horizontal"
             app:theme_textColor="textColorPrimary" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@android:id/summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedRecyclerView
+        <com.rahul.moneywallet.ui.view.theme.ThemedRecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -34,14 +34,14 @@
             android:paddingBottom="@dimen/material_component_lists_padding_bottom"
             android:clipToPadding="false" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedProgressWheel
+        <com.rahul.moneywallet.ui.view.theme.ThemedProgressWheel
             android:id="@+id/progress_wheel"
             android:layout_width="@dimen/material_component_progress_wheel_width"
             android:layout_height="@dimen/material_component_progress_wheel_height"
             android:layout_gravity="center"
             app:matProg_progressIndeterminate="true" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@+id/empty_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

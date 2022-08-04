@@ -8,8 +8,8 @@
 
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.oriondev.moneywallet.ui.activity.NewEditTransferActivity"
-            android:targetPackage="com.oriondev.moneywallet" />
+            android:targetClass="com.rahul.moneywallet.ui.activity.NewEditTransferActivity"
+            android:targetPackage="com.rahul.moneywallet" />
 
     </shortcut>
 
@@ -21,8 +21,8 @@
 
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.oriondev.moneywallet.ui.activity.NewEditTransactionActivity"
-            android:targetPackage="com.oriondev.moneywallet" />
+            android:targetClass="com.rahul.moneywallet.ui.activity.NewEditTransactionActivity"
+            android:targetPackage="com.rahul.moneywallet" />
 
     </shortcut>
 

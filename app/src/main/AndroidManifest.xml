@@ -20,7 +20,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.oriondev.moneywallet">
+    package="com.rahul.moneywallet">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
@@ -34,7 +34,7 @@
 
     <application
         android:icon="@mipmap/ic_launcher"
-        android:name=".App"
+        android:name="com.rahul.moneywallet.App"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:allowBackup="true"
@@ -42,7 +42,7 @@
         android:requestLegacyExternalStorage="true"
         android:fullBackupContent="@xml/backup_rules"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activity.LauncherActivity"
+        <activity android:name="com.rahul.moneywallet.ui.activity.LauncherActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -52,13 +52,13 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
-        <activity android:name=".ui.activity.MainActivity" />
-        <activity android:name=".ui.activity.TutorialActivity" />
-        <activity android:name=".ui.activity.WalletListActivity" />
-        <activity android:name=".ui.activity.BackupListActivity" />
-        <activity android:name=".ui.activity.NewEditCurrencyActivity" />
-        <activity android:name=".ui.activity.NewEditWalletActivity" />
-        <activity android:name=".ui.activity.NewEditTransactionActivity"
+        <activity android:name="com.rahul.moneywallet.ui.activity.MainActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.TutorialActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.WalletListActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.BackupListActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditCurrencyActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditWalletActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditTransactionActivity"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -71,44 +71,44 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.NewEditTransferActivity" />
-        <activity android:name=".ui.activity.NewEditCategoryActivity" />
-        <activity android:name=".ui.activity.NewEditDebtActivity" />
-        <activity android:name=".ui.activity.NewEditBudgetActivity" />
-        <activity android:name=".ui.activity.NewEditSavingActivity" />
-        <activity android:name=".ui.activity.NewEditEventActivity" />
-        <activity android:name=".ui.activity.NewEditRecurrentTransactionActivity" />
-        <activity android:name=".ui.activity.NewEditRecurrentTransferActivity" />
-        <activity android:name=".ui.activity.NewEditTransactionModelActivity" />
-        <activity android:name=".ui.activity.NewEditTransferModelActivity" />
-        <activity android:name=".ui.activity.NewEditPlaceActivity" />
-        <activity android:name=".ui.activity.NewEditPersonActivity" />
-        <activity android:name=".ui.activity.WalletSortActivity" />
-        <activity android:name=".ui.activity.CurrencyListActivity" />
-        <activity android:name=".ui.activity.CategoryPickerActivity" />
-        <activity android:name=".ui.activity.CategorySortActivity" />
-        <activity android:name=".ui.activity.IconListActivity" />
-        <activity android:name=".ui.activity.CalculatorActivity" />
-        <activity android:name=".ui.activity.CurrencyConverterActivity" />
-        <activity android:name=".ui.activity.AboutActivity" />
-        <activity android:name=".ui.activity.SearchActivity" />
-        <activity android:name=".ui.activity.CalendarActivity" />
-        <activity android:name=".ui.activity.MapActivity" />
-        <activity android:name=".ui.activity.PeriodDetailActivity" />
-        <activity android:name=".ui.activity.TransactionListActivity" />
-        <activity android:name=".ui.activity.LockActivity" />
-        <activity android:name=".ui.activity.BackendExplorerActivity" />
-        <activity android:name=".ui.activity.DonationActivity" />
-        <activity android:name=".ui.activity.ImportExportActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditTransferActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditCategoryActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditDebtActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditBudgetActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditSavingActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditEventActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditRecurrentTransactionActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditRecurrentTransferActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditTransactionModelActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditTransferModelActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditPlaceActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.NewEditPersonActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.WalletSortActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.CurrencyListActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.CategoryPickerActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.CategorySortActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.IconListActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.CalculatorActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.CurrencyConverterActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.AboutActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.SearchActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.CalendarActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.MapActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.PeriodDetailActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.TransactionListActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.LockActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.BackendExplorerActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.DonationActivity" />
+        <activity android:name="com.rahul.moneywallet.ui.activity.ImportExportActivity" />
 
         <provider
-            android:name=".storage.database.DataContentProvider"
+            android:name="com.rahul.moneywallet.storage.database.DataContentProvider"
             android:authorities="${applicationId}.storage.data"
             android:readPermission="${applicationId}.permission.READ_DATA"
             android:writePermission="${applicationId}.permission.WRITE_DATA"
             android:exported="true" />
         <provider
-            android:name=".storage.database.SyncContentProvider"
+            android:name="com.rahul.moneywallet.storage.database.SyncContentProvider"
             android:authorities="${applicationId}.storage.sync"
             android:exported="false" />
         <provider
@@ -121,29 +121,29 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
-        <service android:name=".service.openexchangerates.OpenExchangeRatesCurrencyRateDownloadIntentService" />
-        <service android:name=".service.AttachmentHandlerIntentService" />
-        <service android:name=".service.BackupHandlerIntentService" />
-        <service android:name=".service.BackendHandlerIntentService" />
+        <service android:name="com.rahul.moneywallet.service.openexchangerates.OpenExchangeRatesCurrencyRateDownloadIntentService" />
+        <service android:name="com.rahul.moneywallet.service.AttachmentHandlerIntentService" />
+        <service android:name="com.rahul.moneywallet.service.BackupHandlerIntentService" />
+        <service android:name="com.rahul.moneywallet.service.BackendHandlerIntentService" />
         <service
-            android:name=".service.RecurrenceHandlerIntentService"
+            android:name="com.rahul.moneywallet.service.RecurrenceHandlerIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false" />
-        <service android:name=".service.UpgradeLegacyEditionIntentService" />
-        <service android:name=".service.ImportExportIntentService" />
+        <service android:name="com.rahul.moneywallet.service.UpgradeLegacyEditionIntentService" />
+        <service android:name="com.rahul.moneywallet.service.ImportExportIntentService" />
 
-        <receiver android:name=".broadcast.DailyBroadcastReceiver" />
-        <receiver android:name=".broadcast.RecurrenceBroadcastReceiver" />
-        <receiver android:name=".broadcast.AutoBackupBroadcastReceiver" />
-        <receiver android:name=".broadcast.NotificationBroadcastReceiver" />
-        <receiver android:name=".broadcast.BootBroadcastReceiver"
+        <receiver android:name="com.rahul.moneywallet.broadcast.DailyBroadcastReceiver" />
+        <receiver android:name="com.rahul.moneywallet.broadcast.RecurrenceBroadcastReceiver" />
+        <receiver android:name="com.rahul.moneywallet.broadcast.AutoBackupBroadcastReceiver" />
+        <receiver android:name="com.rahul.moneywallet.broadcast.NotificationBroadcastReceiver" />
+        <receiver android:name="com.rahul.moneywallet.broadcast.BootBroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".storage.database.data.sms.SmsListener"
+            android:name="com.rahul.moneywallet.storage.database.data.sms.SmsListener"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="1000">

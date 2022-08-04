@@ -25,12 +25,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedRecyclerView
+    <com.rahul.moneywallet.ui.view.theme.ThemedRecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/message_text_view"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/material_component_dialog_min_height"

@@ -27,7 +27,7 @@
     tools:parentTag="android.widget.LinearLayout"
     tools:orientation="vertical" >
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/description_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
             android:id="@+id/date_edit_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -53,7 +53,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/time_edit_text"/>
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+        <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
             android:id="@+id/time_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/wallet_from_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
         app:met_mode="floatingLabel"
         app:met_leftIcon="@drawable/ic_folder_black_24dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/wallet_to_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
         app:met_mode="floatingLabel"
         app:met_leftIcon="@drawable/ic_folder_black_24dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/money_tax_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
         app:met_mode="floatingLabel"
         app:met_leftIcon="@drawable/ic_mode_edit_black_24dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/event_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -102,7 +102,7 @@
         app:met_leftIcon="@drawable/ic_assistant_photo_24dp"
         app:met_showCancelButton="true" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/people_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
         app:met_mode="floatingLabel"
         app:met_leftIcon="@drawable/ic_people_black_24dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/place_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -122,7 +122,7 @@
         app:met_leftIcon="@drawable/ic_place_24dp"
         app:met_showCancelButton="true" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/note_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
         app:met_mode="floatingLabel"
         app:met_leftIcon="@drawable/ic_content_paste_black_24dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedCheckBox
+    <com.rahul.moneywallet.ui.view.theme.ThemedCheckBox
         android:id="@+id/confirmed_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -144,7 +144,7 @@
         android:checked="true"
         tools:ignore="RtlSymmetry" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedCheckBox
+    <com.rahul.moneywallet.ui.view.theme.ThemedCheckBox
         android:id="@+id/count_in_total_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -157,7 +157,7 @@
         android:checked="true"
         tools:ignore="RtlSymmetry" />
 
-    <com.oriondev.moneywallet.ui.view.AttachmentView
+    <com.rahul.moneywallet.ui.view.AttachmentView
         android:id="@+id/attachment_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

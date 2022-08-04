@@ -27,7 +27,7 @@
     tools:parentTag="android.widget.LinearLayout"
     tools:orientation="vertical" >
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/iso_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
         app:met_mode="floatingLabel"
         app:met_leftIcon="@drawable/ic_code_array_24dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/symbol_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
         app:met_mode="floatingLabel"
         app:met_leftIcon="@drawable/ic_coin_24dp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/decimal_number_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

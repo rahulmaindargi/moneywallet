@@ -17,7 +17,7 @@
  * along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.oriondev.moneywallet.model;
+package com.rahul.moneywallet.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

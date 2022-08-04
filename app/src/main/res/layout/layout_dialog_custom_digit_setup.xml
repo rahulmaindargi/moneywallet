@@ -26,12 +26,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedRelativeLayout
+    <com.rahul.moneywallet.ui.view.theme.ThemedRelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:theme_backgroundColor="colorPrimary" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@+id/display_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,9 +41,9 @@
             app:theme_textColor="textOverColorPrimary"
             tools:text="€ 1.245,89" />
 
-    </com.oriondev.moneywallet.ui.view.theme.ThemedRelativeLayout>
+    </com.rahul.moneywallet.ui.view.theme.ThemedRelativeLayout>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedSwitchCompat
+    <com.rahul.moneywallet.ui.view.theme.ThemedSwitchCompat
         android:id="@+id/show_currency_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
         android:text="@string/hint_show_currency_symbol"
         android:textSize="14sp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedSwitchCompat
+    <com.rahul.moneywallet.ui.view.theme.ThemedSwitchCompat
         android:id="@+id/group_digits_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
         android:text="@string/hint_group_digits"
         android:textSize="14sp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedSwitchCompat
+    <com.rahul.moneywallet.ui.view.theme.ThemedSwitchCompat
         android:id="@+id/round_decimals_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
         android:text="@string/hint_round_decimals"
         android:textSize="14sp" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedSwitchCompat
+    <com.rahul.moneywallet.ui.view.theme.ThemedSwitchCompat
         android:id="@+id/show_always_plus_minus_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

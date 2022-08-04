@@ -34,7 +34,7 @@
     android:paddingStart="@dimen/view_mti_month_lbl_padding_horizontal"
     android:paddingTop="@dimen/view_mti_month_lbl_padding_vertical">
 
-    <com.oriondev.moneywallet.ui.view.calendar.DotView
+    <com.rahul.moneywallet.ui.view.calendar.DotView
         android:id="@+id/mti_view_indicator"
         android:layout_width="12dp"
         android:layout_height="12dp"

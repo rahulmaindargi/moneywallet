@@ -18,7 +18,7 @@
   ~ along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.oriondev.moneywallet.ui.view.theme.ThemedCardView
+<com.rahul.moneywallet.ui.view.theme.ThemedCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -62,7 +62,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintGuide_begin="40dp" />
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+            <com.rahul.moneywallet.ui.view.theme.ThemedTextView
                 android:id="@+id/primary_text_view"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:text="€ 500.00" />
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+            <com.rahul.moneywallet.ui.view.theme.ThemedTextView
                 android:id="@+id/secondary_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
             android:gravity="end"
             style="?android:attr/buttonBarStyle" >
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedCardButton
+            <com.rahul.moneywallet.ui.view.theme.ThemedCardButton
                 android:id="@+id/edit_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -127,7 +127,7 @@
                 android:background="?attr/selectableItemBackground"
                 style="?android:attr/buttonBarButtonStyle" />
 
-            <com.oriondev.moneywallet.ui.view.theme.ThemedCardButton
+            <com.rahul.moneywallet.ui.view.theme.ThemedCardButton
                 android:id="@+id/add_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -141,4 +141,4 @@
 
     </LinearLayout>
 
-</com.oriondev.moneywallet.ui.view.theme.ThemedCardView>
+</com.rahul.moneywallet.ui.view.theme.ThemedCardView>

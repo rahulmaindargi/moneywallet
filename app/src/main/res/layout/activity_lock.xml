@@ -18,7 +18,7 @@
   ~ along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.oriondev.moneywallet.ui.view.theme.ThemedFrameLayout
+<com.rahul.moneywallet.ui.view.theme.ThemedFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -32,7 +32,7 @@
         android:layout_height="match_parent"
         android:visibility="gone" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@+id/pin_help_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,7 +53,7 @@
             app:layout_constraintBottom_toTopOf="@+id/pin_lock_view"
             app:layout_constraintLeft_toLeftOf="parent" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedPinLockView
+        <com.rahul.moneywallet.ui.view.theme.ThemedPinLockView
             android:id="@+id/pin_lock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
         android:layout_height="match_parent"
         android:visibility="gone" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@+id/sequence_help_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
             app:theme_textColor="textOverColorPrimary"
             tools:text="Insert your sequence" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedPatternLockView
+        <com.rahul.moneywallet.ui.view.theme.ThemedPatternLockView
             android:id="@+id/pattern_lock_view"
             android:layout_width="@dimen/activity_lock_pattern_lock_view_width"
             android:layout_height="@dimen/activity_lock_pattern_lock_view_height"
@@ -101,7 +101,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedImageView
+        <com.rahul.moneywallet.ui.view.theme.ThemedImageView
             android:id="@+id/fingerprint_image_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:theme_backgroundColor="colorPrimary" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:id="@+id/fingerprint_help_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -124,4 +124,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.oriondev.moneywallet.ui.view.theme.ThemedFrameLayout>
+</com.rahul.moneywallet.ui.view.theme.ThemedFrameLayout>

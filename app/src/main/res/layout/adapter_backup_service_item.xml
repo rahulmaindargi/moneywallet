@@ -26,7 +26,7 @@
     android:layout_height="@dimen/material_component_lists_two_line_with_avatar_height"
     android:background="?attr/selectableItemBackground">
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedImageView
+    <com.rahul.moneywallet.ui.view.theme.ThemedImageView
         android:id="@+id/avatar_image_view"
         android:layout_width="@dimen/material_component_lists_one_line_avatar_width"
         android:layout_height="@dimen/material_component_lists_one_line_avatar_height"
@@ -39,7 +39,7 @@
         app:theme_backgroundColor="colorWindowBackground"
         tools:src="@mipmap/ic_launcher" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/primary_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

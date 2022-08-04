@@ -18,7 +18,7 @@
   ~ along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout
+<com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@mipmap/ic_launcher" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+    <com.rahul.moneywallet.ui.view.theme.ThemedTextView
         android:id="@+id/name_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
         app:theme_textColor="textColorPrimary"
         tools:text="Euro" />
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedImageView
+    <com.rahul.moneywallet.ui.view.theme.ThemedImageView
         android:id="@+id/action_image_view"
         android:layout_width="24dp"
         android:layout_height="24dp"
@@ -67,4 +67,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:theme_backgroundColor="colorWindowForeground" />
 
-</com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout>
+</com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout>

@@ -27,7 +27,7 @@
     tools:parentTag="android.widget.LinearLayout"
     tools:orientation="vertical" >
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedMaterialEditText
+    <com.rahul.moneywallet.ui.view.theme.ThemedMaterialEditText
         android:id="@+id/parent_category_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,13 +46,13 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp" >
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedRadioButton
+        <com.rahul.moneywallet.ui.view.theme.ThemedRadioButton
             android:id="@+id/income_radio_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/hint_income" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedRadioButton
+        <com.rahul.moneywallet.ui.view.theme.ThemedRadioButton
             android:id="@+id/expense_radio_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
 
     </RadioGroup>
 
-    <com.oriondev.moneywallet.ui.view.theme.ThemedCheckBox
+    <com.rahul.moneywallet.ui.view.theme.ThemedCheckBox
         android:id="@+id/show_report_check_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

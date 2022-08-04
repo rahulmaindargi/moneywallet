@@ -18,7 +18,7 @@
   ~ along with MoneyWallet.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout
+<com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -45,14 +45,14 @@
             android:src="@drawable/ic_app_icon_200dp"
             android:contentDescription="@string/app_name" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedTextView
+        <com.rahul.moneywallet.ui.view.theme.ThemedTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/activity_launcher_legacy_edition_upgrade_title"
             android:textSize="@dimen/activity_launcher_first_start_title_text_size"
             app:theme_textColor="textColorPrimary" />
 
-        <com.oriondev.moneywallet.ui.view.theme.ThemedProgressWheel
+        <com.rahul.moneywallet.ui.view.theme.ThemedProgressWheel
             android:id="@+id/progress_wheel"
             android:layout_width="@dimen/material_component_progress_wheel_width"
             android:layout_height="@dimen/material_component_progress_wheel_height"
@@ -61,4 +61,4 @@
 
     </LinearLayout>
 
-</com.oriondev.moneywallet.ui.view.theme.ThemedConstraintLayout>
+</com.rahul.moneywallet.ui.view.theme.ThemedConstraintLayout>

@@ -7,10 +7,8 @@ import android.os.Bundle;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
-import android.widget.Toast;
 
 public class SmsListener extends BroadcastReceiver {
-    public static final String SMS_INTENT_ACTION = "android.provider.Telephony.SMS_RECEIVED";
     SMSHandler smsHandler = new SMSHandler();
 
     @Override
@@ -23,15 +21,17 @@ public class SmsListener extends BroadcastReceiver {
             if (bundle != null) {
                 Log.d("SmsListenerNew", "SMS Received Not null");
                 try {
+                    String format = bundle.getString("format");
                     byte[][] pdus = (byte[][]) bundle.get("pdus");
-                    for (int i = 0; i < pdus.length; i++) {
-                        SmsMessage sms = SmsMessage.createFromPdu(pdus[i]);
+                    for (byte[] bytes : pdus) {
+                        SmsMessage sms = SmsMessage.createFromPdu(bytes, format);
                         String messageBody = sms.getDisplayMessageBody();
                         String originatingAddress = sms.getOriginatingAddress();
                         String displayOriginatingAddress = sms.getDisplayOriginatingAddress();
                         long timestampMillis = sms.getTimestampMillis();
-                        Toast.makeText(context, originatingAddress + " " + displayOriginatingAddress + " " + messageBody, Toast.LENGTH_LONG).show();
-                        Log.d("SmsListenerNew", "SMS Received Toast DOne");
+                        // Toast.makeText(context, originatingAddress + " " + displayOriginatingAddress + " " + messageBody, Toast.LENGTH_LONG)
+                        // .show();
+                        Log.d("SmsListenerNew", "SMS Received Toast Done");
                         smsHandler.handleSMS(context, originatingAddress, displayOriginatingAddress, messageBody, timestampMillis);
                     }
                 } catch (Exception e) {

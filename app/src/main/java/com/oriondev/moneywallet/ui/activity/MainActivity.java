@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -51,6 +52,7 @@ import androidx.loader.content.Loader;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -359,6 +361,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                                     .build();
 
                     WorkManager.getInstance(this).enqueue(getSmsFormatWorkRequest);
+                    toastCompleted(getSmsFormatWorkRequest, "SMS Formats Refreshed successfully", "SMS Formats Refresh Failed Try again.");
                     break;
                 case ID_SECTION_REFRESH_ALL_SMS:
                     OneTimeWorkRequest getAllSmsWorkRequest =
@@ -366,6 +369,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                                     .build();
 
                     WorkManager.getInstance(this).enqueue(getAllSmsWorkRequest);
+                    toastCompleted(getAllSmsWorkRequest, "SMS Refreshed successfully", "SMS Refresh Failed Try again.");
                     break;
                 default:
                     mCurrentSelection = identifier;
@@ -376,6 +380,16 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         mDrawer.closeDrawer();
         mDrawer.setSelection(mCurrentSelection, false);
         return true;
+    }
+
+    private void toastCompleted(OneTimeWorkRequest oneTimeWorkRequest, String successMessage, String failMessage) {
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(oneTimeWorkRequest.getId()).observe(this, workInfo -> {
+            if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
+            } else if (workInfo != null && workInfo.getState() == WorkInfo.State.FAILED) {
+                Toast.makeText(this, failMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showAtmSearchDialog() {

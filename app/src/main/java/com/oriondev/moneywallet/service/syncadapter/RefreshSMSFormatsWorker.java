@@ -14,8 +14,6 @@ import com.oriondev.moneywallet.storage.database.ImportException;
 import com.oriondev.moneywallet.storage.database.SyncContentProvider;
 import com.oriondev.moneywallet.storage.database.json.JSONDatabaseImporter;
 
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,13 +32,15 @@ public class RefreshSMSFormatsWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Log.d("SMSWorker", "Get doWork");
-        URL url = null;
+        Log.d("SMSFormatWorker", "doWork");
+        URL url;
         StringBuilder stringBuilder = new StringBuilder();
         try {
 
-            url = new URL("https://drive.google.com/uc?export=download&id=1Zbtn6RudgxKykXaXaxDKAQbZ6oeecha9");
-            // url= new URL("https://drive.google.com/file/d/1Zbtn6RudgxKykXaXaxDKAQbZ6oeecha9/view?usp=sharing");
+            //url = new URL("https://drive.google.com/uc?export=download&id=1Zbtn6RudgxKykXaXaxDKAQbZ6oeecha9");
+            url = new URL("https://raw.githubusercontent.com/rahulmaindargi/moneywallet/master/app/src/main/assets/resources/SMS_Transaction_Format" +
+                    ".json");
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -59,7 +59,6 @@ public class RefreshSMSFormatsWorker extends Worker {
         String smsFormats = stringBuilder.toString();
         Log.d("SMSFormats", smsFormats);
 
-        JSONObject obj = null;
         try {
             //obj = new JSONObject(smsFormats);
             //JSONArray smsFormat = obj.getJSONArray("smsFormat");

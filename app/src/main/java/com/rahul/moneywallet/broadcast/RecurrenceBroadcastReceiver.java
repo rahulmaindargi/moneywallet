@@ -49,7 +49,7 @@ public class RecurrenceBroadcastReceiver extends BroadcastReceiver {
         Date nextOccurrence2 = getMinNextRecurrentTransferOccurrence(contentResolver);
         Date nextOccurrence = getMinDate(nextOccurrence1, nextOccurrence2);
         if (nextOccurrence != null) {
-            System.out.println("[ALARM] Next occurrence is at: " + nextOccurrence.toString());
+            System.out.println("[ALARM] Next occurrence is at: " + nextOccurrence);
             if (DateUtils.isBeforeNow(nextOccurrence)) {
                 startBackgroundTask(context);
             } else {
@@ -60,10 +60,10 @@ public class RecurrenceBroadcastReceiver extends BroadcastReceiver {
 
     private static Date getMinNextRecurrentTransactionOccurrence(ContentResolver contentResolver) {
         Uri uri = DataContentProvider.CONTENT_RECURRENT_TRANSACTIONS;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 "MIN(" + Contract.RecurrentTransaction.NEXT_OCCURRENCE + ")"
         };
-        String selection = Contract.RecurrentTransaction.NEXT_OCCURRENCE  + " IS NOT NULL";
+        String selection = Contract.RecurrentTransaction.NEXT_OCCURRENCE + " IS NOT NULL";
         Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -79,10 +79,10 @@ public class RecurrenceBroadcastReceiver extends BroadcastReceiver {
 
     private static Date getMinNextRecurrentTransferOccurrence(ContentResolver contentResolver) {
         Uri uri = DataContentProvider.CONTENT_RECURRENT_TRANSFERS;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 "MIN(" + Contract.RecurrentTransfer.NEXT_OCCURRENCE + ")"
         };
-        String selection = Contract.RecurrentTransfer.NEXT_OCCURRENCE  + " IS NOT NULL";
+        String selection = Contract.RecurrentTransfer.NEXT_OCCURRENCE + " IS NOT NULL";
         Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -107,10 +107,7 @@ public class RecurrenceBroadcastReceiver extends BroadcastReceiver {
             } else {
                 return date1;
             }
-        } else if (date2 != null) {
-            return date2;
-        }
-        return null;
+        } else return date2;
     }
 
     private static void schedulePendingIntent(Context context, Date date) {
@@ -118,7 +115,7 @@ public class RecurrenceBroadcastReceiver extends BroadcastReceiver {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Service.ALARM_SERVICE);
         if (alarmManager != null) {
             alarmManager.set(AlarmManager.RTC_WAKEUP, date.getTime(), pendingIntent);
-            System.out.println("[ALARM] RecurrenceTask scheduled at: " + date.toString());
+            System.out.println("[ALARM] RecurrenceTask scheduled at: " + date);
         }
     }
 
@@ -132,16 +129,16 @@ public class RecurrenceBroadcastReceiver extends BroadcastReceiver {
 
     private static PendingIntent createPendingIntent(Context context) {
         Intent intent = new Intent(context, RecurrenceBroadcastReceiver.class);
-        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        startBackgroundTask(context);
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private static void startBackgroundTask(Context context) {
         System.out.println("[ALARM] RecurrenceTask fired now");
         RecurrenceHandlerIntentService.enqueueWork(context, new Intent());
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        startBackgroundTask(context);
     }
 }

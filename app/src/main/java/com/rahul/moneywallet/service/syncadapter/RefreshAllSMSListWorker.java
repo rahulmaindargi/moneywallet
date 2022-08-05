@@ -31,7 +31,8 @@ public class RefreshAllSMSListWorker extends Worker {
         URL url = null;
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:ss");
         SMSHandler handler = new SMSHandler();
-        String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY};
+        String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY,
+                Telephony.Sms.Inbox.DATE_SENT};
         try (Cursor cursor = contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, projections, null, null,
                 Telephony.Sms.Inbox.DEFAULT_SORT_ORDER)) {
             if (cursor != null) {
@@ -40,12 +41,20 @@ public class RefreshAllSMSListWorker extends Worker {
                         String date = cursor.getString(0);
                         String address = cursor.getString(1);
                         String body = cursor.getString(2);
+                        String date_sent = cursor.getString(3);
                         Log.d("RefreshAllSMSListWorker", "date : " + date);
+                        Log.d("RefreshAllSMSListWorker", "date_sent : " + date_sent);
                         Log.d("RefreshAllSMSListWorker", "address : " + address);
                         Log.d("RefreshAllSMSListWorker", "body : " + body);
+//                        Calendar calendar = Calendar.getInstance();
+//                        calendar.setTimeInMillis(Long.parseLong(date));
+                        //calendar.getTimeInMillis()
+                        long dateVal = Long.parseLong(date);
+                        dateVal = (dateVal / 1000) * 1000;
 
-                        handler.handleSMS(getApplicationContext(), address, address, body,
-                                Long.parseLong(date));
+                        dateVal = Long.parseLong(date_sent);
+                        dateVal = (dateVal / 1000) * 1000;
+                        handler.handleSMS(getApplicationContext(), address, address, body, dateVal);
                         cursor.moveToNext();
                     } while (!cursor.isAfterLast());
                 }

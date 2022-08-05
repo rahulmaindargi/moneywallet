@@ -83,12 +83,7 @@ public class AutoBackupBroadcastReceiver extends BroadcastReceiver {
 
     private static PendingIntent createPendingIntent(Context context) {
         Intent intent = new Intent(context, AutoBackupBroadcastReceiver.class);
-        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        startBackgroundTask(context);
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private static void startBackgroundTask(Context context) {
@@ -129,5 +124,10 @@ public class AutoBackupBroadcastReceiver extends BroadcastReceiver {
         // if an exception occur inside one intent service and a backend should be disabled, it
         // will handle it automatically without the need to wait here for a response.
         AutoBackupBroadcastReceiver.scheduleAutoBackupTask(context);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        startBackgroundTask(context);
     }
 }

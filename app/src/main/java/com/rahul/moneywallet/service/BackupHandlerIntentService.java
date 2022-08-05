@@ -27,12 +27,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import android.text.TextUtils;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.api.BackendException;
@@ -89,23 +90,19 @@ public class BackupHandlerIntentService extends IntentService {
     public static final String PROGRESS_STATUS = "BackupHandlerIntentService::Argument::ProgressStatus";
     public static final String PROGRESS_VALUE = "BackupHandlerIntentService::Argument::ProgressValue";
     public static final String CALLER_ID = "BackupHandlerIntentService::Argument::CallerId";
-
+    public static final int ACTION_LIST = 1;
+    public static final int ACTION_BACKUP = 2;
+    public static final int ACTION_RESTORE = 3;
+    public static final int STATUS_BACKUP_CREATION = 1;
+    public static final int STATUS_BACKUP_UPLOADING = 2;
+    public static final int STATUS_BACKUP_DOWNLOADING = 3;
+    public static final int STATUS_BACKUP_RESTORING = 4;
     private static final String ATTACHMENT_FOLDER = "attachments";
     private static final String BACKUP_CACHE_FOLDER = "backups";
     private static final String TEMP_FOLDER = "temp";
     private static final String FILE_DATETIME_PATTERN = "yyyy-MM-dd_HH-mm-ss";
     private static final String OUTPUT_FILE = "backup_%s%s";
-
     private static final int ACTION_NONE = 0;
-    public static final int ACTION_LIST = 1;
-    public static final int ACTION_BACKUP = 2;
-    public static final int ACTION_RESTORE = 3;
-
-    public static final int STATUS_BACKUP_CREATION = 1;
-    public static final int STATUS_BACKUP_UPLOADING = 2;
-    public static final int STATUS_BACKUP_DOWNLOADING = 3;
-    public static final int STATUS_BACKUP_RESTORING = 4;
-
     private static final boolean DEFAULT_AUTO_BACKUP = false;
     private static final boolean DEFAULT_ONLY_ON_WIFI = false;
     private static final boolean DEFAULT_RUN_FOREGROUND = false;
@@ -118,6 +115,10 @@ public class BackupHandlerIntentService extends IntentService {
     private LocalBroadcastManager mBroadcastManager;
     private NotificationCompat.Builder mNotificationBuilder;
 
+    public BackupHandlerIntentService() {
+        super("BackupHandlerIntentService");
+    }
+
     public static void startInForeground(Context context, Intent intent) {
         intent.putExtra(BackupHandlerIntentService.RUN_FOREGROUND, true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -125,10 +126,6 @@ public class BackupHandlerIntentService extends IntentService {
         } else {
             context.startService(intent);
         }
-    }
-
-    public BackupHandlerIntentService() {
-        super("BackupHandlerIntentService");
     }
 
     @Override
@@ -238,7 +235,8 @@ public class BackupHandlerIntentService extends IntentService {
     /**
      * Create a local zip file that contains the database entries according to the backup
      * file specification. If a password is provided, set it to the zip file.
-     * @param folder where the local backup is stored.
+     *
+     * @param folder   where the local backup is stored.
      * @param password if the backup should be protected.
      * @return the backup file is success.
      */
@@ -432,7 +430,8 @@ public class BackupHandlerIntentService extends IntentService {
                 Intent retryIntent = new Intent(this, NotificationBroadcastReceiver.class);
                 retryIntent.setAction(NotificationBroadcastReceiver.ACTION_RETRY_BACKUP_CREATION);
                 retryIntent.putExtra(NotificationBroadcastReceiver.ACTION_INTENT_ARGUMENTS, intentArguments);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, retryIntent,
+                        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
                 // finish to setup the notification body
                 mNotificationBuilder.setContentText(getString(R.string.notification_content_backup_error_wifi_network));
                 mNotificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(getString(R.string.notification_content_backup_error_wifi_network)));
@@ -453,7 +452,8 @@ public class BackupHandlerIntentService extends IntentService {
                     Intent retryIntent = new Intent(this, NotificationBroadcastReceiver.class);
                     retryIntent.setAction(NotificationBroadcastReceiver.ACTION_RETRY_BACKUP_CREATION);
                     retryIntent.putExtra(NotificationBroadcastReceiver.ACTION_INTENT_ARGUMENTS, intentArguments);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, retryIntent,
+                            PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
                     // finish to setup the notification body
                     mNotificationBuilder.setContentText(getString(R.string.notification_content_backup_error_backend_recoverable));
                     mNotificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(getString(R.string.notification_content_backup_error_backend_recoverable)));

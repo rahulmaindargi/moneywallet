@@ -26,6 +26,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.core.app.NotificationCompat;
 
 import com.rahul.moneywallet.R;
@@ -74,7 +75,7 @@ public class DailyBroadcastReceiver extends BroadcastReceiver {
 
     private static PendingIntent createNotificationIntent(Context context) {
         Intent intent = new Intent(context, DailyBroadcastReceiver.class);
-        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override

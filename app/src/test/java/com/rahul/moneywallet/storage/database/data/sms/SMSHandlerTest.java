@@ -39,9 +39,8 @@ class SMSHandlerTest {
         Mockito.lenient().when(cursor.moveToNext()).thenReturn(false);
         Mockito.lenient().when(cursor.isAfterLast()).thenReturn(false);
         Mockito.lenient().when(cursor.getString(3)).thenReturn("(?i)INR (?<amount>(?:[0-9]|,)*.?[0-9]{2}) spent on ICICI Bank Card (?<account>" +
-                "(?:[a-z]|[A-Z]|[0-9])+) on (?<date>(?:[0][1-9]|[1-2][0-9]|3[0-1])-(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-" +
-                "(?:[0-9]+)) " +
-                "at (?<to>(?:[a-z]|[0-9]|_|@|-| )+). Avl Lmt: INR (?:(?:[0-9]|,)*.?[0-9]{2})..*");
+                "(?:[a-z]|[A-Z]|[0-9])+) on (?<date>(?:[0][1-9]|[1-2][0-9]|3[0-1])-(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-(?:[0-9]+)) " +
+                "at (?<to>(?:[a-z]|[0-9]|_|@|-| |\\*)+). Avl Lmt: INR (?:(?:[0-9]|,)*.?[0-9]{2})..*");
         Mockito.lenient().when(cursor.getString(1)).thenReturn("debit");
         Mockito.lenient().when(cursor.getColumnIndexOrThrow(Contract.SMSFormat.REGEX)).thenReturn(3);
         Mockito.lenient().when(cursor.getColumnIndexOrThrow(Contract.SMSFormat.TYPE)).thenReturn(1);
@@ -57,6 +56,9 @@ class SMSHandlerTest {
                     System.currentTimeMillis());
 
             Assertions.assertNotNull(parsedDetails);
+            Assertions.assertNotNull(parsedDetails.getAccount());
+            Assertions.assertNotEquals(0, parsedDetails.getAmount());
+            Assertions.assertNotNull(parsedDetails.getOtherParty());
 
             Mockito.lenient().when(cursor.getString(3)).thenReturn("(?i)Your (?<account>(?:[a-z]|[A-Z]|[0-9])+) A/c has been debited with INR " +
                     "(?<amount>(?:[0-9]|,)*.?[0-9]{2}) on (?<date>(?:[0][1-9]|[1-2][0-9]|3[0-1])-" +
@@ -68,7 +70,12 @@ class SMSHandlerTest {
             parsedDetails = smsHandler.getParsedDetails(uri, contentResolver,
                     "address", "address", message,
                     System.currentTimeMillis());
+
+
             Assertions.assertNotNull(parsedDetails);
+            Assertions.assertNotNull(parsedDetails.getAccount());
+            Assertions.assertNotEquals(0, parsedDetails.getAmount());
+            Assertions.assertNotNull(parsedDetails.getOtherParty());
         }
 
     }

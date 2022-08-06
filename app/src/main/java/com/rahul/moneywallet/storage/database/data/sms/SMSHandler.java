@@ -51,7 +51,7 @@ public class SMSHandler {
             long money = moneyDecimal.longValue();
             dataImporter.insertTransaction(details.account, currencyUnit, "Misc",
                     Date.from(details.dateTime.atZone(ZoneId.systemDefault()).toInstant())
-                    , money, "debit".equalsIgnoreCase(details.type) ? 1 : 0, details.otherParty, null,
+                    , money, "debit".equalsIgnoreCase(details.type) ? 0 : 1, details.otherParty, null,
                     null, null, message);
         }
     }

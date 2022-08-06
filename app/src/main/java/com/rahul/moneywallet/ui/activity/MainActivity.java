@@ -33,6 +33,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -52,7 +53,7 @@ import androidx.loader.content.Loader;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
+import androidx.work.Operation;
 import androidx.work.WorkManager;
 
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -96,6 +97,10 @@ import com.rahul.moneywallet.ui.view.theme.ThemedDialog;
 import com.rahul.moneywallet.ui.view.theme.ThemedRecyclerView;
 import com.rahul.moneywallet.utils.IconLoader;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Locale;
 
 public class MainActivity extends BaseActivity implements DrawerController, AccountHeader.OnAccountHeaderListener, Drawer.OnDrawerItemClickListener
@@ -202,8 +207,8 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                         createDrawerItem(ID_SECTION_BANK, R.drawable.ic_account_balance_24dp, R.string.menu_search_bank),
                         new DividerDrawerItem(),
                         createDrawerItem(ID_SECTION_SETTING, R.drawable.ic_settings_24dp, R.string.menu_setting),
-                        createDrawerItem(ID_SECTION_REFRESH_SMS_FORMATS, R.drawable.ic_settings_24dp, R.string.menu_refresh_sms_formats),
-                        createDrawerItem(ID_SECTION_REFRESH_ALL_SMS, R.drawable.ic_settings_24dp, R.string.menu_refresh_all_sms),
+                        createDrawerItem(ID_SECTION_REFRESH_SMS_FORMATS, R.drawable.ic_restore_24dp, R.string.menu_refresh_sms_formats),
+                        createDrawerItem(ID_SECTION_REFRESH_ALL_SMS, R.drawable.ic_restore_24dp, R.string.menu_refresh_all_sms),
                         createDrawerItem(ID_SECTION_SUPPORT_DEVELOPER, R.drawable.ic_favorite_border_black_24dp, R.string.menu_support_developer),
                         createDrawerItem(ID_SECTION_ABOUT, R.drawable.ic_info_outline_24dp, R.string.menu_about)
                 )
@@ -360,16 +365,60 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                             new OneTimeWorkRequest.Builder(RefreshSMSFormatsWorker.class)
                                     .build();
 
-                    WorkManager.getInstance(this).enqueue(getSmsFormatWorkRequest);
-                    toastCompleted(getSmsFormatWorkRequest, "SMS Formats Refreshed successfully", "SMS Formats Refresh Failed Try again.");
+                    Operation operationFormat = WorkManager.getInstance(this).enqueue(getSmsFormatWorkRequest);
+
+                    operationFormat.getState().observe(this, (state -> {
+                        if (state instanceof Operation.State.SUCCESS) {
+                            Toast.makeText(this, "SMS Formats Refreshed successfully", Toast.LENGTH_SHORT).show();
+                        } else if (state instanceof Operation.State.FAILURE) {
+                            Throwable throwable = ((Operation.State.FAILURE) state).getThrowable();
+                            Toast.makeText(this,
+                                    "SMS Formats Refresh Failed Try again." + throwable.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                            Log.e("SMSFormatRefresh", "SMS Formats Refresh Failed", throwable);
+
+                            StringWriter sw = new StringWriter();
+                            throwable.printStackTrace(new PrintWriter(sw));
+                            String stacktrace = sw.toString();
+                            Log.d("SMSFormatRefresh", "SMS Formats Refresh Failed" + stacktrace);
+
+                            try {
+                                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
+                                throwable.printStackTrace(pw);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }));
+
                     break;
                 case ID_SECTION_REFRESH_ALL_SMS:
                     OneTimeWorkRequest getAllSmsWorkRequest =
                             new OneTimeWorkRequest.Builder(RefreshAllSMSListWorker.class)
                                     .build();
 
-                    WorkManager.getInstance(this).enqueue(getAllSmsWorkRequest);
-                    toastCompleted(getAllSmsWorkRequest, "SMS Refreshed successfully", "SMS Refresh Failed Try again.");
+                    Operation operationSms = WorkManager.getInstance(this).enqueue(getAllSmsWorkRequest);
+                    operationSms.getState().observe(this, (state -> {
+                        if (state instanceof Operation.State.SUCCESS) {
+                            Toast.makeText(this, "SMS Refreshed successfully", Toast.LENGTH_SHORT).show();
+                        } else if (state instanceof Operation.State.FAILURE) {
+                            Throwable throwable = ((Operation.State.FAILURE) state).getThrowable();
+                            Toast.makeText(this, "SMS Refresh Failed Try again." + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("SMSRefresh", "SMS Refresh Failed", throwable);
+                            StringWriter sw = new StringWriter();
+                            throwable.printStackTrace(new PrintWriter(sw));
+                            String stacktrace = sw.toString();
+                            Log.d("SMSRefresh", "SMS Refresh Failed" + stacktrace);
+
+                            try {
+                                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
+                                throwable.printStackTrace(pw);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }));
+
                     break;
                 default:
                     mCurrentSelection = identifier;
@@ -380,16 +429,6 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         mDrawer.closeDrawer();
         mDrawer.setSelection(mCurrentSelection, false);
         return true;
-    }
-
-    private void toastCompleted(OneTimeWorkRequest oneTimeWorkRequest, String successMessage, String failMessage) {
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(oneTimeWorkRequest.getId()).observe(this, workInfo -> {
-            if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
-            } else if (workInfo != null && workInfo.getState() == WorkInfo.State.FAILED) {
-                Toast.makeText(this, failMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void showAtmSearchDialog() {

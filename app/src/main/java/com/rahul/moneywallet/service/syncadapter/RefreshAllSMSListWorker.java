@@ -12,9 +12,6 @@ import androidx.work.WorkerParameters;
 
 import com.rahul.moneywallet.storage.database.data.sms.SMSHandler;
 
-import java.net.URL;
-import java.time.format.DateTimeFormatter;
-
 public class RefreshAllSMSListWorker extends Worker {
     ContentResolver contentResolver;
 
@@ -28,8 +25,7 @@ public class RefreshAllSMSListWorker extends Worker {
     @Override
     public Result doWork() {
         Log.d("SMSLoader", "Get doWork");
-        URL url = null;
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:ss");
+
         SMSHandler handler = new SMSHandler();
         String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY,
                 Telephony.Sms.Inbox.DATE_SENT};

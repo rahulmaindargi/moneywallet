@@ -34,9 +34,10 @@ public class SMSHandler {
     public void handleSMS(Context context, String originatingAddress, String dispOriginatingAddress, String message, long timestampMillis) {
         Log.d("SMSHandler", "handleSMS");
         ContentResolver contentResolver = context.getContentResolver();
-        ParsedDetails details = getParsedDetails(contentResolver, originatingAddress, dispOriginatingAddress, message, timestampMillis);
+        ParsedDetails details = getParsedDetails(SyncContentProvider.CONTENT_SMS_FORMAT, contentResolver, originatingAddress,
+                dispOriginatingAddress, message, timestampMillis);
         if (details == null) return;
-        System.out.println(details);
+        // System.out.println(details);
         String id =
                 details.account + details.amount + details.otherParty + details.dateTime +
                         details.type + originatingAddress + dispOriginatingAddress;
@@ -50,15 +51,16 @@ public class SMSHandler {
             long money = moneyDecimal.longValue();
             dataImporter.insertTransaction(details.account, currencyUnit, "Misc",
                     Date.from(details.dateTime.atZone(ZoneId.systemDefault()).toInstant())
-                    , money, "Expense".equalsIgnoreCase(details.type) ? 1 : 0, details.otherParty, null,
+                    , money, "debit".equalsIgnoreCase(details.type) ? 1 : 0, details.otherParty, null,
                     null, null, message);
         }
     }
 
     @Nullable
-    protected ParsedDetails getParsedDetails(ContentResolver contentResolver, String originatingAddress, String dispOriginatingAddress,
+    protected ParsedDetails getParsedDetails(Uri contentSmsFormat, ContentResolver contentResolver, String originatingAddress,
+                                             String dispOriginatingAddress,
                                              String message, long timestampMillis) {
-        Uri contentSmsFormat = SyncContentProvider.CONTENT_SMS_FORMAT;
+
         String[] projection = new String[]{
                 Contract.SMSFormat.ID,
                 Contract.SMSFormat.TYPE,

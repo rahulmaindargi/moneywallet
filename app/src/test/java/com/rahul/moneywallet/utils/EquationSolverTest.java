@@ -1,15 +1,15 @@
 package com.rahul.moneywallet.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.rahul.moneywallet.model.CurrencyUnit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EquationSolverTest {
 
     @InjectMocks

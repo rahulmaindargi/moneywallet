@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -46,7 +47,7 @@ public class SMSHandler {
         if (dataImporter.insertSMS(id, message)) {
             Log.d("SMSHandler", "SMS Inserted ");
             CurrencyUnit currencyUnit = CurrencyManager.getCurrency("INR");
-            BigDecimal decimalMultiply = new BigDecimal(Math.pow(10, currencyUnit.getDecimals()));
+            BigDecimal decimalMultiply = BigDecimal.valueOf(Math.pow(10, currencyUnit.getDecimals()));
             BigDecimal moneyDecimal = decimalMultiply.multiply(new BigDecimal(details.amount));
             long money = moneyDecimal.longValue();
             dataImporter.insertTransaction(details.account, currencyUnit, "Misc",
@@ -79,6 +80,13 @@ public class SMSHandler {
                     do {
                         String regex = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.REGEX));
                         String type = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.TYPE));
+
+                        regex=regex.replaceAll("\\[\\[account\\]\\]", "(?<account>(?:[a-z]|[A-Z]|[0-9])+)");
+                        regex=regex.replaceAll("\\[\\[amount\\]\\]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
+                        regex=regex.replaceAll("\\[\\[date\\]\\]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])-(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-(?:[0-9]+))");
+                        regex=regex.replaceAll("\\[\\[time\\]\\]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
+                        regex=regex.replaceAll("\\[\\[to\\]\\]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*)+)");
+
                         Pattern pattern = Pattern.compile(regex);
                         Matcher matcher = pattern.matcher(message);
                         Log.d("SMSHandler", "Matcher Check");
@@ -145,7 +153,7 @@ public class SMSHandler {
 
 
     private LocalDate getLocalDate(String date, long timestampMillis) {
-        List<String> formats = Stream.of("dd-MMM-yyyy", "dd-MMM-yy").collect(Collectors.toList());
+        List<String> formats = Stream.of("dd-MMM-yyyy", "dd-MMM-yy", "d-MMM-yyyy", "d-MMM-yy").collect(Collectors.toList());
         return parseWithFormat(date, formats, 0, timestampMillis);
     }
 
@@ -163,54 +171,54 @@ public class SMSHandler {
         }
     }
 
-    private boolean checkSenderIsValid(String sender) {
+//    private boolean checkSenderIsValid(String sender) {
+//
+//        return (sender.trim().contains("+918586980859")
+//                || sender.contains("08586980869")
+//                || sender.contains("085869")
+//                || sender.contains("ICICIB")
+//                || sender.contains("HDFCBK")
+//                || sender.contains("SBIINB")
+//                || sender.contains("SBMSMS")
+//                || sender.contains("SCISMS")
+//                || sender.contains("CBSSBI")
+//                || sender.contains("SBIPSG")
+//                || sender.contains("SBIUPI")
+//                || sender.contains("SBICRD")
+//                || sender.contains("ATMSBI")
+//                || sender.contains("QPMYAMEX")
+//                || sender.contains("IDFCFB")
+//                || sender.contains("UCOBNK")
+//                || sender.contains("CANBNK")
+//                || sender.contains("BOIIND")
+//                || sender.contains("AXISBK")
+//                || sender.contains("PAYTMB")
+//                || sender.contains("UnionB")
+//                || sender.contains("INDBNK")
+//                || sender.contains("KOTAKB")
+//                || sender.contains("CENTBK")
+//                || sender.contains("SCBANK")
+//                || sender.contains("PNBSMS")
+//                || sender.contains("DOPBNK")
+//                || sender.contains("YESBNK")
+//                || sender.contains("IDBIBK")
+//                || sender.contains("ALBANK")
+//                || sender.contains("CITIBK")
+//                || sender.contains("ANDBNK")
+//                || sender.contains("BOBTXN")
+//                || sender.contains("IOBCHN")
+//                || sender.contains("MAHABK")
+//                || sender.contains("OBCBNK")
+//                || sender.contains("RBLBNK")
+//                || sender.contains("RBLCRD")
+//                || sender.contains("SPRCRD")
+//                || sender.contains("HSBCBK")
+//                || sender.contains("HSBCIN")
+//                || sender.contains("INDUSB")
+//                || sender.contains("TM-CITIBA"));
+//    }
 
-        return (sender.trim().contains("+918586980859")
-                || sender.contains("08586980869")
-                || sender.contains("085869")
-                || sender.contains("ICICIB")
-                || sender.contains("HDFCBK")
-                || sender.contains("SBIINB")
-                || sender.contains("SBMSMS")
-                || sender.contains("SCISMS")
-                || sender.contains("CBSSBI")
-                || sender.contains("SBIPSG")
-                || sender.contains("SBIUPI")
-                || sender.contains("SBICRD")
-                || sender.contains("ATMSBI")
-                || sender.contains("QPMYAMEX")
-                || sender.contains("IDFCFB")
-                || sender.contains("UCOBNK")
-                || sender.contains("CANBNK")
-                || sender.contains("BOIIND")
-                || sender.contains("AXISBK")
-                || sender.contains("PAYTMB")
-                || sender.contains("UnionB")
-                || sender.contains("INDBNK")
-                || sender.contains("KOTAKB")
-                || sender.contains("CENTBK")
-                || sender.contains("SCBANK")
-                || sender.contains("PNBSMS")
-                || sender.contains("DOPBNK")
-                || sender.contains("YESBNK")
-                || sender.contains("IDBIBK")
-                || sender.contains("ALBANK")
-                || sender.contains("CITIBK")
-                || sender.contains("ANDBNK")
-                || sender.contains("BOBTXN")
-                || sender.contains("IOBCHN")
-                || sender.contains("MAHABK")
-                || sender.contains("OBCBNK")
-                || sender.contains("RBLBNK")
-                || sender.contains("RBLCRD")
-                || sender.contains("SPRCRD")
-                || sender.contains("HSBCBK")
-                || sender.contains("HSBCIN")
-                || sender.contains("INDUSB")
-                || sender.contains("TM-CITIBA"));
-    }
-
-    public class ParsedDetails {
+    public static class ParsedDetails {
         LocalDateTime dateTime;
         double amount;
         String account;
@@ -265,6 +273,7 @@ public class SMSHandler {
             return Double.compare(that.amount, amount) == 0 && Objects.equals(dateTime, that.dateTime) && Objects.equals(account, that.account) && Objects.equals(otherParty, that.otherParty);
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "ParsedDetails{" +

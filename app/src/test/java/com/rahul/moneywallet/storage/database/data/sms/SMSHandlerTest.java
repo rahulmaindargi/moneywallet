@@ -38,9 +38,8 @@ class SMSHandlerTest {
         Mockito.lenient().when(cursor.moveToFirst()).thenReturn(true);
         Mockito.lenient().when(cursor.moveToNext()).thenReturn(false);
         Mockito.lenient().when(cursor.isAfterLast()).thenReturn(false);
-        Mockito.lenient().when(cursor.getString(3)).thenReturn("(?i)INR (?<amount>(?:[0-9]|,)*.?[0-9]{2}) spent on ICICI Bank Card (?<account>" +
-                "(?:[a-z]|[A-Z]|[0-9])+) on (?<date>(?:[0][1-9]|[1-2][0-9]|3[0-1])-(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-(?:[0-9]+)) " +
-                "at (?<to>(?:[a-z]|[0-9]|_|@|-| |\\*)+). Avl Lmt: INR (?:(?:[0-9]|,)*.?[0-9]{2})..*");
+        Mockito.lenient().when(cursor.getString(3)).thenReturn("(?i)INR [[amount]] spent on ICICI Bank Card [[account]] on [[date]] " +
+                "at [[to]]..*");
         Mockito.lenient().when(cursor.getString(1)).thenReturn("debit");
         Mockito.lenient().when(cursor.getColumnIndexOrThrow(Contract.SMSFormat.REGEX)).thenReturn(3);
         Mockito.lenient().when(cursor.getColumnIndexOrThrow(Contract.SMSFormat.TYPE)).thenReturn(1);
@@ -60,10 +59,7 @@ class SMSHandlerTest {
             Assertions.assertNotEquals(0, parsedDetails.getAmount());
             Assertions.assertNotNull(parsedDetails.getOtherParty());
 
-            Mockito.lenient().when(cursor.getString(3)).thenReturn("(?i)Your (?<account>(?:[a-z]|[A-Z]|[0-9])+) A/c has been debited with INR " +
-                    "(?<amount>(?:[0-9]|,)*.?[0-9]{2}) on (?<date>(?:[0][1-9]|[1-2][0-9]|3[0-1])-" +
-                    "(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-(?:[0-9]+)) at (?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])) and account " +
-                    "(?<to>(?:[a-z]|[0-9]|_|@|-| )+) has been credited. UPI Ref no. (?:[0-9]+)");
+            Mockito.lenient().when(cursor.getString(3)).thenReturn("(?i)Your [[account]] A\\/c has been debited with INR [[amount]] on [[date]] at [[time]] and account [[to]](?<= has) been credited..*");
 
             message = "Your Citibank A/c has been debited with INR 18719.40 on 04-AUG-2022 at 21:40 and account billdesk@hdfcbank has been credited" +
                     ". UPI Ref no. 221632857699";

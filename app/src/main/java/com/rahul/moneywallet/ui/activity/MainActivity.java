@@ -54,6 +54,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.Operation;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -97,11 +98,8 @@ import com.rahul.moneywallet.ui.view.theme.ThemedDialog;
 import com.rahul.moneywallet.ui.view.theme.ThemedRecyclerView;
 import com.rahul.moneywallet.utils.IconLoader;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Locale;
+import java.util.UUID;
 
 public class MainActivity extends BaseActivity implements DrawerController, AccountHeader.OnAccountHeaderListener, Drawer.OnDrawerItemClickListener
         , LoaderManager.LoaderCallbacks<Cursor> {
@@ -364,7 +362,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
                     Operation operationFormat = WorkManager.getInstance(this).enqueue(getSmsFormatWorkRequest);
 
-                    operationFormat.getState().observe(this, (state -> handleRefreshState(state, "SMS Formats Refreshed successfully", "SMS Formats Refresh Failed Try again.", "SMSFormatRefresh")));
+                    operationFormat.getState().observe(this, (state -> handleRefreshState(state, "SMS Formats Refreshed successfully", "SMS Formats Refresh Failed Try again.", "SMSFormatRefresh", getSmsFormatWorkRequest.getId())));
 
                     break;
                 case ID_SECTION_REFRESH_ALL_SMS:
@@ -374,7 +372,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                                     .build();
 
                     Operation operationSms = WorkManager.getInstance(this).enqueue(getAllSmsWorkRequest);
-                    operationSms.getState().observe(this, (state -> handleRefreshState(state, "SMS Refreshed successfully", "SMS Refresh Failed Try again.", "SMSRefresh")));
+                    operationSms.getState().observe(this, (state -> handleRefreshState(state, "SMS Refreshed successfully", "SMS Refresh Failed Try again.", "SMSRefresh", getAllSmsWorkRequest.getId())));
 
                     break;
                 default:
@@ -388,24 +386,24 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         return true;
     }
 
-    private void handleRefreshState(Operation.State state, String successMessage, String failureMessage, String operation) {
+    private void handleRefreshState(Operation.State state, String successMessage, String failureMessage, String operation, UUID id) {
+
         if (state instanceof Operation.State.SUCCESS) {
-            Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Operation started", Toast.LENGTH_SHORT).show();
+            WorkManager.getInstance(this).getWorkInfoByIdLiveData(id).observe(this, workInfo -> {
+                if (workInfo.getState().isFinished()) {
+                    if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                        Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, failureMessage, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         } else if (state instanceof Operation.State.FAILURE) {
             Throwable throwable = ((Operation.State.FAILURE) state).getThrowable();
-            Toast.makeText(this, failureMessage + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Operation not started. Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
             Log.e(operation, failureMessage, throwable);
-            StringWriter sw = new StringWriter();
-            throwable.printStackTrace(new PrintWriter(sw));
-            String stacktrace = sw.toString();
-            Log.d(operation, failureMessage + stacktrace);
 
-            try {
-                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
-                throwable.printStackTrace(pw);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -421,6 +419,12 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.RECEIVE_SMS},
                     1);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    3);
         }
     }
 

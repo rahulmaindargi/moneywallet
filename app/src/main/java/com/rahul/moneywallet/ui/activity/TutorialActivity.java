@@ -30,10 +30,9 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -55,9 +54,7 @@ import com.rahul.moneywallet.storage.database.DataContentProvider;
 import com.rahul.moneywallet.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by andrea on 30/07/18.
@@ -151,26 +148,13 @@ public class TutorialActivity extends AppIntro2 {
         getPager().setCurrentItem(getSlides().size() - 1, true);
     }
 
+    ActivityResultLauncher<Intent> intentActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> onActivityResult(REQUEST_NEW_WALLET, result.getResultCode(), result.getData()));
     @Override
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);
-        //StartActivityForResult startActivityForResult = new StartActivityForResult();
-        //startActivityForResult.createIntent(this, new Intent(this, NewEditWalletActivity.class));
 
-        registerForActivityResult(new ActivityResultContract<Intent, Map<Integer, Intent>>() {
-            @Override
-            public Map<Integer, Intent> parseResult(int i, @Nullable Intent intent) {
-                Map<Integer, Intent> result = new HashMap<>();
-                result.put(i, intent);
-                return result;
-            }
-
-            @NonNull
-            @Override
-            public Intent createIntent(@NonNull Context context, Intent intent) {
-                return new Intent(context, NewEditWalletActivity.class);
-            }
-        }, result -> result.forEach((key, value) -> onActivityResult(REQUEST_NEW_WALLET, key, value)));
+        Intent intent = new Intent(this, NewEditWalletActivity.class);
+        intentActivityResultLauncher.launch(intent);
         // TODO: Remove if above works.
         //startActivityForResult(new Intent(this, NewEditWalletActivity.class), REQUEST_NEW_WALLET);
     }

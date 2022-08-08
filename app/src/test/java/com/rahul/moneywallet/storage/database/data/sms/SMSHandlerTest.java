@@ -17,6 +17,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @ExtendWith(MockitoExtension.class)
 class SMSHandlerTest {
     ContentResolver contentResolver;
@@ -28,6 +31,22 @@ class SMSHandlerTest {
         contentResolver = Mockito.mock(ContentResolver.class);
         cursor = Mockito.mock(Cursor.class);
         uri = Mockito.mock(Uri.class);
+    }
+
+
+    @Test
+    void testFormat() {
+        String regex = "(?i)Payment of Rs.[[amount]] received for card [[account]] on [[date]]..*";
+        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[A-Z]|[0-9]|\\\\*)+)");
+        regex = regex.replaceAll("\\[\\[amount]]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
+        regex = regex.replaceAll("\\[\\[date]]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])[-|\\/](?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|0[1-9]|1[0-2])[-|\\/](?:[0-9]+))");
+        regex = regex.replaceAll("\\[\\[time]]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
+        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+)");
+        System.out.println(regex);
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher("Payment of Rs.18719.40 received for card ************2147 on 05/08/22. Limit available=Rs.1257010.00. Download CitiMobile app to track spends.");
+
+        Assertions.assertTrue(matcher.find());
     }
 
     @Test
@@ -52,7 +71,7 @@ class SMSHandlerTest {
             mockedLogStatic.when(() -> Log.d(any(), any())).thenReturn(1);
             SMSHandler.ParsedDetails parsedDetails = smsHandler.getParsedDetails(uri, contentResolver,
                     "address", "address", message,
-                    System.currentTimeMillis());
+                    System.currentTimeMillis(), null);
 
             Assertions.assertNotNull(parsedDetails);
             Assertions.assertNotNull(parsedDetails.getAccount());
@@ -65,8 +84,7 @@ class SMSHandlerTest {
                     ". UPI Ref no. 221632857699";
             parsedDetails = smsHandler.getParsedDetails(uri, contentResolver,
                     "address", "address", message,
-                    System.currentTimeMillis());
-
+                    System.currentTimeMillis(), null);
 
             Assertions.assertNotNull(parsedDetails);
             Assertions.assertNotNull(parsedDetails.getAccount());

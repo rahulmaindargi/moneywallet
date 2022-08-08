@@ -14,11 +14,20 @@ import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.storage.database.SyncContentProvider;
 import com.rahul.moneywallet.utils.CurrencyManager;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.sql.Date;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,7 +48,7 @@ public class SMSHandler {
         Log.d("SMSHandler", "handleSMS");
         ContentResolver contentResolver = context.getContentResolver();
         ParsedDetails details = getParsedDetails(SyncContentProvider.CONTENT_SMS_FORMAT, contentResolver, originatingAddress,
-                dispOriginatingAddress, message, timestampMillis);
+                dispOriginatingAddress, message, timestampMillis, context);
         if (details == null) return;
         // System.out.println(details);
         String id =
@@ -47,6 +56,7 @@ public class SMSHandler {
                         details.type + originatingAddress + dispOriginatingAddress;
         Log.d("SMSHandler", "SMSID:= " + id);
         SMSDataImporter dataImporter = new SMSDataImporter(context);
+
         if (dataImporter.insertSMS(id, message)) {
             Log.d("SMSHandler", "SMS Inserted ");
             CurrencyUnit currencyUnit = CurrencyManager.getCurrency("INR");
@@ -63,7 +73,7 @@ public class SMSHandler {
     @Nullable
     protected ParsedDetails getParsedDetails(Uri contentSmsFormat, ContentResolver contentResolver, String originatingAddress,
                                              String dispOriginatingAddress,
-                                             String message, long timestampMillis) {
+                                             String message, long timestampMillis, Context context) {
 
         String[] projection = new String[]{
                 Contract.SMSFormat.ID,
@@ -74,6 +84,7 @@ public class SMSHandler {
         String selection = Contract.SMSFormat.SENDER + " In ( ?, ? )";
         String[] selectionArgs = new String[]{originatingAddress, dispOriginatingAddress};
         Log.d("SMSHandler", "Searching DB");
+        // Set<String> formats=new HashSet<>();
         try (Cursor cursor = contentResolver.query(contentSmsFormat, projection, selection, selectionArgs, null)) {
             if (cursor != null) {
                 Log.d("SMSHandler", "Cursor not null");
@@ -83,12 +94,12 @@ public class SMSHandler {
                         String regex = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.REGEX));
                         String type = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.TYPE));
 
-                        regex = regex.replaceAll("\\[\\[account\\]\\]", "(?<account>(?:[a-z]|[A-Z]|[0-9])+)");
-                        regex = regex.replaceAll("\\[\\[amount\\]\\]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
-                        regex = regex.replaceAll("\\[\\[date\\]\\]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])-(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-(?:[0-9]+))");
-                        regex = regex.replaceAll("\\[\\[time\\]\\]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
-                        regex = regex.replaceAll("\\[\\[to\\]\\]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*)+)");
-
+                        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[A-Z]|[0-9]|\\\\*)+)");
+                        regex = regex.replaceAll("\\[\\[amount]]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
+                        regex = regex.replaceAll("\\[\\[date]]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])[-|\\/](?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|0[1-9]|1[0-2])[-|\\/](?:[0-9]+))");
+                        regex = regex.replaceAll("\\[\\[time]]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
+                        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+)");
+                        //   formats.add(regex);
                         Pattern pattern = Pattern.compile(regex);
                         Matcher matcher = pattern.matcher(message);
                         Log.d("SMSHandler", "Matcher Check");
@@ -108,41 +119,58 @@ public class SMSHandler {
                             } catch (IllegalArgumentException iae) {
                                 time = null;
                             }
-                            String to = matcher.group("to");
-
-                            if (account != null && amount != null && to != null) {
+                            String to;
+                            try {
+                                to = matcher.group("to");
+                            } catch (IllegalArgumentException iae) {
+                                to = null;
+                            }
+                            if (account != null && amount != null) {
                                 Log.d("SMSHandler", "account: " + account);
                                 Log.d("SMSHandler", "amount: " + amount);
                                 Log.d("SMSHandler", "to: " + to);
                                 Log.d("SMSHandler", "date: " + date);
                                 Log.d("SMSHandler", "time: " + time);
-                                ParsedDetails details = new ParsedDetails();
-                                details.setAccount(account);
-                                details.setAmount(Double.parseDouble(amount));
-                                details.setOtherParty(to);
-                                if (date != null && time != null) {
-                                    DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_TIME;
-                                    LocalDate lDate = getLocalDate(date, timestampMillis);
-                                    LocalTime lTime = LocalTime.parse(time, timeFormatter);
-                                    details.setDateTime(LocalDateTime.of(lDate, lTime));
-                                } else if (date != null) {
-                                    LocalDate lDate = getLocalDate(date, timestampMillis);
-                                    details.setDateTime(LocalDateTime.of(lDate,
-                                            Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalTime()));
-                                } else if (time != null) {
-                                    DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_TIME;
-                                    LocalTime lTime = LocalTime.parse(time, timeFormatter);
-                                    details.setDateTime(LocalDateTime.of(Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalDate(), lTime));
-                                } else {
-                                    // Both Date time null
-                                    if (timestampMillis != 0) {
-                                        details.setDateTime(Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                                try {
+                                    ParsedDetails details = new ParsedDetails();
+                                    details.setAccount(account);
+                                    // TODO: Find a way to allow , if its decimal separator for locale
+                                    //amount.replaceAll(",","");
+                                    Number parsedAmount = NumberFormat.getInstance().parse(amount);
+                                    details.setAmount(parsedAmount.doubleValue());
+                                    details.setOtherParty(StringUtils.isEmpty(to) ? "Unknown" : to);
+                                    if (date != null && time != null) {
+                                        DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_TIME;
+                                        LocalDate lDate = getLocalDate(date, timestampMillis);
+                                        LocalTime lTime = LocalTime.parse(time, timeFormatter);
+                                        details.setDateTime(LocalDateTime.of(lDate, lTime));
+                                    } else if (date != null) {
+                                        LocalDate lDate = getLocalDate(date, timestampMillis);
+                                        details.setDateTime(LocalDateTime.of(lDate,
+                                                Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalTime()));
+                                    } else if (time != null) {
+                                        DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_TIME;
+                                        LocalTime lTime = LocalTime.parse(time, timeFormatter);
+                                        details.setDateTime(LocalDateTime.of(Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalDate(), lTime));
                                     } else {
-                                        details.setDateTime(LocalDateTime.now());
+                                        // Both Date time null
+                                        if (timestampMillis != 0) {
+                                            details.setDateTime(Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                                        } else {
+                                            details.setDateTime(LocalDateTime.now());
+                                        }
+                                    }
+                                    details.setType(type);
+                                    return details;
+                                } catch (ParseException parseException) {
+                                    Log.e("SMSHandler", "Parse exception", parseException);
+                                    Log.e("SMSHandler", "Parse exception For SMS " + message);
+                                    try (PrintWriter pw = new PrintWriter(new FileOutputStream(context.getExternalFilesDir("SMSHandler.log")))) {
+                                        parseException.printStackTrace(pw);
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
                                     }
                                 }
-                                details.setType(type);
-                                return details;
                             }
                         }
                     } while (cursor.moveToNext());
@@ -150,27 +178,41 @@ public class SMSHandler {
             }
         } catch (Throwable t) {
             try {
-                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
-                t.printStackTrace(pw);
-            } catch (FileNotFoundException e) {
+                StringWriter sw = new StringWriter();
+                t.printStackTrace(new PrintWriter(sw));
+                Files.write(new File(context.getExternalFilesDir(null), "SMSHandler.log").toPath(),
+                        ("\n" + sw).getBytes(),
+                        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (IOException e) {
                 e.printStackTrace();
+                Log.e("SMSHandler", "Failed to Log exception", e);
             }
             throw t;
         }
-        Log.d("SMS Handler", "No Formatter Matched for Sender " + originatingAddress + " " + dispOriginatingAddress + " Message " + message);
+        Log.w("SMSHandler", "No Formatter Matched for Sender " + originatingAddress + " " + dispOriginatingAddress + " Message " + message);
+
+        try {
+            Files.write(new File(context.getExternalFilesDir(null), "no_format_matched.log").toPath(),
+                    ("\nNo Formatter Matched for Sender " + originatingAddress + " " + dispOriginatingAddress + " Message " + message).getBytes(),
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("SMSHandler", "Failed to No format matched", e);
+        }
+
         return null;
     }
 
 
     private LocalDate getLocalDate(String date, long timestampMillis) {
-        List<String> formats = Stream.of("dd-MMM-yyyy", "dd-MMM-yy", "d-MMM-yyyy", "d-MMM-yy").collect(Collectors.toList());
+        List<String> formats = Stream.of("dd-MMM-yyyy", "dd-MMM-yy", "dd/MM/yy", "dd/MM/yyyy").collect(Collectors.toList());
         return parseWithFormat(date, formats, 0, timestampMillis);
     }
 
 
     private LocalDate parseWithFormat(String date, List<String> formats, int index, long timestampMillis) {
         if (index >= formats.size()) {
-            Log.e("SMSParsing", "Handle Date format : " + date);
+            Log.e("SMSParsing", "Handle Date format : <" + date + ">");
             return Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
         }
         try {

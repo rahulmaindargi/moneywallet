@@ -14,6 +14,9 @@ import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.storage.database.SyncContentProvider;
 import com.rahul.moneywallet.utils.CurrencyManager;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
@@ -74,18 +77,17 @@ public class SMSHandler {
         try (Cursor cursor = contentResolver.query(contentSmsFormat, projection, selection, selectionArgs, null)) {
             if (cursor != null) {
                 Log.d("SMSHandler", "Cursor not null");
-                cursor.moveToFirst();
-                if (!cursor.isAfterLast()) {
-                    Log.d("SMSHandler", "Cursor after last");
+                if (cursor.moveToFirst()) {
+                    Log.d("SMSHandler", "Cursor First");
                     do {
                         String regex = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.REGEX));
                         String type = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.TYPE));
 
-                        regex=regex.replaceAll("\\[\\[account\\]\\]", "(?<account>(?:[a-z]|[A-Z]|[0-9])+)");
-                        regex=regex.replaceAll("\\[\\[amount\\]\\]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
-                        regex=regex.replaceAll("\\[\\[date\\]\\]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])-(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-(?:[0-9]+))");
-                        regex=regex.replaceAll("\\[\\[time\\]\\]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
-                        regex=regex.replaceAll("\\[\\[to\\]\\]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*)+)");
+                        regex = regex.replaceAll("\\[\\[account\\]\\]", "(?<account>(?:[a-z]|[A-Z]|[0-9])+)");
+                        regex = regex.replaceAll("\\[\\[amount\\]\\]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
+                        regex = regex.replaceAll("\\[\\[date\\]\\]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])-(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-(?:[0-9]+))");
+                        regex = regex.replaceAll("\\[\\[time\\]\\]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
+                        regex = regex.replaceAll("\\[\\[to\\]\\]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*)+)");
 
                         Pattern pattern = Pattern.compile(regex);
                         Matcher matcher = pattern.matcher(message);
@@ -146,6 +148,14 @@ public class SMSHandler {
                     } while (cursor.moveToNext());
                 }
             }
+        } catch (Throwable t) {
+            try {
+                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
+                t.printStackTrace(pw);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            throw t;
         }
         Log.d("SMS Handler", "No Formatter Matched for Sender " + originatingAddress + " " + dispOriginatingAddress + " Message " + message);
         return null;
@@ -171,52 +181,6 @@ public class SMSHandler {
         }
     }
 
-//    private boolean checkSenderIsValid(String sender) {
-//
-//        return (sender.trim().contains("+918586980859")
-//                || sender.contains("08586980869")
-//                || sender.contains("085869")
-//                || sender.contains("ICICIB")
-//                || sender.contains("HDFCBK")
-//                || sender.contains("SBIINB")
-//                || sender.contains("SBMSMS")
-//                || sender.contains("SCISMS")
-//                || sender.contains("CBSSBI")
-//                || sender.contains("SBIPSG")
-//                || sender.contains("SBIUPI")
-//                || sender.contains("SBICRD")
-//                || sender.contains("ATMSBI")
-//                || sender.contains("QPMYAMEX")
-//                || sender.contains("IDFCFB")
-//                || sender.contains("UCOBNK")
-//                || sender.contains("CANBNK")
-//                || sender.contains("BOIIND")
-//                || sender.contains("AXISBK")
-//                || sender.contains("PAYTMB")
-//                || sender.contains("UnionB")
-//                || sender.contains("INDBNK")
-//                || sender.contains("KOTAKB")
-//                || sender.contains("CENTBK")
-//                || sender.contains("SCBANK")
-//                || sender.contains("PNBSMS")
-//                || sender.contains("DOPBNK")
-//                || sender.contains("YESBNK")
-//                || sender.contains("IDBIBK")
-//                || sender.contains("ALBANK")
-//                || sender.contains("CITIBK")
-//                || sender.contains("ANDBNK")
-//                || sender.contains("BOBTXN")
-//                || sender.contains("IOBCHN")
-//                || sender.contains("MAHABK")
-//                || sender.contains("OBCBNK")
-//                || sender.contains("RBLBNK")
-//                || sender.contains("RBLCRD")
-//                || sender.contains("SPRCRD")
-//                || sender.contains("HSBCBK")
-//                || sender.contains("HSBCIN")
-//                || sender.contains("INDUSB")
-//                || sender.contains("TM-CITIBA"));
-//    }
 
     public static class ParsedDetails {
         LocalDateTime dateTime;

@@ -140,7 +140,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
             if (intent != null) {
                 int action = intent.getIntExtra(BackupHandlerIntentService.ACTION, 0);
                 if (action == BackupHandlerIntentService.ACTION_RESTORE) {
-                    getSupportLoaderManager().restartLoader(LOADER_WALLETS, null, MainActivity.this);
+                    LoaderManager.getInstance(MainActivity.this).restartLoader(LOADER_WALLETS, null, MainActivity.this);
                 }
             }
         }
@@ -155,12 +155,8 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECEIVE_SMS) != PERMISSION_GRANTED) {
+        checkPermission();
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS},
-                    1);
-        }
         initializeUi();
         loadUi(savedInstanceState);
         registerReceiver();
@@ -240,7 +236,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
             mCurrentSelection = ID_SECTION_TRANSACTIONS;
         }
         mDrawer.setSelection(mCurrentSelection, true);
-        getSupportLoaderManager().restartLoader(LOADER_WALLETS, null, this);
+        LoaderManager.getInstance(this).restartLoader(LOADER_WALLETS, null, this);
     }
 
     private void registerReceiver() {
@@ -256,7 +252,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
      * @param savedState of the current instance of the activity.
      */
     @Override
-    protected void onSaveInstanceState(Bundle savedState) {
+    protected void onSaveInstanceState(@NonNull Bundle savedState) {
         super.onSaveInstanceState(savedState);
         savedState.putLong(SAVED_SELECTION, mCurrentSelection);
     }
@@ -361,63 +357,24 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                     startActivity(new Intent(this, AboutActivity.class));
                     break;
                 case ID_SECTION_REFRESH_SMS_FORMATS:
+                    checkPermission();
                     OneTimeWorkRequest getSmsFormatWorkRequest =
                             new OneTimeWorkRequest.Builder(RefreshSMSFormatsWorker.class)
                                     .build();
 
                     Operation operationFormat = WorkManager.getInstance(this).enqueue(getSmsFormatWorkRequest);
 
-                    operationFormat.getState().observe(this, (state -> {
-                        if (state instanceof Operation.State.SUCCESS) {
-                            Toast.makeText(this, "SMS Formats Refreshed successfully", Toast.LENGTH_SHORT).show();
-                        } else if (state instanceof Operation.State.FAILURE) {
-                            Throwable throwable = ((Operation.State.FAILURE) state).getThrowable();
-                            Toast.makeText(this,
-                                    "SMS Formats Refresh Failed Try again." + throwable.getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                            Log.e("SMSFormatRefresh", "SMS Formats Refresh Failed", throwable);
-
-                            StringWriter sw = new StringWriter();
-                            throwable.printStackTrace(new PrintWriter(sw));
-                            String stacktrace = sw.toString();
-                            Log.d("SMSFormatRefresh", "SMS Formats Refresh Failed" + stacktrace);
-
-                            try {
-                                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
-                                throwable.printStackTrace(pw);
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }));
+                    operationFormat.getState().observe(this, (state -> handleRefreshState(state, "SMS Formats Refreshed successfully", "SMS Formats Refresh Failed Try again.", "SMSFormatRefresh")));
 
                     break;
                 case ID_SECTION_REFRESH_ALL_SMS:
+                    checkPermission();
                     OneTimeWorkRequest getAllSmsWorkRequest =
                             new OneTimeWorkRequest.Builder(RefreshAllSMSListWorker.class)
                                     .build();
 
                     Operation operationSms = WorkManager.getInstance(this).enqueue(getAllSmsWorkRequest);
-                    operationSms.getState().observe(this, (state -> {
-                        if (state instanceof Operation.State.SUCCESS) {
-                            Toast.makeText(this, "SMS Refreshed successfully", Toast.LENGTH_SHORT).show();
-                        } else if (state instanceof Operation.State.FAILURE) {
-                            Throwable throwable = ((Operation.State.FAILURE) state).getThrowable();
-                            Toast.makeText(this, "SMS Refresh Failed Try again." + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.e("SMSRefresh", "SMS Refresh Failed", throwable);
-                            StringWriter sw = new StringWriter();
-                            throwable.printStackTrace(new PrintWriter(sw));
-                            String stacktrace = sw.toString();
-                            Log.d("SMSRefresh", "SMS Refresh Failed" + stacktrace);
-
-                            try {
-                                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
-                                throwable.printStackTrace(pw);
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }));
+                    operationSms.getState().observe(this, (state -> handleRefreshState(state, "SMS Refreshed successfully", "SMS Refresh Failed Try again.", "SMSRefresh")));
 
                     break;
                 default:
@@ -429,6 +386,42 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         mDrawer.closeDrawer();
         mDrawer.setSelection(mCurrentSelection, false);
         return true;
+    }
+
+    private void handleRefreshState(Operation.State state, String successMessage, String failureMessage, String operation) {
+        if (state instanceof Operation.State.SUCCESS) {
+            Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
+        } else if (state instanceof Operation.State.FAILURE) {
+            Throwable throwable = ((Operation.State.FAILURE) state).getThrowable();
+            Toast.makeText(this, failureMessage + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.e(operation, failureMessage, throwable);
+            StringWriter sw = new StringWriter();
+            throwable.printStackTrace(new PrintWriter(sw));
+            String stacktrace = sw.toString();
+            Log.d(operation, failureMessage + stacktrace);
+
+            try {
+                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
+                throwable.printStackTrace(pw);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void checkPermission() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_SMS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_SMS},
+                    2);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECEIVE_SMS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECEIVE_SMS},
+                    1);
+        }
     }
 
     private void showAtmSearchDialog() {

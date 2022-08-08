@@ -12,6 +12,10 @@ import androidx.work.WorkerParameters;
 
 import com.rahul.moneywallet.storage.database.data.sms.SMSHandler;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+
 public class RefreshAllSMSListWorker extends Worker {
     ContentResolver contentResolver;
 
@@ -29,8 +33,7 @@ public class RefreshAllSMSListWorker extends Worker {
         SMSHandler handler = new SMSHandler();
         String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY,
                 Telephony.Sms.Inbox.DATE_SENT};
-        try (Cursor cursor = contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, projections, null, null,
-                Telephony.Sms.Inbox.DEFAULT_SORT_ORDER)) {
+        try (Cursor cursor = contentResolver.query(Telephony.Sms.CONTENT_URI, projections, null, null, null)) {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
@@ -42,19 +45,22 @@ public class RefreshAllSMSListWorker extends Worker {
                         Log.d("RefreshAllSMSListWorker", "date_sent : " + date_sent);
                         Log.d("RefreshAllSMSListWorker", "address : " + address);
                         Log.d("RefreshAllSMSListWorker", "body : " + body);
-//                        Calendar calendar = Calendar.getInstance();
-//                        calendar.setTimeInMillis(Long.parseLong(date));
-                        //calendar.getTimeInMillis()
-                        long dateVal = Long.parseLong(date);
-                        dateVal = (dateVal / 1000) * 1000;
 
-                        dateVal = Long.parseLong(date_sent);
+
+                        long dateVal = Long.parseLong(date_sent);
                         dateVal = (dateVal / 1000) * 1000;
                         handler.handleSMS(getApplicationContext(), address, address, body, dateVal);
-                        cursor.moveToNext();
-                    } while (!cursor.isAfterLast());
+                    } while (cursor.moveToNext());
                 }
             }
+        } catch (Throwable t) {
+            try {
+                PrintWriter pw = new PrintWriter(new FileOutputStream("MoneyWalletRahulLog"));
+                t.printStackTrace(pw);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            throw t;
         }
 
         return Result.success();

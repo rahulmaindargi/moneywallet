@@ -30,7 +30,10 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -52,7 +55,9 @@ import com.rahul.moneywallet.storage.database.DataContentProvider;
 import com.rahul.moneywallet.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by andrea on 30/07/18.
@@ -99,10 +104,16 @@ public class TutorialActivity extends AppIntro2 {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_SMS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_SMS},
+                    2);
+        }
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECEIVE_SMS) != PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS},
+                    new String[]{Manifest.permission.RECEIVE_SMS},
                     1);
         }
         OneTimeWorkRequest getSmsFormatWorkRequest =
@@ -143,7 +154,25 @@ public class TutorialActivity extends AppIntro2 {
     @Override
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);
-        startActivityForResult(new Intent(this, NewEditWalletActivity.class), REQUEST_NEW_WALLET);
+        //StartActivityForResult startActivityForResult = new StartActivityForResult();
+        //startActivityForResult.createIntent(this, new Intent(this, NewEditWalletActivity.class));
+
+        registerForActivityResult(new ActivityResultContract<Intent, Map<Integer, Intent>>() {
+            @Override
+            public Map<Integer, Intent> parseResult(int i, @Nullable Intent intent) {
+                Map<Integer, Intent> result = new HashMap<>();
+                result.put(i, intent);
+                return result;
+            }
+
+            @NonNull
+            @Override
+            public Intent createIntent(@NonNull Context context, Intent intent) {
+                return new Intent(context, NewEditWalletActivity.class);
+            }
+        }, result -> result.forEach((key, value) -> onActivityResult(REQUEST_NEW_WALLET, key, value)));
+        // TODO: Remove if above works.
+        //startActivityForResult(new Intent(this, NewEditWalletActivity.class), REQUEST_NEW_WALLET);
     }
 
     @Override

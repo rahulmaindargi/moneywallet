@@ -71,6 +71,18 @@
       "sender": "VD-ICICIB",
       "type": "credit",
       "regex_Format": "(?i)Dear Customer, your ICICI Bank Account [[account]] has been credited with INR [[amount]] on [[date]]. Info:[[to]](?<=. ).*"
+    },
+    {
+      "id": 13,
+      "sender": "VM-ICICIB",
+      "type": "debit",
+      "regex_Format": "(?i)ICICI Bank Account [[account]] is credited with Rs [[amount]] on [[date]] by Account linked to mobile number [[to]](?<=. ).*"
+    },
+    {
+      "id": 14,
+      "sender": "TM-CITIBA",
+      "type": "debit",
+      "regex_Format": "(?i)Your a\/c no.[[account]] is debited for Rs.[[amount]] on [[date]] and a\/c [[to]](?<= credited).*"
     }
   ]
 }

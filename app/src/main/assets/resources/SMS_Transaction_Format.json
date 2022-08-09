@@ -33,7 +33,7 @@
     {
       "sender": "TM-CITIBN",
       "type": "debit",
-      "regex_Format": "(?i)Your Citi A\/c [[account]] is debited for Rs.[[amount]] on [[date]] [[time]] for fund transfer request to [[to]] (Ref. No.*"
+      "regex_Format": "(?i)Your Citi A\/c [[account]] is debited for Rs.[[amount]] on [[date]] [[time]] for fund transfer request to [[to]] \\(Ref. No.*"
     },
     {
       "sender": "JM-ICICIB",

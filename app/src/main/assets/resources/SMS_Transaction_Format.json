@@ -67,7 +67,7 @@
     },
     {
       "sender": "VM-ICICIB",
-      "type": "debit",
+      "type": "credit",
       "regex_Format": "(?i)ICICI Bank Account [[account]] is credited with Rs [[amount]] on [[date]] by Account linked to mobile number [[to]]. IMPS Ref.*"
     }
   ]

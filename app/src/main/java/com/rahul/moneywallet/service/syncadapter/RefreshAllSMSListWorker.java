@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 
 public class RefreshAllSMSListWorker extends Worker {
     ContentResolver contentResolver;
@@ -34,6 +35,14 @@ public class RefreshAllSMSListWorker extends Worker {
         Log.d("SMSLoader", "Get doWork");
 
         SMSHandler handler = new SMSHandler();
+        try {
+            Files.write(new File(getApplicationContext().getExternalFilesDir(null), "no_format_matched.log").toPath(),
+                    ("Refresh SMS Started at " + LocalDateTime.now()).getBytes(),
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("RefreshAllSMSListWorker", "Failed to Reset No format matched file", e);
+        }
         String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY,
                 Telephony.Sms.Inbox.DATE_SENT};
         try (Cursor cursor = contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, projections, null, null, null)) {
@@ -65,11 +74,18 @@ public class RefreshAllSMSListWorker extends Worker {
                         StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("SMSHandler", "Failed to Log exception", e);
+                Log.e("RefreshAllSMSListWorker", "Failed to Log exception", e);
             }
             throw t;
         }
-
+        try {
+            Files.write(new File(getApplicationContext().getExternalFilesDir(null), "no_format_matched.log").toPath(),
+                    ("Refresh SMS Finished at " + LocalDateTime.now()).getBytes(),
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("RefreshAllSMSListWorker", "Failed to No format matched", e);
+        }
         return Result.success();
     }
 

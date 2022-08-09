@@ -41,7 +41,7 @@ public class RefreshAllSMSListWorker extends Worker {
         ExecutorService executorService = null;
         try {
 
-            executorService = Executors.newFixedThreadPool(10);
+            executorService = Executors.newSingleThreadExecutor();
             List<Future<?>> futureList = new ArrayList<>();
             try {
                 Files.write(new File(getApplicationContext().getExternalFilesDir(null), "no_format_matched.log").toPath(),

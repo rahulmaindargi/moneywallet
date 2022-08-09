@@ -94,11 +94,11 @@ public class SMSHandler {
                         String regex = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.REGEX));
                         String type = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.TYPE));
 
-                        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[A-Z]|[0-9]|\\\\*)+)");
+                        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[0-9]|\\\\*)+)");
                         regex = regex.replaceAll("\\[\\[amount]]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
                         regex = regex.replaceAll("\\[\\[date]]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])[-|\\/](?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|0[1-9]|1[0-2])[-|\\/](?:[0-9]+))");
                         regex = regex.replaceAll("\\[\\[time]]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
-                        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+?)");
+                        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+?)");
                         //   formats.add(regex);
                         Pattern pattern = Pattern.compile(regex);
                         Matcher matcher = pattern.matcher(message);

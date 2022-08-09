@@ -46,22 +46,32 @@ class SMSHandlerTest {
 
         Assertions.assertTrue(matcher.find());
 
-        preRegex = "(?i)Your [[account]] A\\/c has been debited with INR [[amount]] on [[date]] at [[time]] and account [[to]](?<= has) been credited..*";
+        preRegex = "(?i)Your [[account]] A\\/c has been debited with INR [[amount]] on [[date]] at [[time]] and account [[to]] has been credited..*";
         regex = getRegex(preRegex);
         System.out.println(regex);
         pattern = Pattern.compile(regex);
         matcher = pattern.matcher("Your Citibank A/c has been debited with INR 100.25 on 03-06-1988 at 07:00 and account Testing.upi@to has been credited.");
         Assertions.assertTrue(matcher.find());
-        System.out.println(matcher.group("to"));
+        Assertions.assertEquals("Testing.upi@to", matcher.group("to"));
+
+        preRegex = "(?i)Dear Customer, ICICI Bank Account [[account]] is debited with INR [[amount]] on [[date]]. Info: [[to]]. The Available.*";
+        regex = getRegex(preRegex);
+        System.out.println(regex);
+        pattern = Pattern.compile(regex);
+        matcher = pattern.matcher("Dear Customer, ICICI Bank Account XX097 is debited with INR 477.00 on 04-Aug-22. Info: INF*IWISH Con. The Available account");
+        Assertions.assertTrue(matcher.find());
+        Assertions.assertEquals("INF*IWISH Con", matcher.group("to"));
+
+
     }
 
     @NonNull
     private String getRegex(String regex) {
-        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[A-Z]|[0-9]|\\\\*)+)");
+        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[0-9]|\\\\*)+)");
         regex = regex.replaceAll("\\[\\[amount]]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
         regex = regex.replaceAll("\\[\\[date]]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])[-|\\/](?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|0[1-9]|1[0-2])[-|\\/](?:[0-9]+))");
         regex = regex.replaceAll("\\[\\[time]]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
-        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+?)");
+        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+?)");
         return regex;
     }
 

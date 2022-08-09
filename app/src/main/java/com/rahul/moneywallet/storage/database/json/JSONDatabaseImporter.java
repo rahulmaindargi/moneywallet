@@ -562,10 +562,12 @@ public class JSONDatabaseImporter implements DatabaseImporter {
         try {
             if (JSONDatabase.SMSFormat.ARRAY.equals(mReader.readName())) {
                 mReader.beginArray();
+                int msgId = 1;
                 while (mReader.hasArrayAnotherObject()) {
                     JSONObject object = mReader.readObject();
-                    SMSFormat transferAttachment = mFactory.getSMSFormat(object);
+                    SMSFormat transferAttachment = mFactory.getSMSFormat(object, msgId);
                     long id = SQLDatabaseImporter.insert(contentResolver, transferAttachment);
+                    msgId += 1;
                 }
                 mReader.endArray();
             } else {

@@ -19,7 +19,30 @@
 
 package com.rahul.moneywallet.storage.database.json;
 
-import com.rahul.moneywallet.storage.database.model.*;
+import com.rahul.moneywallet.storage.database.model.Attachment;
+import com.rahul.moneywallet.storage.database.model.Budget;
+import com.rahul.moneywallet.storage.database.model.BudgetWallet;
+import com.rahul.moneywallet.storage.database.model.Category;
+import com.rahul.moneywallet.storage.database.model.Currency;
+import com.rahul.moneywallet.storage.database.model.Debt;
+import com.rahul.moneywallet.storage.database.model.DebtPerson;
+import com.rahul.moneywallet.storage.database.model.Event;
+import com.rahul.moneywallet.storage.database.model.EventPerson;
+import com.rahul.moneywallet.storage.database.model.Person;
+import com.rahul.moneywallet.storage.database.model.Place;
+import com.rahul.moneywallet.storage.database.model.RecurrentTransaction;
+import com.rahul.moneywallet.storage.database.model.RecurrentTransfer;
+import com.rahul.moneywallet.storage.database.model.SMSFormat;
+import com.rahul.moneywallet.storage.database.model.Saving;
+import com.rahul.moneywallet.storage.database.model.Transaction;
+import com.rahul.moneywallet.storage.database.model.TransactionAttachment;
+import com.rahul.moneywallet.storage.database.model.TransactionModel;
+import com.rahul.moneywallet.storage.database.model.TransactionPerson;
+import com.rahul.moneywallet.storage.database.model.Transfer;
+import com.rahul.moneywallet.storage.database.model.TransferAttachment;
+import com.rahul.moneywallet.storage.database.model.TransferModel;
+import com.rahul.moneywallet.storage.database.model.TransferPerson;
+import com.rahul.moneywallet.storage.database.model.Wallet;
 
 import org.json.JSONObject;
 
@@ -449,12 +472,13 @@ import java.util.Map;
         return transferAttachment;
     }
 
-    /*package-local*/ SMSFormat getSMSFormat(JSONObject object) {
+    /*package-local*/ SMSFormat getSMSFormat(JSONObject object, int msgId) {
         SMSFormat transferAttachment = new SMSFormat();
         transferAttachment.mSender = object.optString(JSONDatabase.SMSFormat.SENDER, null);
         transferAttachment.mType = object.optString(JSONDatabase.SMSFormat.TYPE, null);
         transferAttachment.regexFormat = object.optString(JSONDatabase.SMSFormat.REGEX, null);
-        transferAttachment.mUUID = object.optString(JSONDatabase.SMSFormat.ID, null);
+        transferAttachment.mUUID = String.valueOf(msgId);
+        //object.optString(JSONDatabase.SMSFormat.ID, null);
         transferAttachment.mLastEdit = object.optLong(JSONDatabase.SMSFormat.LAST_EDIT, 0L);
         transferAttachment.mDeleted = object.optBoolean(JSONDatabase.SMSFormat.DELETED, false);
         return transferAttachment;

@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.rahul.moneywallet.storage.database.Contract;
 
 import org.junit.jupiter.api.Assertions;
@@ -36,17 +38,31 @@ class SMSHandlerTest {
 
     @Test
     void testFormat() {
-        String regex = "(?i)Payment of Rs.[[amount]] received for card [[account]] on [[date]]..*";
-        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[A-Z]|[0-9]|\\\\*)+)");
-        regex = regex.replaceAll("\\[\\[amount]]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
-        regex = regex.replaceAll("\\[\\[date]]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])[-|\\/](?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|0[1-9]|1[0-2])[-|\\/](?:[0-9]+))");
-        regex = regex.replaceAll("\\[\\[time]]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
-        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+)");
+        String preRegex = "(?i)Payment of Rs.[[amount]] received for card [[account]] on [[date]]..*";
+        String regex = getRegex(preRegex);
         System.out.println(regex);
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher("Payment of Rs.18719.40 received for card ************2147 on 05/08/22. Limit available=Rs.1257010.00. Download CitiMobile app to track spends.");
 
         Assertions.assertTrue(matcher.find());
+
+        preRegex = "(?i)Your [[account]] A\\/c has been debited with INR [[amount]] on [[date]] at [[time]] and account [[to]](?<= has) been credited..*";
+        regex = getRegex(preRegex);
+        System.out.println(regex);
+        pattern = Pattern.compile(regex);
+        matcher = pattern.matcher("Your Citibank A/c has been debited with INR 100.25 on 03-06-1988 at 07:00 and account Testing.upi@to has been credited.");
+        Assertions.assertTrue(matcher.find());
+        System.out.println(matcher.group("to"));
+    }
+
+    @NonNull
+    private String getRegex(String regex) {
+        regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[A-Z]|[0-9]|\\\\*)+)");
+        regex = regex.replaceAll("\\[\\[amount]]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
+        regex = regex.replaceAll("\\[\\[date]]", "(?<date>(?:[1-9]|[0][1-9]|[1-2][0-9]|3[0-1])[-|\\/](?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|0[1-9]|1[0-2])[-|\\/](?:[0-9]+))");
+        regex = regex.replaceAll("\\[\\[time]]", "(?<time>(?:[0-1][0-9]|2[0-3]):(?:[0-5][0-9])(?::[0-5][0-9])?)");
+        regex = regex.replaceAll("\\[\\[to]]", "(?<to>(?:[A-Z]|[a-z]|[0-9]|_|@|-| |\\\\*|\\\\.)+?)");
+        return regex;
     }
 
     @Test

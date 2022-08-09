@@ -62,6 +62,15 @@ class SMSHandlerTest {
         Assertions.assertTrue(matcher.find());
         Assertions.assertEquals("INF*IWISH Con", matcher.group("to"));
 
+        preRegex = "(?i)Your Citi A\\/c [[account]] is debited for Rs.[[amount]] on [[date]] [[time]] for fund transfer request to [[to]] \\(Ref. No.*";
+
+        regex = getRegex(preRegex);
+        System.out.println(regex);
+        pattern = Pattern.compile(regex);
+        matcher = pattern.matcher("Your Citi A/c 0703 is debited for Rs.136,000.00 on 01-AUG-2022 16:36:18 for fund transfer request to RAHUL VIVEK MAINDARGI (Ref. No.070070253855764). A/c balance=Rs.69,754.32");
+        Assertions.assertTrue(matcher.find());
+        // Assertions.assertEquals("INF*IWISH Con", matcher.group("to"));
+
 
     }
 

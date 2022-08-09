@@ -59,7 +59,7 @@ public class SMSHandler {
 
         if (dataImporter.insertSMS(id, message)) {
             Log.d("SMSHandler", "SMS Inserted ");
-            CurrencyUnit currencyUnit = CurrencyManager.getCurrency("INR");
+            CurrencyUnit currencyUnit = CurrencyManager.getDefaultCurrency();
             BigDecimal decimalMultiply = BigDecimal.valueOf(Math.pow(10, currencyUnit.getDecimals()));
             BigDecimal moneyDecimal = decimalMultiply.multiply(new BigDecimal(details.amount));
             long money = moneyDecimal.longValue();

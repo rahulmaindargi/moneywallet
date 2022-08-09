@@ -19,6 +19,11 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class RefreshAllSMSListWorker extends Worker {
     ContentResolver contentResolver;
@@ -28,55 +33,70 @@ public class RefreshAllSMSListWorker extends Worker {
         contentResolver = context.getContentResolver();
     }
 
-
     @NonNull
     @Override
     public Result doWork() {
         Log.d("SMSLoader", "Get doWork");
-
         SMSHandler handler = new SMSHandler();
+        ExecutorService executorService = null;
         try {
-            Files.write(new File(getApplicationContext().getExternalFilesDir(null), "no_format_matched.log").toPath(),
-                    ("Refresh SMS Started at " + LocalDateTime.now()).getBytes(),
-                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e("RefreshAllSMSListWorker", "Failed to Reset No format matched file", e);
-        }
-        String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY,
-                Telephony.Sms.Inbox.DATE_SENT};
-        try (Cursor cursor = contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, projections, null, null, null)) {
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    do {
-                        String date = cursor.getString(0);
-                        String address = cursor.getString(1);
-                        String body = cursor.getString(2);
-                        String date_sent = cursor.getString(3);
-                        Log.d("RefreshAllSMSListWorker", "date : " + date);
-                        Log.d("RefreshAllSMSListWorker", "date_sent : " + date_sent);
-                        Log.d("RefreshAllSMSListWorker", "address : " + address);
-                        Log.d("RefreshAllSMSListWorker", "body : " + body);
-                        if (checkSenderIsValid(address)) {
-                            long dateVal = Long.parseLong(date_sent);
-                            dateVal = (dateVal / 1000) * 1000;
-                            handler.handleSMS(getApplicationContext(), address, address, body, dateVal);
-                        }
-                    } while (cursor.moveToNext());
-                }
-            }
-        } catch (Throwable t) {
+
+            executorService = Executors.newFixedThreadPool(10);
+            List<Future<?>> futureList = new ArrayList<>();
             try {
-                StringWriter sw = new StringWriter();
-                t.printStackTrace(new PrintWriter(sw));
-                Files.write(new File(getApplicationContext().getExternalFilesDir(null), "RefreshSMSList.log").toPath(),
-                        ("\n" + sw).getBytes(),
-                        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                Files.write(new File(getApplicationContext().getExternalFilesDir(null), "no_format_matched.log").toPath(),
+                        ("Refresh SMS Started at " + LocalDateTime.now()).getBytes(),
+                        StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("RefreshAllSMSListWorker", "Failed to Log exception", e);
+                Log.e("RefreshAllSMSListWorker", "Failed to Reset No format matched file", e);
             }
-            throw t;
+            String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY,
+                    Telephony.Sms.Inbox.DATE_SENT};
+            try (Cursor cursor = contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, projections, null, null, null)) {
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        do {
+                            String date = cursor.getString(0);
+                            String address = cursor.getString(1);
+                            String body = cursor.getString(2);
+                            String date_sent = cursor.getString(3);
+                            Log.d("RefreshAllSMSListWorker", "date : " + date);
+                            Log.d("RefreshAllSMSListWorker", "date_sent : " + date_sent);
+                            Log.d("RefreshAllSMSListWorker", "address : " + address);
+                            Log.d("RefreshAllSMSListWorker", "body : " + body);
+                            if (checkSenderIsValid(address)) {
+                                long dateVal = Long.parseLong(date_sent);
+                                Runnable runnable = () -> {
+                                    long finalDate = (dateVal / 1000) * 1000;
+                                    handler.handleSMS(getApplicationContext(), address, address, body, finalDate);
+                                };
+                                futureList.add(executorService.submit(runnable));
+                                // handler.handleSMS(getApplicationContext(), address, address, body, dateVal);
+                            }
+                        } while (cursor.moveToNext());
+                        while (futureList.size() > 0) {
+                            futureList.removeIf(Future::isDone);
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                try {
+                    StringWriter sw = new StringWriter();
+                    t.printStackTrace(new PrintWriter(sw));
+                    Files.write(new File(getApplicationContext().getExternalFilesDir(null), "RefreshSMSList.log").toPath(),
+                            ("\n" + sw).getBytes(),
+                            StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e("RefreshAllSMSListWorker", "Failed to Log exception", e);
+                }
+                throw t;
+            }
+        } finally {
+            if (executorService != null) {
+                executorService.shutdown();
+            }
         }
         try {
             Files.write(new File(getApplicationContext().getExternalFilesDir(null), "no_format_matched.log").toPath(),
@@ -133,6 +153,7 @@ public class RefreshAllSMSListWorker extends Worker {
                 || sender.contains("HSBCBK")
                 || sender.contains("HSBCIN")
                 || sender.contains("INDUSB")
-                || sender.contains("CITIBA"));
+                || sender.contains("CITIBA")
+                || sender.contains("CITIBN"));
     }
 }

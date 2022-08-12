@@ -211,6 +211,8 @@ package com.rahul.moneywallet.storage.database;
             Transaction.UUID + " TEXT NOT NULL UNIQUE, " +
             Transaction.LAST_EDIT + " INTEGER NOT NULL, " +
             Transaction.DELETED + " INTEGER NOT NULL DEFAULT 0, " +
+            Transaction.SYNC_SIDE_ID + " TEXT, " +
+            Transaction.SYNCED_WITH_LIST + " TEXT, " +
             "FOREIGN KEY (" + Transaction.CATEGORY + ") REFERENCES " + Category.TABLE +
             "(" + Category.ID + ") ON UPDATE NO ACTION ON DELETE CASCADE, " +
             "FOREIGN KEY (" + Transaction.WALLET + ") REFERENCES " + Wallet.TABLE +
@@ -450,6 +452,13 @@ package com.rahul.moneywallet.storage.database;
     /*package-local*/ static final String CREATE_WALLET_INDEX_COLUMN = "ALTER TABLE " +
             Wallet.TABLE + " ADD COLUMN " + Wallet.INDEX + " INTEGER NOT NULL DEFAULT 0";
 
+    /*package-local*/ static final String CREATE_TRANSACTION_DEVICE_ID_SOURCE_COLUMN = "ALTER TABLE " +
+            Transaction.TABLE + " ADD COLUMN " + Transaction.DEVICE_SOURCE_ID + " TEXT NOT NULL DEFAULT ";
+    /*package-local*/ static final String CREATE_TRANSACTION_SYNCED_SIDE_ID_COLUMN = "ALTER TABLE " +
+            Transaction.TABLE + " ADD COLUMN " + Transaction.SYNC_SIDE_ID + " TEXT";
+    /*package-local*/ static final String CREATE_TRANSACTION_SYNCED_WITH_LIST_COLUMN = "ALTER TABLE " +
+            Transaction.TABLE + " ADD COLUMN " + Transaction.SYNCED_WITH_LIST + " TEXT NOT NULL DEFAULT ";
+
     /**
      * This class defines the common columns for all SQL tables.
      * Those columns are necessary for future updates in case of creation of a SyncAdapter.
@@ -613,6 +622,9 @@ package com.rahul.moneywallet.storage.database;
         /*package-local*/ static final String CONFIRMED = "transaction_confirmed";
         /*package-local*/ static final String COUNT_IN_TOTAL = "transaction_count_in_total";
         /*package-local*/ static final String TAG = "transaction_tag";
+        /*package-local*/ static final String DEVICE_SOURCE_ID = "transaction_device_source_id";
+        /*package-local*/ static final String SYNC_SIDE_ID = "transaction_sync_side_id";
+        /*package-local*/ static final String SYNCED_WITH_LIST = "transaction_synced_with_list";
     }
 
     /*package-local*/ static final class TransactionPeople extends BaseTable {

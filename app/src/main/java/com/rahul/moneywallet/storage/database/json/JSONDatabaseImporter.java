@@ -20,6 +20,7 @@
 package com.rahul.moneywallet.storage.database.json;
 
 import android.content.ContentResolver;
+import android.content.Context;
 
 import com.rahul.moneywallet.storage.database.DatabaseImporter;
 import com.rahul.moneywallet.storage.database.ImportException;
@@ -376,14 +377,14 @@ public class JSONDatabaseImporter implements DatabaseImporter {
     }
 
     @Override
-    public void importTransactions(ContentResolver contentResolver) throws ImportException {
+    public void importTransactions(ContentResolver contentResolver, Context mContext) throws ImportException {
         try {
             if (JSONDatabase.Transaction.ARRAY.equals(mReader.readName())) {
                 mReader.beginArray();
                 while (mReader.hasArrayAnotherObject()) {
                     JSONObject object = mReader.readObject();
-                    Transaction transaction = mFactory.getTransaction(object);
-                    long id = SQLDatabaseImporter.insert(contentResolver, transaction);
+                    Transaction transaction = mFactory.getTransaction(object, mContext);
+                    long id = SQLDatabaseImporter.insert(contentResolver, transaction, mContext);
                     mFactory.cacheTransaction(transaction.mUUID, id);
                 }
                 mReader.endArray();

@@ -311,7 +311,11 @@ import java.util.HashMap;
         object.put(JSONDatabase.Transaction.ID, transaction.mUUID);
         object.put(JSONDatabase.Transaction.LAST_EDIT, transaction.mLastEdit);
         object.put(JSONDatabase.Transaction.DELETED, transaction.mDeleted);
+        object.put(JSONDatabase.Transaction.SYNCED_SIDE_ID, transaction.mSyncedSideId);
+        object.put(JSONDatabase.Transaction.SYNCED_DEVICE_LIST, transaction.mSyncedWithList);
+        object.put(JSONDatabase.Transaction.DEVICE_SOURCE_ID, transaction.mDeviceSourceId);
         mCacheTransactions.put(transaction.mId, transaction.mUUID);
+
         return object;
     }
 

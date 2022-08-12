@@ -45,6 +45,10 @@ public class CSVDataImporter extends AbstractDataImporter {
             if (TextUtils.isEmpty(wallet) || TextUtils.isEmpty(currency) || TextUtils.isEmpty(category) || TextUtils.isEmpty(datetimeString) || TextUtils.isEmpty(moneyString)) {
                 throw new RuntimeException("Invalid csv file: one or more required columns are missing");
             }
+
+            String deviceSourceID = getTrimmedString(lineMap.get(Constants.COLUMN_DEVICE_SOURCE_ID));
+            String syncSideID = getTrimmedString(lineMap.get(Constants.COLUMN_SYNCED_SIDE_ID));
+            String syncedWithList = getTrimmedString(lineMap.get(Constants.COLUMN_SYNCED_WITH_LIST));
             // extract the optional information from the csv file
             String description = getTrimmedString(lineMap.get(Constants.COLUMN_DESCRIPTION));
             String event = getTrimmedString(lineMap.get(Constants.COLUMN_EVENT));
@@ -67,7 +71,7 @@ public class CSVDataImporter extends AbstractDataImporter {
             long money = moneyDecimal.longValue();
             int direction = money < 0 ? Contract.Direction.EXPENSE : Contract.Direction.INCOME;
             Date datetime = DateUtils.getDateFromSQLDateTimeString(datetimeString);
-            insertTransaction(wallet, currencyUnit, category, datetime, Math.abs(money), direction, description, event, place, people, note);
+            insertTransaction(wallet, currencyUnit, category, datetime, Math.abs(money), direction, description, event, place, people, note, deviceSourceID, syncSideID, syncedWithList);
             lineMap = mReader.readMap();
         }
     }

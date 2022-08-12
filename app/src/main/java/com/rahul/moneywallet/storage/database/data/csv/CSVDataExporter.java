@@ -55,6 +55,9 @@ public class CSVDataExporter extends AbstractDataExporter {
         contractColumns.add(Constants.COLUMN_DATETIME);
         contractColumns.add(Constants.COLUMN_MONEY);
         contractColumns.add(Constants.COLUMN_DESCRIPTION);
+        contractColumns.add(Constants.COLUMN_DEVICE_SOURCE_ID);
+        contractColumns.add(Constants.COLUMN_SYNCED_SIDE_ID);
+        contractColumns.add(Constants.COLUMN_SYNCED_WITH_LIST);
         if (optionalColumns != null) {
             for (String column : optionalColumns) {
                 switch (column) {
@@ -93,34 +96,34 @@ public class CSVDataExporter extends AbstractDataExporter {
             for (int i = 0; i < columns.length; i++) {
                 switch (columns[i]) {
                     case Constants.COLUMN_WALLET:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.WALLET_NAME));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_NAME));
                         break;
                     case Constants.COLUMN_CURRENCY:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.WALLET_CURRENCY));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_CURRENCY));
                         break;
                     case Constants.COLUMN_CATEGORY:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.CATEGORY_NAME));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_NAME));
                         break;
                     case Constants.COLUMN_DATETIME:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.DATE));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DATE));
                         break;
                     case Constants.COLUMN_MONEY:
-                        CurrencyUnit currencyUnit = CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Transaction.WALLET_CURRENCY)));
-                        long money = cursor.getLong(cursor.getColumnIndex(Contract.Transaction.MONEY));
-                        int direction = cursor.getInt(cursor.getColumnIndex(Contract.Transaction.DIRECTION));
+                        CurrencyUnit currencyUnit = CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_CURRENCY)));
+                        long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.MONEY));
+                        int direction = cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transaction.DIRECTION));
                         if (direction == Contract.Direction.EXPENSE) {
                             money *= -1;
                         }
                         csvRow[i] = mMoneyFormatter.getNotTintedString(currencyUnit, money);
                         break;
                     case Constants.COLUMN_DESCRIPTION:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.DESCRIPTION));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DESCRIPTION));
                         break;
                     case Constants.COLUMN_EVENT:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.EVENT_NAME));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.EVENT_NAME));
                         break;
                     case Constants.COLUMN_PEOPLE:
-                        List<Long> peopleIds = Contract.parseObjectIds(cursor.getString(cursor.getColumnIndex(Contract.Transaction.PEOPLE_IDS)));
+                        List<Long> peopleIds = Contract.parseObjectIds(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.PEOPLE_IDS)));
                         if (peopleIds != null && !peopleIds.isEmpty()) {
                             StringBuilder builder = new StringBuilder();
                             for (Long personId : peopleIds) {
@@ -138,10 +141,22 @@ public class CSVDataExporter extends AbstractDataExporter {
                         }
                         break;
                     case Constants.COLUMN_PLACE:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.PLACE_NAME));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.PLACE_NAME));
                         break;
                     case Constants.COLUMN_NOTE:
-                        csvRow[i] = cursor.getString(cursor.getColumnIndex(Contract.Transaction.NOTE));
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.NOTE));
+                        break;
+                    case Constants.COLUMN_DEVICE_SOURCE_ID:
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DEVICE_SOURCE_ID));
+                        break;
+                    case Constants.COLUMN_SYNCED_SIDE_ID:
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.SYNC_SIDE_ID));
+                        break;
+                    case Constants.COLUMN_SYNCED_WITH_LIST:
+                        csvRow[i] = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.SYNCED_WITH_LIST));
+                        if (csvRow[i] != null) {
+                            csvRow[i] = csvRow[i].replaceAll(",", ";");
+                        }
                         break;
                 }
             }

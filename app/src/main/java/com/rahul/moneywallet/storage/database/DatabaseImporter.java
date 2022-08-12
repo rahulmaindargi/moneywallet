@@ -20,6 +20,7 @@
 package com.rahul.moneywallet.storage.database;
 
 import android.content.ContentResolver;
+import android.content.Context;
 
 /**
  * Created by andrea on 25/10/18.
@@ -57,7 +58,7 @@ public interface DatabaseImporter {
 
     void importRecurrentTransfers(ContentResolver contentResolver) throws ImportException;
 
-    void importTransactions(ContentResolver contentResolver) throws ImportException;
+    void importTransactions(ContentResolver contentResolver, Context mContext) throws ImportException;
 
     void importTransactionPeople(ContentResolver contentResolver) throws ImportException;
 

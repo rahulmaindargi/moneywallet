@@ -20,6 +20,8 @@
 package com.rahul.moneywallet.ui.activity;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static com.rahul.moneywallet.service.syncworkers.devicesync.NSDClientHelper.CLIENT_WORKER_NAME;
+import static com.rahul.moneywallet.service.syncworkers.devicesync.NSDServiceRegistrationHelper.SERVER_WORKER_NAME;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
@@ -52,6 +54,7 @@ import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.Operation;
 import androidx.work.WorkInfo;
@@ -73,8 +76,10 @@ import com.rahul.moneywallet.model.ColorIcon;
 import com.rahul.moneywallet.model.Money;
 import com.rahul.moneywallet.model.WalletAccount;
 import com.rahul.moneywallet.service.BackupHandlerIntentService;
-import com.rahul.moneywallet.service.syncadapter.RefreshAllSMSListWorker;
-import com.rahul.moneywallet.service.syncadapter.RefreshSMSFormatsWorker;
+import com.rahul.moneywallet.service.syncworkers.RefreshAllSMSListWorker;
+import com.rahul.moneywallet.service.syncworkers.RefreshSMSFormatsWorker;
+import com.rahul.moneywallet.service.syncworkers.devicesync.NSDClientHelper;
+import com.rahul.moneywallet.service.syncworkers.devicesync.NSDServiceRegistrationHelper;
 import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.storage.database.DataContentProvider;
 import com.rahul.moneywallet.storage.preference.PreferenceManager;
@@ -99,7 +104,6 @@ import com.rahul.moneywallet.ui.view.theme.ThemedRecyclerView;
 import com.rahul.moneywallet.utils.IconLoader;
 
 import java.util.Locale;
-import java.util.UUID;
 
 public class MainActivity extends BaseActivity implements DrawerController, AccountHeader.OnAccountHeaderListener, Drawer.OnDrawerItemClickListener
         , LoaderManager.LoaderCallbacks<Cursor> {
@@ -128,6 +132,8 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
     private static final int ID_SECTION_ABOUT = 17;
     private static final int ID_SECTION_REFRESH_SMS_FORMATS = 18;
     private static final int ID_SECTION_REFRESH_ALL_SMS = 19;
+    private static final int ID_SECTION_SYNC_NEARBY_DEVICE_CLIENT = 20;
+    private static final int ID_SECTION_SYNC_NEARBY_DEVICE_SERVER = 21;
 
     private final static int ID_ACTION_NEW_WALLET = 1;
     private final static int ID_ACTION_MANAGE_WALLET = 2;
@@ -158,7 +164,6 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         initializeUi();
         loadUi(savedInstanceState);
         registerReceiver();
-
     }
 
     /**
@@ -201,9 +206,11 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                         createDrawerItem(ID_SECTION_BANK, R.drawable.ic_account_balance_24dp, R.string.menu_search_bank),
                         new DividerDrawerItem(),
                         createDrawerItem(ID_SECTION_SETTING, R.drawable.ic_settings_24dp, R.string.menu_setting),
-                        createDrawerItem(ID_SECTION_REFRESH_SMS_FORMATS, R.drawable.ic_restore_24dp, R.string.menu_refresh_sms_formats),
-                        createDrawerItem(ID_SECTION_REFRESH_ALL_SMS, R.drawable.ic_restore_24dp, R.string.menu_refresh_all_sms),
-                        createDrawerItem(ID_SECTION_SUPPORT_DEVELOPER, R.drawable.ic_favorite_border_black_24dp, R.string.menu_support_developer),
+                        createDrawerItem(ID_SECTION_REFRESH_SMS_FORMATS, R.drawable.ic_refresh_black_24dp, R.string.menu_refresh_sms_formats),
+                        createDrawerItem(ID_SECTION_REFRESH_ALL_SMS, R.drawable.ic_refresh_black_24dp, R.string.menu_refresh_all_sms),
+                        createDrawerItem(ID_SECTION_SYNC_NEARBY_DEVICE_CLIENT, R.drawable.ic_restore_24dp, R.string.menu_sync_near_by_device_client),
+                        createDrawerItem(ID_SECTION_SYNC_NEARBY_DEVICE_SERVER, R.drawable.ic_restore_24dp, R.string.menu_sync_near_by_device_server),
+                        //createDrawerItem(ID_SECTION_SUPPORT_DEVELOPER, R.drawable.ic_favorite_border_black_24dp, R.string.menu_support_developer),
                         createDrawerItem(ID_SECTION_ABOUT, R.drawable.ic_info_outline_24dp, R.string.menu_about)
                 )
                 .withOnDrawerItemClickListener(this)
@@ -356,24 +363,42 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                     break;
                 case ID_SECTION_REFRESH_SMS_FORMATS:
                     checkPermission();
-                    OneTimeWorkRequest getSmsFormatWorkRequest =
-                            new OneTimeWorkRequest.Builder(RefreshSMSFormatsWorker.class)
-                                    .build();
 
-                    Operation operationFormat = WorkManager.getInstance(this).enqueue(getSmsFormatWorkRequest);
+                    Operation operationFormat = WorkManager.getInstance(this).enqueueUniqueWork("RefreshSMSFormatsWorker", ExistingWorkPolicy.KEEP, OneTimeWorkRequest.from(RefreshSMSFormatsWorker.class));
 
-                    operationFormat.getState().observe(this, (state -> handleRefreshState(state, "SMS Formats Refreshed successfully", "SMS Formats Refresh Failed Try again.", "SMSFormatRefresh", getSmsFormatWorkRequest.getId())));
+                    operationFormat.getState().observe(this, state -> handleRefreshState(state, "SMS Formats Refreshed successfully", "SMS Formats Refresh Failed Try again.", "SMSFormatRefresh", "RefreshSMSFormatsWorker"));
 
                     break;
                 case ID_SECTION_REFRESH_ALL_SMS:
                     checkPermission();
-                    OneTimeWorkRequest getAllSmsWorkRequest =
-                            new OneTimeWorkRequest.Builder(RefreshAllSMSListWorker.class)
-                                    .build();
 
-                    Operation operationSms = WorkManager.getInstance(this).enqueue(getAllSmsWorkRequest);
-                    operationSms.getState().observe(this, (state -> handleRefreshState(state, "SMS Refreshed successfully", "SMS Refresh Failed Try again.", "SMSRefresh", getAllSmsWorkRequest.getId())));
+                    Operation operationSms = WorkManager.getInstance(this).enqueueUniqueWork("RefreshAllSMSListWorker", ExistingWorkPolicy.KEEP, OneTimeWorkRequest.from(RefreshAllSMSListWorker.class));
+                    operationSms.getState().observe(this, state -> handleRefreshState(state, "SMS Refreshed successfully", "SMS Refresh Failed Try again.", "SMSRefresh", "RefreshAllSMSListWorker"));
+                    break;
+                case ID_SECTION_SYNC_NEARBY_DEVICE_CLIENT:
+                    checkPermission();
+                    NSDClientHelper clientHelper = new NSDClientHelper(this);
+                    clientHelper.startDiscovery();
+                    WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData(CLIENT_WORKER_NAME)
+                            .observe(this, infos -> infos.stream()
+                                    .filter(info -> !info.getState().isFinished())
+                                    .findAny().ifPresent(info ->
+                                            workerCompletionToast(CLIENT_WORKER_NAME, "Data Sent", "Data Send failed", clientHelper::stopDiscovery)
+                                    )
+                            );
 
+                    break;
+                case ID_SECTION_SYNC_NEARBY_DEVICE_SERVER:
+                    checkPermission();
+                    NSDServiceRegistrationHelper helper = new NSDServiceRegistrationHelper(this);
+                    helper.registerService();
+                    WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData(SERVER_WORKER_NAME)
+                            .observe(this, infos -> infos.stream()
+                                    .filter(info -> !info.getState().isFinished())
+                                    .findAny().ifPresent(info ->
+                                            workerCompletionToast(SERVER_WORKER_NAME, "Data Received", "Data Receive failed", helper::deRegisterService)
+                                    )
+                            );
                     break;
                 default:
                     mCurrentSelection = identifier;
@@ -386,19 +411,27 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         return true;
     }
 
-    private void handleRefreshState(Operation.State state, String successMessage, String failureMessage, String operation, UUID id) {
+    private void workerCompletionToast(String serverWorkerName, String successMessage, String failMessage, Runnable extraHandler) {
+        WorkManager.getInstance(this)
+                .getWorkInfosForUniqueWorkLiveData(serverWorkerName)
+                .observe(this, infos -> infos.stream()
+                        .filter(info -> info.getState().isFinished())
+                        .forEach(info -> {
+                            if (extraHandler != null) {
+                                extraHandler.run();
+                            }
+                            if (info.getState() == WorkInfo.State.SUCCEEDED) {
+                                Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, failMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        }));
+    }
 
+    private void handleRefreshState(Operation.State state, String successMessage, String failureMessage, String operation, String workName) {
         if (state instanceof Operation.State.SUCCESS) {
             Toast.makeText(this, "Operation started", Toast.LENGTH_SHORT).show();
-            WorkManager.getInstance(this).getWorkInfoByIdLiveData(id).observe(this, workInfo -> {
-                if (workInfo.getState().isFinished()) {
-                    if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                        Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, failureMessage, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+            workerCompletionToast(workName, successMessage, failureMessage, null);
         } else if (state instanceof Operation.State.FAILURE) {
             Throwable throwable = ((Operation.State.FAILURE) state).getThrowable();
             Toast.makeText(this, "Operation not started. Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
@@ -424,6 +457,12 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    3);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.GET_ACCOUNTS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.GET_ACCOUNTS, Manifest.permission.READ_EXTERNAL_STORAGE},
                     3);
         }
     }
@@ -604,7 +643,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
             }
             long currentWalletId = PreferenceManager.getCurrentWallet();
             if (currentWalletId == PreferenceManager.NO_CURRENT_WALLET) {
-                // if no wallet is set as current wallet, let the drawer to select the (first changed) Last (i.e. Total Wallet)
+                // if no wallet is set as current wallet, let the drawer to select the  Last (i.e. Total Wallet)
                 // wallet found and then fire the onProfileChanged callback that will automatically
                 // register the id inside the PreferenceManager and notify the changed to all the
                 // observer registered at that uri.

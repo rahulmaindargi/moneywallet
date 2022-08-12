@@ -21,6 +21,7 @@ package com.rahul.moneywallet.storage.database.backup;
 
 import android.content.ContentResolver;
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.rahul.moneywallet.storage.database.DatabaseImporter;
@@ -86,7 +87,7 @@ public class DefaultBackupImporter extends AbstractBackupImporter {
             importer.importSavings(contentResolver);
             importer.importRecurrentTransactions(contentResolver);
             importer.importRecurrentTransfers(contentResolver);
-            importer.importTransactions(contentResolver);
+            importer.importTransactions(contentResolver, mContext);
             importer.importTransactionPeople(contentResolver);
             importer.importTransactionModels(contentResolver);
             importer.importTransfers(contentResolver);

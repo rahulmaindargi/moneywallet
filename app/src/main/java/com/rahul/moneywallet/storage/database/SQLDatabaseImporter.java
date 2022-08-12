@@ -22,6 +22,7 @@ package com.rahul.moneywallet.storage.database;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.net.Uri;
 
 import com.rahul.moneywallet.storage.database.model.Attachment;
@@ -49,6 +50,7 @@ import com.rahul.moneywallet.storage.database.model.TransferAttachment;
 import com.rahul.moneywallet.storage.database.model.TransferModel;
 import com.rahul.moneywallet.storage.database.model.TransferPerson;
 import com.rahul.moneywallet.storage.database.model.Wallet;
+import com.rahul.moneywallet.utils.Utils;
 
 /**
  * Created by andrea on 27/10/18.
@@ -298,7 +300,7 @@ public class SQLDatabaseImporter {
         return ContentUris.parseId(uri);
     }
 
-    public static long insert(ContentResolver contentResolver, Transaction transaction) {
+    public static long insert(ContentResolver contentResolver, Transaction transaction, Context mContext) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(Schema.Transaction.MONEY, transaction.mMoney);
         contentValues.put(Schema.Transaction.DATE, transaction.mDate);
@@ -319,6 +321,9 @@ public class SQLDatabaseImporter {
         contentValues.put(Schema.Transaction.UUID, transaction.mUUID);
         contentValues.put(Schema.Transaction.LAST_EDIT, transaction.mLastEdit);
         contentValues.put(Schema.Transaction.DELETED, transaction.mDeleted);
+        contentValues.put(Schema.Transaction.DEVICE_SOURCE_ID, transaction.mDeviceSourceId != null ? transaction.mDeviceSourceId : Utils.getDeviceID(mContext));
+        contentValues.put(Schema.Transaction.SYNC_SIDE_ID, transaction.mSyncedSideId);
+        contentValues.put(Schema.Transaction.SYNCED_WITH_LIST, transaction.mSyncedWithList);
         Uri uri = SyncContentProvider.CONTENT_TRANSACTION;
         uri = contentResolver.insert(uri, contentValues);
         return ContentUris.parseId(uri);

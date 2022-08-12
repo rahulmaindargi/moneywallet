@@ -1,4 +1,4 @@
-package com.rahul.moneywallet.service.syncadapter;
+package com.rahul.moneywallet.service.syncworkers;
 
 import android.content.ContentResolver;
 import android.content.Context;

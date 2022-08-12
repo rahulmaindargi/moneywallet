@@ -21,6 +21,7 @@ package com.rahul.moneywallet.storage.database.backup;
 
 import android.content.ContentResolver;
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.rahul.moneywallet.storage.database.ImportException;
@@ -116,7 +117,7 @@ public class LegacyBackupImporter extends AbstractBackupImporter {
             mDatabaseImporter.importSavings(contentResolver);
             mDatabaseImporter.importRecurrentTransactions(contentResolver);
             mDatabaseImporter.importRecurrentTransfers(contentResolver);
-            mDatabaseImporter.importTransactions(contentResolver);
+            mDatabaseImporter.importTransactions(contentResolver, mContext);
             mDatabaseImporter.importTransactionPeople(contentResolver);
             mDatabaseImporter.importTransactionModels(contentResolver);
             mDatabaseImporter.importTransfers(contentResolver);

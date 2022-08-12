@@ -19,22 +19,33 @@
 
 package com.rahul.moneywallet.utils;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import androidx.annotation.IdRes;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.IdRes;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.IFile;
 import com.rahul.moneywallet.storage.database.backup.BackupManager;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Created by andrea on 03/02/18.
@@ -151,10 +162,37 @@ public class Utils {
         if (list instanceof ArrayList) {
             return (ArrayList<IFile>) list;
         } else {
-            ArrayList<IFile> wrappedList = new ArrayList<>();
-            wrappedList.addAll(list);
-            return wrappedList;
+            return new ArrayList<>(list);
         }
+    }
+
+    public static String DEVICE_ID;
+
+    public static String getDeviceID(Context context) {
+
+        if (DEVICE_ID == null) {
+            synchronized (Utils.class) {
+                if (DEVICE_ID == null) {
+                    Account[] accountsByType = context.getSystemService(AccountManager.class).getAccountsByType("com.google");
+                    Optional<Account> googleAccount = Stream.of(accountsByType).filter(account -> account.type.equals("com.google")).findFirst();
+                    String androidId = null;
+
+                    if (googleAccount.isPresent()) {
+                        androidId = googleAccount.get().name;
+                        Log.d("Android Google name", androidId);
+                    }
+                    if (StringUtils.isEmpty(androidId)) {
+                        androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    }
+                    if (StringUtils.isEmpty(androidId)) {
+                        androidId = Settings.Global.getString(context.getContentResolver(), Settings.Global.DEVICE_NAME);
+                    }
+                    Log.d("AndroidID", androidId);
+                    DEVICE_ID = UUID.nameUUIDFromBytes(androidId.getBytes()).toString();
+                }
+            }
+        }
+        return DEVICE_ID;
     }
 
 }

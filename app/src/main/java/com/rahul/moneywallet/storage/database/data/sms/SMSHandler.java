@@ -13,6 +13,7 @@ import com.rahul.moneywallet.model.CurrencyUnit;
 import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.storage.database.SyncContentProvider;
 import com.rahul.moneywallet.utils.CurrencyManager;
+import com.rahul.moneywallet.utils.Utils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -66,7 +67,7 @@ public class SMSHandler {
             dataImporter.insertTransaction(details.account, currencyUnit, "Misc",
                     Date.from(details.dateTime.atZone(ZoneId.systemDefault()).toInstant())
                     , money, "debit".equalsIgnoreCase(details.type) ? 0 : 1, details.otherParty, null,
-                    null, null, message);
+                    null, null, message, Utils.getDeviceID(context), null, null);
         }
     }
 

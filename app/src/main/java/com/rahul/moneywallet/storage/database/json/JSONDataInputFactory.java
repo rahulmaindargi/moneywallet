@@ -19,6 +19,8 @@
 
 package com.rahul.moneywallet.storage.database.json;
 
+import android.content.Context;
+
 import com.rahul.moneywallet.storage.database.model.Attachment;
 import com.rahul.moneywallet.storage.database.model.Budget;
 import com.rahul.moneywallet.storage.database.model.BudgetWallet;
@@ -43,6 +45,7 @@ import com.rahul.moneywallet.storage.database.model.TransferAttachment;
 import com.rahul.moneywallet.storage.database.model.TransferModel;
 import com.rahul.moneywallet.storage.database.model.TransferPerson;
 import com.rahul.moneywallet.storage.database.model.Wallet;
+import com.rahul.moneywallet.utils.Utils;
 
 import org.json.JSONObject;
 
@@ -336,7 +339,7 @@ import java.util.Map;
         return transfer;
     }
 
-    /*package-local*/ Transaction getTransaction(JSONObject object) {
+    /*package-local*/ Transaction getTransaction(JSONObject object, Context mContext) {
         Transaction transaction = new Transaction();
         transaction.mMoney = object.optLong(JSONDatabase.Transaction.MONEY, 0L);
         transaction.mDate = object.optString(JSONDatabase.Transaction.DATE, null);
@@ -357,6 +360,9 @@ import java.util.Map;
         transaction.mUUID = object.optString(JSONDatabase.Transaction.ID, null);
         transaction.mLastEdit = object.optLong(JSONDatabase.Transaction.LAST_EDIT, 0L);
         transaction.mDeleted = object.optBoolean(JSONDatabase.Transaction.DELETED, false);
+        transaction.mDeviceSourceId = object.optString(JSONDatabase.Transaction.DEVICE_SOURCE_ID, Utils.getDeviceID(mContext));
+        transaction.mSyncedSideId = object.optString(JSONDatabase.Transaction.SYNCED_SIDE_ID, null);
+        transaction.mSyncedWithList = object.optString(JSONDatabase.Transaction.SYNCED_DEVICE_LIST, null);
         return transaction;
     }
 

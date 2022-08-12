@@ -42,7 +42,7 @@ public abstract class AbstractDataImporter {
 
     protected void insertTransaction(String wallet, CurrencyUnit currencyUnit, String category,
                                      Date datetime, Long money, int direction, String description,
-                                     String event, String place, String people, String note) {
+                                     String event, String place, String people, String note, String deviceSourceId, String syncedSideId, String syncedWithList) {
         ContentResolver contentResolver = getContext().getContentResolver();
         ContentValues contentValues = new ContentValues();
         // the first step consists in checking if a wallet with the same name and currency already
@@ -71,6 +71,9 @@ public abstract class AbstractDataImporter {
         contentValues.put(Contract.Transaction.TYPE, Contract.TransactionType.STANDARD);
         contentValues.put(Contract.Transaction.CONFIRMED, true);
         contentValues.put(Contract.Transaction.COUNT_IN_TOTAL, true);
+        contentValues.put(Contract.Transaction.DEVICE_SOURCE_ID, deviceSourceId);
+        contentValues.put(Contract.Transaction.SYNC_SIDE_ID, syncedSideId);
+        contentValues.put(Contract.Transaction.SYNCED_WITH_LIST, syncedWithList);
         contentResolver.insert(DataContentProvider.CONTENT_TRANSACTIONS, contentValues);
     }
 
@@ -84,7 +87,7 @@ public abstract class AbstractDataImporter {
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
-                    return cursor.getLong(cursor.getColumnIndex(Contract.Wallet.ID));
+                    return cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.ID));
                 }
             } finally {
                 cursor.close();
@@ -105,7 +108,7 @@ public abstract class AbstractDataImporter {
         return ContentUris.parseId(result);
     }
 
-    private long getOrCreateCategory(ContentResolver contentResolver, String name, int direction) {
+    protected long getOrCreateCategory(ContentResolver contentResolver, String name, int direction) {
         Uri uri = DataContentProvider.CONTENT_CATEGORIES;
         Contract.CategoryType type = direction == Contract.Direction.INCOME ? Contract.CategoryType.INCOME : Contract.CategoryType.EXPENSE;
         String[] projection = new String[]{Contract.Category.ID};
@@ -119,7 +122,7 @@ public abstract class AbstractDataImporter {
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
-                    return cursor.getLong(cursor.getColumnIndex(Contract.Category.ID));
+                    return cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Category.ID));
                 }
             } finally {
                 cursor.close();
@@ -139,7 +142,7 @@ public abstract class AbstractDataImporter {
         return ContentUris.parseId(result);
     }
 
-    private Long getEvent(ContentResolver contentResolver, String name) {
+    protected Long getEvent(ContentResolver contentResolver, String name) {
         if (!TextUtils.isEmpty(name)) {
             Uri uri = DataContentProvider.CONTENT_EVENTS;
             String[] projection = new String[]{Contract.Event.ID};
@@ -150,7 +153,7 @@ public abstract class AbstractDataImporter {
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
-                        return cursor.getLong(cursor.getColumnIndex(Contract.Event.ID));
+                        return cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Event.ID));
                     }
                 } finally {
                     cursor.close();
@@ -160,7 +163,7 @@ public abstract class AbstractDataImporter {
         return null;
     }
 
-    private Long getOrCreatePlace(ContentResolver contentResolver, String name) {
+    protected Long getOrCreatePlace(ContentResolver contentResolver, String name) {
         if (!TextUtils.isEmpty(name)) {
             Uri uri = DataContentProvider.CONTENT_PLACES;
             String[] projection = new String[]{Contract.Place.ID};
@@ -171,7 +174,7 @@ public abstract class AbstractDataImporter {
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
-                        return cursor.getLong(cursor.getColumnIndex(Contract.Place.ID));
+                        return cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Place.ID));
                     }
                 } finally {
                     cursor.close();
@@ -193,7 +196,7 @@ public abstract class AbstractDataImporter {
         return null;
     }
 
-    private String getOrCreatePeople(ContentResolver contentResolver, String people) {
+    protected String getOrCreatePeople(ContentResolver contentResolver, String people) {
         if (!TextUtils.isEmpty(people)) {
             List<Long> peopleIds = new ArrayList<>();
             for (String person : people.split(",")) {
@@ -210,7 +213,7 @@ public abstract class AbstractDataImporter {
                         try {
                             if (cursor.moveToFirst()) {
                                 personFound = true;
-                                peopleIds.add(cursor.getLong(cursor.getColumnIndex(Contract.Person.ID)));
+                                peopleIds.add(cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Person.ID)));
                             }
                         } finally {
                             cursor.close();

@@ -234,6 +234,9 @@ public class Contract {
         public static final String PEOPLE_IDS = "transaction_person_ids";
         public static final String ATTACHMENT_IDS = "transaction_attachment_ids";
         public static final String TAG = Schema.Transaction.TAG;
+        public static final String DEVICE_SOURCE_ID = Schema.Transaction.DEVICE_SOURCE_ID;
+        public static final String SYNC_SIDE_ID = Schema.Transaction.SYNC_SIDE_ID;
+        public static final String SYNCED_WITH_LIST = Schema.Transaction.SYNCED_WITH_LIST;
     }
 
     public static final class Transfer {

@@ -21,6 +21,7 @@ package com.rahul.moneywallet.storage.database.backup;
 
 import android.content.ContentResolver;
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.rahul.moneywallet.storage.database.DataContentProvider;
@@ -40,7 +41,7 @@ public abstract class AbstractBackupImporter {
 
     private static final String TEMP_BACKUP_FILE = "database.bk";
 
-    private final Context mContext;
+    protected final Context mContext;
     private final File mBackupFile;
 
     /*package-local*/ AbstractBackupImporter(Context context, File backupFile) {

@@ -253,6 +253,10 @@ package com.rahul.moneywallet.storage.database.json;
         /*package-local*/ static final String TAG = "tag";
         /*package-local*/ static final String LAST_EDIT = "last_edit";
         /*package-local*/ static final String DELETED = "deleted";
+        /*package-local*/ static final String DEVICE_SOURCE_ID = "device_source_id";
+        /*package-local*/ static final String SYNCED_SIDE_ID = "synced_side_id";
+        /*package-local*/ static final String SYNCED_DEVICE_LIST = "synced_device_list";
+
     }
 
     /*package-local*/ static final class TransactionPeople {

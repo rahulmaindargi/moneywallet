@@ -41,4 +41,8 @@ public class Transaction extends BaseItem {
     public boolean mConfirmed;
     public boolean mCountInTotal;
     public String mTag;
+    public String mDeviceSourceId;
+    public String mSyncedSideId;
+    public String mSyncedWithList;
+
 }

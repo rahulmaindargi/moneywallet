@@ -38,6 +38,8 @@
     <string name="menu_setting">"Settings"</string>
     <string name="menu_refresh_sms_formats">"SMS Formats"</string>
     <string name="menu_refresh_all_sms">"Refresh SMS"</string>
+    <string name="menu_sync_near_by_device_client">"Send Transactions"</string>
+    <string name="menu_sync_near_by_device_server">"Receive Transactions"</string>
     <string name="menu_support_developer">"Support developer"</string>
     <string name="menu_about">"About"</string>
 

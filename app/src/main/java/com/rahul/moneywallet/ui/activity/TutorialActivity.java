@@ -48,7 +48,7 @@ import com.rahul.moneywallet.model.Category;
 import com.rahul.moneywallet.model.ColorIcon;
 import com.rahul.moneywallet.model.Icon;
 import com.rahul.moneywallet.picker.IconPicker;
-import com.rahul.moneywallet.service.syncadapter.RefreshSMSFormatsWorker;
+import com.rahul.moneywallet.service.syncworkers.RefreshSMSFormatsWorker;
 import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.storage.database.DataContentProvider;
 import com.rahul.moneywallet.utils.Utils;
@@ -101,18 +101,7 @@ public class TutorialActivity extends AppIntro2 {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_SMS) != PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_SMS},
-                    2);
-        }
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECEIVE_SMS) != PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECEIVE_SMS},
-                    1);
-        }
+        checkPermissions();
         OneTimeWorkRequest getSmsFormatWorkRequest =
                 new OneTimeWorkRequest.Builder(RefreshSMSFormatsWorker.class)
                         .build();
@@ -131,6 +120,33 @@ public class TutorialActivity extends AppIntro2 {
                 "#4CAF50"));
         showStatusBar(false);
         setColorTransitionsEnabled(true);
+    }
+
+    private void checkPermissions() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_SMS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_SMS},
+                    2);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECEIVE_SMS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECEIVE_SMS},
+                    1);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    3);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.GET_ACCOUNTS) != PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.GET_ACCOUNTS, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    3);
+        }
     }
 
     private void addSlide(@DrawableRes int drawable, @StringRes int title, @StringRes int description, int backgroundColor) {

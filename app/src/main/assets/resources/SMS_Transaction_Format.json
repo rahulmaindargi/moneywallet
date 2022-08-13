@@ -22,6 +22,11 @@
     },
     {
       "sender": "CITIBA",
+      "type": "debit",
+      "regex_Format": "(?i)Rs. [[amount]] spent on card [[account]] on [[date]] at [[to]]. Limit.*"
+    },
+    {
+      "sender": "CITIBA",
       "type": "credit",
       "regex_Format": "(?i)Rs.[[amount]] is credited to your a\/c [[account]] from Citi Account of [[to]] on [[date]] [[time]] \\(Ref no..*"
     },

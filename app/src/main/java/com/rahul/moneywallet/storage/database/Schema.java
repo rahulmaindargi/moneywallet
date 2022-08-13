@@ -457,7 +457,7 @@ package com.rahul.moneywallet.storage.database;
     /*package-local*/ static final String CREATE_TRANSACTION_SYNCED_SIDE_ID_COLUMN = "ALTER TABLE " +
             Transaction.TABLE + " ADD COLUMN " + Transaction.SYNC_SIDE_ID + " TEXT";
     /*package-local*/ static final String CREATE_TRANSACTION_SYNCED_WITH_LIST_COLUMN = "ALTER TABLE " +
-            Transaction.TABLE + " ADD COLUMN " + Transaction.SYNCED_WITH_LIST + " TEXT NOT NULL DEFAULT ";
+            Transaction.TABLE + " ADD COLUMN " + Transaction.SYNCED_WITH_LIST + " TEXT";
 
     /**
      * This class defines the common columns for all SQL tables.

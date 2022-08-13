@@ -82,7 +82,8 @@ public class SMSHandler {
                 Contract.SMSFormat.SENDER,
                 Contract.SMSFormat.REGEX
         };
-        String selection = Contract.SMSFormat.SENDER + " In ( ?, ? )";
+        //String selection = Contract.SMSFormat.SENDER + " In ( ?, ? )";
+        String selection = "? like '%' ||" + Contract.SMSFormat.SENDER + "|| '%' OR ? like '%' ||" + Contract.SMSFormat.SENDER + "|| '%'";
         String[] selectionArgs = new String[]{originatingAddress, dispOriginatingAddress};
         Log.d("SMSHandler", "Searching DB");
         // Set<String> formats=new HashSet<>();

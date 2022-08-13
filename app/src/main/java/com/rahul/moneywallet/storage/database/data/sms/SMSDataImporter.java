@@ -50,7 +50,7 @@ public class SMSDataImporter extends AbstractDataImporter {
         Uri uri = DataContentProvider.CONTENT_WALLETS;
         String[] projection = new String[]{Contract.Wallet.ID};
         String selection =
-                "( " + Contract.Wallet.NOTE + " LIKE '%'+ ?+ '%' OR " + Contract.Wallet.NAME + " = ? ) AND " + Contract.Wallet.CURRENCY +
+                "( " + Contract.Wallet.NOTE + " LIKE '%'|| ?||'%' OR " + Contract.Wallet.NAME + " = ? ) AND " + Contract.Wallet.CURRENCY +
                         " = ?";
         String[] selectionArgs = new String[]{name, name, currencyUnit.getIso()};
         String sortOrder = Contract.Wallet.ID + " DESC";

@@ -1,77 +1,67 @@
 {
   "smsFormat": [
     {
-      "sender": "TM-CITIBA",
+      "sender": "CITIBA",
       "type": "debit",
-      "regex_Format": "(?i)Your [[account]] A\\/c has been debited with INR [[amount]] on [[date]] at [[time]] and account [[to]] has been credited..*"
+      "regex_Format": "(?i)Your [[account]] A\/c has been debited with INR [[amount]] on [[date]] at [[time]] and account [[to]] has been credited..*"
     },
     {
-      "sender": "TM-CITIBA",
+      "sender": "CITIBA",
       "type": "credit",
       "regex_Format": "(?i)Your [[account]] A\/c has been credited with INR [[amount]] on [[date]] at [[time]] received from [[to]]. UPI Ref.*"
     },
     {
-      "sender": "TM-CITIBA",
+      "sender": "CITIBA",
       "type": "credit",
       "regex_Format": "(?i)Your Citibank account [[account]] has been credited with [[to]] of Rs. [[amount]] on [[date]]. .*"
     },
     {
-      "sender": "TM-CITIBA",
+      "sender": "CITIBA",
       "type": "debit",
       "regex_Format": "(?i)Your a\/c no.[[account]] is debited for Rs.[[amount]] on [[date]] and a\/c [[to]] credited.*"
     },
     {
-      "sender": "JM-CITIBA",
+      "sender": "CITIBA",
       "type": "credit",
       "regex_Format": "(?i)Rs.[[amount]] is credited to your a\/c [[account]] from Citi Account of [[to]] on [[date]] [[time]] \\(Ref no..*"
     },
     {
-      "sender": "JD-CITIBA",
+      "sender": "CITIBA",
       "type": "credit",
       "regex_Format": "(?i)Payment of Rs.[[amount]] received for card [[account]] on [[date]]..*"
     },
     {
-      "sender": "TM-CITIBN",
+      "sender": "CITIBN",
       "type": "debit",
       "regex_Format": "(?i)Your Citi A\/c [[account]] is debited for Rs.[[amount]] on [[date]] [[time]] for fund transfer request to [[to]] \\(Ref. No.*"
     },
     {
-      "sender": "JM-ICICIB",
+      "sender": "ICICIB",
       "type": "debit",
       "regex_Format": "(?i)INR [[amount]] spent on ICICI Bank Card [[account]] on [[date]] at [[to]]. Avl Lmt.*"
     },
     {
-      "sender": "JM-ICICIB",
+      "sender": "ICICIB",
       "type": "debit",
       "regex_Format": "(?i)Dear Customer, ICICI Bank Account [[account]] is debited with INR [[amount]] on [[date]]. Info: [[to]]. The Available.*"
     },
     {
-      "sender": "JM-ICICIB",
+      "sender": "ICICIB",
       "type": "debit",
-      "regex_Format": "(?i)ICICI Bank Acct [[account]] debited for Rs [[amount]] on [[date]]; [[to]] credited..*"
+      "regex_Format": "(?i)ICICI Bank Acct [[account]] debited (?:for Rs|with INR) [[amount]] on [[date]][;|\\.] [[to]] credited..*"
     },
     {
-      "sender": "AD-ICICIB",
-      "type": "debit",
-      "regex_Format": "(?i)ICICI Bank Acct [[account]] debited for Rs [[amount]] on [[date]]; [[to]] credited..*"
-    },
-    {
-      "sender": "JD-ICICIB",
-      "type": "debit",
-      "regex_Format": "(?i)ICICI Bank Acct [[account]] debited with INR [[amount]] on [[date]]. [[to]] credited..*"
-    },
-    {
-      "sender": "TM-ICICIB",
+      "sender": "ICICIB",
       "type": "credit",
       "regex_Format": "(?i)Dear Customer, Payment of INR [[amount]] has been received towards your ICICI Bank Credit Card [[account]] on [[date]] through UPI..*"
     },
     {
-      "sender": "VD-ICICIB",
+      "sender": "ICICIB",
       "type": "credit",
       "regex_Format": "(?i)Dear Customer, your ICICI Bank Account [[account]] has been credited with INR [[amount]] on [[date]]. Info:[[to]]. The Available.*"
     },
     {
-      "sender": "VM-ICICIB",
+      "sender": "ICICIB",
       "type": "credit",
       "regex_Format": "(?i)ICICI Bank Account [[account]] is credited with Rs [[amount]] on [[date]] by Account linked to mobile number [[to]]. IMPS Ref.*"
     }

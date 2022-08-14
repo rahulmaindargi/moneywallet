@@ -20,7 +20,9 @@
 package com.rahul.moneywallet.picker;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -28,6 +30,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.rahul.moneywallet.model.Group;
 import com.rahul.moneywallet.model.OverviewSetting;
+import com.rahul.moneywallet.storage.database.Contract;
+import com.rahul.moneywallet.storage.database.DataContentProvider;
 import com.rahul.moneywallet.storage.preference.PreferenceManager;
 import com.rahul.moneywallet.ui.fragment.dialog.OverviewSettingDialog;
 import com.rahul.moneywallet.utils.DateUtils;
@@ -58,7 +62,7 @@ public class OverviewSettingPicker extends Fragment implements OverviewSettingDi
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;
@@ -73,6 +77,24 @@ public class OverviewSettingPicker extends Fragment implements OverviewSettingDi
         if (savedInstanceState != null) {
             mOverviewSetting = savedInstanceState.getParcelable(SS_OVERVIEW_SETTING);
         } else {
+            Calendar firstDate = null;
+            try (Cursor firstTransactionDateC = getContext().getContentResolver().query(DataContentProvider.CONTENT_TRANSACTIONS, new String[]{"DISTINCT " + Contract.Transaction.DATE}, null, null, Contract.Transaction.DATE + " ASC LIMIT 1")) {
+
+                if (firstTransactionDateC != null && firstTransactionDateC.moveToFirst()) {
+                    firstDate = Calendar.getInstance();
+                    Date date = DateUtils.getDateFromSQLDateString(firstTransactionDateC.getString(firstTransactionDateC.getColumnIndexOrThrow(Contract.Transaction.DATE)));
+                    firstDate.setTime(date);
+                }
+            }
+            Calendar lastDate = null;
+            try (Cursor lastTransactionDateC = getContext().getContentResolver().query(DataContentProvider.CONTENT_TRANSACTIONS, new String[]{"DISTINCT " + Contract.Transaction.DATE}, null, null, Contract.Transaction.DATE + " DESC LIMIT 1")) {
+
+                if (lastTransactionDateC != null && lastTransactionDateC.moveToFirst()) {
+                    lastDate = Calendar.getInstance();
+                    Date date = DateUtils.getDateFromSQLDateString(lastTransactionDateC.getString(lastTransactionDateC.getColumnIndexOrThrow(Contract.Transaction.DATE)));
+                    lastDate.setTime(date);
+                }
+            }
             Date startDate;
             Date endDate;
             Calendar calendar = Calendar.getInstance();
@@ -87,8 +109,11 @@ public class OverviewSettingPicker extends Fragment implements OverviewSettingDi
                         calendar.add(Calendar.DAY_OF_MONTH, -7);
                     }
                     calendar.set(Calendar.DAY_OF_WEEK, firstDayOfWeek);
+
                     startDate = calendar.getTime();
                     endDate = DateUtils.addDays(calendar, 6);
+                    startDate = firstDate != null && firstDate.after(calendar) ? firstDate.getTime() : startDate;
+                    endDate = lastDate != null && lastDate.before(calendar) ? lastDate.getTime() : endDate;
                     break;
                 case WEEKLY:
                     // we consider the current month
@@ -100,6 +125,8 @@ public class OverviewSettingPicker extends Fragment implements OverviewSettingDi
                     calendar.set(Calendar.DAY_OF_MONTH, firstDayOfMonth);
                     startDate = calendar.getTime();
                     endDate = DateUtils.addMonthAndDay(calendar, 1, -1);
+                    startDate = firstDate != null && firstDate.after(calendar) ? firstDate.getTime() : startDate;
+                    endDate = lastDate != null && lastDate.before(calendar) ? lastDate.getTime() : endDate;
                     break;
                 case MONTHLY:
                     // we consider the current year
@@ -108,6 +135,9 @@ public class OverviewSettingPicker extends Fragment implements OverviewSettingDi
                     startDate = calendar.getTime();
                     calendar.set(currentYear, Calendar.DECEMBER, 31);
                     endDate = calendar.getTime();
+
+                    startDate = firstDate != null && firstDate.after(calendar) ? firstDate.getTime() : startDate;
+                    endDate = lastDate != null && lastDate.before(calendar) ? lastDate.getTime() : endDate;
                     break;
                 case YEARLY:
                     // we consider the last three years
@@ -116,10 +146,14 @@ public class OverviewSettingPicker extends Fragment implements OverviewSettingDi
                     startDate = calendar.getTime();
                     calendar.set(currentYear, Calendar.DECEMBER, 31);
                     endDate = calendar.getTime();
+                    startDate = firstDate != null && firstDate.after(calendar) ? firstDate.getTime() : startDate;
+                    endDate = lastDate != null && lastDate.before(calendar) ? lastDate.getTime() : endDate;
                     break;
                 default:
                     startDate = calendar.getTime();
                     endDate = calendar.getTime();
+                    startDate = firstDate != null && firstDate.after(calendar) ? firstDate.getTime() : startDate;
+                    endDate = lastDate != null && lastDate.before(calendar) ? lastDate.getTime() : endDate;
                     break;
             }
             mOverviewSetting = new OverviewSetting(startDate, endDate, groupType, OverviewSetting.CashFlow.NET_INCOMES);

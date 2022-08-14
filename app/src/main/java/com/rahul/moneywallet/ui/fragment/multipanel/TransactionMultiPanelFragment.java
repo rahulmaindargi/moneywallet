@@ -26,11 +26,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Group;
@@ -85,7 +87,7 @@ public class TransactionMultiPanelFragment extends MultiPanelCursorListItemFragm
     private BroadcastReceiver mBroadcastReceiver;
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mBroadcastReceiver = PreferenceManager.registerCurrentWalletObserver(context, this);
     }
@@ -113,7 +115,7 @@ public class TransactionMultiPanelFragment extends MultiPanelCursorListItemFragm
     }
 
     @Override
-    protected AbstractCursorAdapter onCreateAdapter() {
+    protected AbstractCursorAdapter<RecyclerView.ViewHolder> onCreateAdapter() {
         return new TransactionCursorAdapter(this);
     }
 
@@ -221,7 +223,7 @@ public class TransactionMultiPanelFragment extends MultiPanelCursorListItemFragm
         @Override
         public Cursor loadInBackground() {
             Cursor cursor = super.loadInBackground();
-            return new TransactionHeaderCursor(cursor, mGroup, mStartDate, mEndDate);
+            return new TransactionHeaderCursor(cursor, mGroup, mStartDate, mEndDate, true);
         }
     }
 }

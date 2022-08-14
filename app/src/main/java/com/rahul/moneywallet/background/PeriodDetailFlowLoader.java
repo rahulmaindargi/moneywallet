@@ -70,14 +70,22 @@ public class PeriodDetailFlowLoader extends AbstractGenericLoader<PeriodDetailFl
     private final Date mEndDate;
     private final boolean mIncomes;
 
-    public PeriodDetailFlowLoader(Context context, Date startDate, Date endDate, boolean incomes) {
+    public long getSelectedCategory() {
+        return mSelectedCategory;
+    }
+
+    private final long mSelectedCategory;
+
+    public PeriodDetailFlowLoader(Context context, Date startDate, Date endDate, boolean incomes, long selectedCategory) {
         super(context);
         mStartDate = startDate;
         mEndDate = endDate;
         mIncomes = incomes;
+        mSelectedCategory = selectedCategory;
     }
 
-    @Override @SuppressLint("UseSparseArrays")
+    @Override
+    @SuppressLint("UseSparseArrays")
     public PeriodDetailFlowData loadInBackground() {
         Money totalMoney = new Money();
         Map<CurrencyUnit, PieData> pieDataSets = new HashMap<>();
@@ -85,22 +93,27 @@ public class PeriodDetailFlowLoader extends AbstractGenericLoader<PeriodDetailFl
         // load from content resolver
         Map<Long, Category> categoryCache = loadCategoryCache();
         Uri uri = DataContentProvider.CONTENT_TRANSACTIONS;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Contract.Transaction.CATEGORY_ID,
                 Contract.Transaction.CATEGORY_PARENT_ID,
                 Contract.Transaction.MONEY,
                 Contract.Transaction.WALLET_CURRENCY
         };
         String selection;
-        String[] selectionArgs;
+        List<String> selectionArgs = new ArrayList<>();
         long currentWallet = PreferenceManager.getCurrentWallet();
+
         if (currentWallet == PreferenceManager.TOTAL_WALLET_ID) {
-            selection = Contract.Transaction.WALLET_COUNT_IN_TOTAL + " = 1";
-            selectionArgs = null;
+            selection = Contract.Transaction.WALLET_COUNT_IN_TOTAL + " = ?";
+            selectionArgs.add(String.valueOf(1));
+            //selectionArgs = null;
         } else {
             selection = Contract.Transaction.WALLET_ID + " = ?";
-            selectionArgs = new String[] {String.valueOf(currentWallet)};
+            selectionArgs.add(String.valueOf(currentWallet));
+            //selectionArgs = new String[] {String.valueOf(currentWallet)};
         }
+
+        selection += " AND " + Contract.Transaction.CATEGORY_SHOW_REPORT + " = '1'";
         selection += " AND " + Contract.Transaction.CONFIRMED + " = '1' AND " + Contract.Transaction.COUNT_IN_TOTAL + " = '1'";
         selection += " AND DATETIME(" + Contract.Transaction.DATE + ") <= DATETIME('now', 'localtime')";
         selection += " AND " + Contract.Transaction.DIRECTION + " = " + (mIncomes ? Contract.Direction.INCOME : Contract.Direction.EXPENSE);
@@ -110,13 +123,19 @@ public class PeriodDetailFlowLoader extends AbstractGenericLoader<PeriodDetailFl
         if (mEndDate != null) {
             selection += " AND DATETIME(" + Contract.Transaction.DATE + ") <= DATETIME('" + DateUtils.getSQLDateTimeString(mEndDate) + "')";
         }
+        if (mSelectedCategory != -1) {
+            selection += " AND (" + Contract.Transaction.CATEGORY_PARENT_ID + " = ? OR " + Contract.Transaction.CATEGORY_ID + " = ? )";
+            selectionArgs.add(String.valueOf(mSelectedCategory));
+            selectionArgs.add(String.valueOf(mSelectedCategory));
+        }
         String sortOrder = Contract.Transaction.CATEGORY_ID;
-        Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+
+        Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, selectionArgs.toArray(new String[0]), sortOrder);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
                     long categoryId;
-                    if (cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_PARENT_ID))) {
+                    if (mSelectedCategory != -1 || cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_PARENT_ID))) {
                         categoryId = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_ID));
                     } else {
                         categoryId = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_PARENT_ID));
@@ -197,7 +216,7 @@ public class PeriodDetailFlowLoader extends AbstractGenericLoader<PeriodDetailFl
     private Map<Long, Category> loadCategoryCache() {
         Map<Long, Category> cache = new HashMap<>();
         Uri uri = DataContentProvider.CONTENT_CATEGORIES;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Contract.Category.ID,
                 Contract.Category.NAME,
                 Contract.Category.ICON,
@@ -205,6 +224,9 @@ public class PeriodDetailFlowLoader extends AbstractGenericLoader<PeriodDetailFl
         };
         String selection = Contract.Category.PARENT + " IS NULL AND " +
                 Contract.Category.SHOW_REPORT + " = '1'";
+        if (mSelectedCategory != -1) {
+            selection = Contract.Category.SHOW_REPORT + " = '1'";
+        }
         Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {

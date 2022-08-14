@@ -19,11 +19,13 @@
 
 package com.rahul.moneywallet.ui.adapter.recycler;
 
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.OverviewData;
@@ -47,6 +49,7 @@ public class OverviewItemAdapter extends RecyclerView.Adapter<OverviewItemAdapte
         mMoneyFormatter = MoneyFormatter.getInstance();
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_overview_item, parent, false));
@@ -86,7 +89,7 @@ public class OverviewItemAdapter extends RecyclerView.Adapter<OverviewItemAdapte
         @Override
         public void onClick(View v) {
             if (mController != null) {
-                int index = getAdapterPosition();
+                int index = getBindingAdapterPosition();
                 if (mData != null) {
                     PeriodMoney periodMoney = mData.getPeriodMoney(index);
                     mController.onPeriodClick(periodMoney);

@@ -19,12 +19,14 @@
 
 package com.rahul.moneywallet.ui.adapter.recycler;
 
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.CategoryMoney;
@@ -49,6 +51,7 @@ public class PeriodDetailFlowAdapter extends RecyclerView.Adapter<PeriodDetailFl
         mMoneyFormatter = MoneyFormatter.getInstance();
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_category_money_item, parent, false));
@@ -78,9 +81,9 @@ public class PeriodDetailFlowAdapter extends RecyclerView.Adapter<PeriodDetailFl
 
     /*package-local*/ class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private ImageView mIconImageView;
-        private TextView mNameTextView;
-        private TextView mMoneyTextView;
+        private final ImageView mIconImageView;
+        private final TextView mNameTextView;
+        private final TextView mMoneyTextView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -93,10 +96,11 @@ public class PeriodDetailFlowAdapter extends RecyclerView.Adapter<PeriodDetailFl
         @Override
         public void onClick(View v) {
             if (mController != null) {
-                int index = getAdapterPosition();
+
+                int index = getBindingAdapterPosition();
                 if (mData != null) {
                     CategoryMoney category = mData.getCategory(index);
-                    mController.onCategoryClick(category.getId());
+                    mController.onCategoryClick(category.getId(), category.getName());
                 }
             }
         }
@@ -104,6 +108,6 @@ public class PeriodDetailFlowAdapter extends RecyclerView.Adapter<PeriodDetailFl
 
     public interface Controller {
 
-        void onCategoryClick(long id);
+        void onCategoryClick(long id, String name);
     }
 }

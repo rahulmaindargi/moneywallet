@@ -23,18 +23,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
-import androidx.viewpager.widget.ViewPager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import androidx.viewpager.widget.ViewPager;
 
 import com.itsronald.widget.ViewPagerIndicator;
 import com.rahul.moneywallet.R;
@@ -49,11 +51,12 @@ import com.rahul.moneywallet.ui.adapter.recycler.PeriodDetailFlowAdapter;
 import com.rahul.moneywallet.utils.MoneyFormatter;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Created by andrea on 01/05/18.
  */
-public class PeriodDetailFlowFragment extends Fragment implements PeriodDetailFlowAdapter.Controller, LoaderManager.LoaderCallbacks<PeriodDetailFlowData>,CurrentWalletController {
+public class PeriodDetailFlowFragment extends Fragment implements PeriodDetailFlowAdapter.Controller, LoaderManager.LoaderCallbacks<PeriodDetailFlowData>, CurrentWalletController {
 
     private static final int LOADER_FRAGMENT_DATA = 3648;
 
@@ -61,11 +64,15 @@ public class PeriodDetailFlowFragment extends Fragment implements PeriodDetailFl
     private static final String ARG_END_DATE = "PeriodDetailFlowFragment::Arguments::EndDate";
     private static final String ARG_INCOMES = "PeriodDetailFlowFragment::Arguments::Incomes";
 
+    private static final String ARG_SELECTED_CATEGORY = "PeriodDetailFlowFragment::Arguments::SelectedCategory";
+
+
     public static PeriodDetailFlowFragment newInstance(Date start, Date end, boolean incomes) {
         Bundle arguments = new Bundle();
         arguments.putSerializable(ARG_START_DATE, start);
         arguments.putSerializable(ARG_END_DATE, end);
         arguments.putBoolean(ARG_INCOMES, incomes);
+
         PeriodDetailFlowFragment fragment = new PeriodDetailFlowFragment();
         fragment.setArguments(arguments);
         return fragment;
@@ -83,12 +90,13 @@ public class PeriodDetailFlowFragment extends Fragment implements PeriodDetailFl
     private Date mEndDate;
     private boolean mIncomes;
 
-    private MoneyFormatter mMoneyFormatter = MoneyFormatter.getInstance();
+
+    private final MoneyFormatter mMoneyFormatter = MoneyFormatter.getInstance();
 
     private BroadcastReceiver mBroadcastReceiver;
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mBroadcastReceiver = PreferenceManager.registerCurrentWalletObserver(context, this);
     }
@@ -130,11 +138,22 @@ public class PeriodDetailFlowFragment extends Fragment implements PeriodDetailFl
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         mHeaderLeftTextView.setText(mIncomes ? R.string.hint_incomes : R.string.hint_expenses);
-        getLoaderManager().restartLoader(LOADER_FRAGMENT_DATA, null, this);
+        LoaderManager.getInstance(this).restartLoader(LOADER_FRAGMENT_DATA, null, this);
     }
 
     @Override
-    public void onCategoryClick(long id) {
+    public void onCategoryClick(long id, String name) {
+        Loader<?> objectLoader = Objects.requireNonNull(LoaderManager.getInstance(this).getLoader(LOADER_FRAGMENT_DATA));
+        long selectedCategory = ((PeriodDetailFlowLoader) objectLoader).getSelectedCategory();
+        Log.d("PeriodDetailFlowFragment", "selectedCategory : " + selectedCategory);
+        if (!mIncomes && selectedCategory == -1) {
+            Bundle bundle = new Bundle();
+            bundle.putLong(ARG_SELECTED_CATEGORY, id);
+            mHeaderLeftTextView.setText(name);
+            LoaderManager.getInstance(this).restartLoader(LOADER_FRAGMENT_DATA, bundle, this);
+            return;
+        }
+
         Intent intent = new Intent(getActivity(), TransactionListActivity.class);
         intent.putExtra(TransactionListActivity.CATEGORY_ID, id);
         intent.putExtra(TransactionListActivity.START_DATE, mStartDate);
@@ -142,13 +161,18 @@ public class PeriodDetailFlowFragment extends Fragment implements PeriodDetailFl
         startActivity(intent);
     }
 
+    @NonNull
     @Override
     public Loader<PeriodDetailFlowData> onCreateLoader(int id, Bundle args) {
-        return new PeriodDetailFlowLoader(getActivity(), mStartDate, mEndDate, mIncomes);
+        long selectedCategory = -1;
+        if (args != null && args.containsKey(ARG_SELECTED_CATEGORY)) {
+            selectedCategory = args.getLong(ARG_SELECTED_CATEGORY);
+        }
+        return new PeriodDetailFlowLoader(getActivity(), mStartDate, mEndDate, mIncomes, selectedCategory);
     }
 
     @Override
-    public void onLoadFinished(Loader<PeriodDetailFlowData> loader, PeriodDetailFlowData data) {
+    public void onLoadFinished(@NonNull Loader<PeriodDetailFlowData> loader, PeriodDetailFlowData data) {
         if (data != null) {
             if (mIncomes) {
                 mMoneyFormatter.applyTintedIncome(mHeaderRightTextView, data.getTotalMoney());
@@ -169,12 +193,12 @@ public class PeriodDetailFlowFragment extends Fragment implements PeriodDetailFl
     }
 
     @Override
-    public void onLoaderReset(Loader<PeriodDetailFlowData> loader) {
+    public void onLoaderReset(@NonNull Loader<PeriodDetailFlowData> loader) {
         // nothing to release
     }
 
     @Override
     public void onCurrentWalletChanged(long walletId) {
-        getLoaderManager().restartLoader(LOADER_FRAGMENT_DATA, null, this);
+        LoaderManager.getInstance(this).restartLoader(LOADER_FRAGMENT_DATA, null, this);
     }
 }

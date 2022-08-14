@@ -19,22 +19,21 @@
 
 package com.rahul.moneywallet.ui.adapter.pager;
 
-import androidx.annotation.NonNull;
-import androidx.viewpager.widget.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.viewpager.widget.PagerAdapter;
+
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.RadarChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.RadarData;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.OverviewData;
 
@@ -63,6 +62,7 @@ public class OverviewChartViewPagerAdapter extends PagerAdapter {
                 barChart.setDrawBarShadow(false);
                 barChart.setDrawGridBackground(false);
                 barChart.setDrawMarkers(true);
+
                 if (mOverviewData != null) {
                     BarData barData = mOverviewData.getBarData();
                     barChart.setData(barData);
@@ -77,14 +77,7 @@ public class OverviewChartViewPagerAdapter extends PagerAdapter {
                             xAxis.setAxisMinimum(-1f);
                         }
                         xAxis.setAxisMaximum(mOverviewData.getPeriodCount());
-                        xAxis.setValueFormatter(new IAxisValueFormatter() {
-
-                            @Override
-                            public String getFormattedValue(float value, AxisBase axis) {
-                                return String.valueOf((int) value + 1);
-                            }
-
-                        });
+                        xAxis.setValueFormatter((value, axis) -> String.valueOf((int) value + 1));
                         YAxis leftAxis = barChart.getAxisLeft();
                         leftAxis.setSpaceTop(35f);
                         barChart.getAxisRight().setEnabled(false);
@@ -106,14 +99,7 @@ public class OverviewChartViewPagerAdapter extends PagerAdapter {
                         xAxis.setGranularity(1f);
                         xAxis.setAxisMinimum(-1f);
                         xAxis.setAxisMaximum(mOverviewData.getPeriodCount());
-                        xAxis.setValueFormatter(new IAxisValueFormatter() {
-
-                            @Override
-                            public String getFormattedValue(float value, AxisBase axis) {
-                                return String.valueOf((int) value + 1);
-                            }
-
-                        });
+                        xAxis.setValueFormatter((value, axis) -> String.valueOf((int) value + 1));
                         YAxis leftAxis = lineChart.getAxisLeft();
                         leftAxis.setSpaceTop(35f);
                         lineChart.getAxisRight().setEnabled(false);

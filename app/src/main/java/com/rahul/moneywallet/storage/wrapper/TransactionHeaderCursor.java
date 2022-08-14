@@ -51,12 +51,14 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
     private final Group mGroup;
     private final Date mLowerBound;
     private final Date mUpperBound;
+    private final boolean mNeglectCategoryShowReport;
 
-    public TransactionHeaderCursor(Cursor cursor, Group group, Date lowerBound, Date upperBound) {
+    public TransactionHeaderCursor(Cursor cursor, Group group, Date lowerBound, Date upperBound, boolean neglectCategoryShowReport) {
         super(cursor);
         mGroup = group;
         mLowerBound = lowerBound;
         mUpperBound = upperBound;
+        mNeglectCategoryShowReport = neglectCategoryShowReport;
         generateHeaders(cursor);
     }
 
@@ -68,6 +70,7 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
         int indexCurrency = cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_CURRENCY);
         int indexTransactionConfirmed = cursor.getColumnIndexOrThrow(Contract.Transaction.CONFIRMED);
         int indexTransactionCountInTotal = cursor.getColumnIndexOrThrow(Contract.Transaction.COUNT_IN_TOTAL);
+        int indexCategoryShowReport = cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_SHOW_REPORT);
         if (cursor.moveToFirst()) {
             Header header = null;
             do {
@@ -83,7 +86,7 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
                     }
                 }
                 addItem(cursor.getPosition());
-                if (cursor.getInt(indexTransactionConfirmed) == 1 && cursor.getInt(indexTransactionCountInTotal) == 1) {
+                if (cursor.getInt(indexTransactionConfirmed) == 1 && cursor.getInt(indexTransactionCountInTotal) == 1 && (mNeglectCategoryShowReport || cursor.getInt(indexCategoryShowReport) == 1)) {
                     String currency = cursor.getString(indexCurrency);
                     long money = cursor.getLong(indexTransactionMoney);
                     int direction = cursor.getInt(indexTransactionDirection);

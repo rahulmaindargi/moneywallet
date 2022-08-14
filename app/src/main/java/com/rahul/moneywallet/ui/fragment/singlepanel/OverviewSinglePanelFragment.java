@@ -23,18 +23,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.annotation.MenuRes;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
-import androidx.viewpager.widget.ViewPager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import androidx.viewpager.widget.ViewPager;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.background.OverviewDataLoader;
@@ -66,7 +67,7 @@ public class OverviewSinglePanelFragment extends SinglePanelFragment implements 
     private BroadcastReceiver mBroadcastReceiver;
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mBroadcastReceiver = PreferenceManager.registerCurrentWalletObserver(context, this);
     }
@@ -119,7 +120,7 @@ public class OverviewSinglePanelFragment extends SinglePanelFragment implements 
 
     @Override
     public void onOverviewSettingChanged(String tag, OverviewSetting overviewSetting) {
-        getLoaderManager().restartLoader(LOADER_OVERVIEW_DATA, null, this);
+        LoaderManager.getInstance(this).restartLoader(LOADER_OVERVIEW_DATA, null, this);
     }
 
     @NonNull
@@ -150,6 +151,6 @@ public class OverviewSinglePanelFragment extends SinglePanelFragment implements 
 
     @Override
     public void onCurrentWalletChanged(long walletId) {
-        getLoaderManager().restartLoader(LOADER_OVERVIEW_DATA, null, this);
+        LoaderManager.getInstance(this).restartLoader(LOADER_OVERVIEW_DATA, null, this);
     }
 }

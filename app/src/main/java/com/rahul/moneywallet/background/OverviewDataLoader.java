@@ -51,13 +51,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by andrea on 17/08/18.
  */
 public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
 
-    private final static int[] COLOR_PALETTE = new int[] {
+    private final static int[] COLOR_PALETTE = new int[]{
             Color.parseColor("#D32F2F"),
             Color.parseColor("#FF5722"),
             Color.parseColor("#FDD835"),
@@ -78,7 +80,7 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
         Money totalNetIncomes = new Money();
         List<PeriodMoney> periodMoneyList = new ArrayList<>();
         Uri uri = DataContentProvider.CONTENT_TRANSACTIONS;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 Contract.Transaction.DATE,
                 Contract.Transaction.DIRECTION,
                 Contract.Transaction.WALLET_CURRENCY,
@@ -92,7 +94,7 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
             selectionArgs = null;
         } else {
             selection = Contract.Transaction.WALLET_ID + " = ?";
-            selectionArgs = new String[] {String.valueOf(currentWallet)};
+            selectionArgs = new String[]{String.valueOf(currentWallet)};
         }
         selection += " AND " + Contract.Transaction.CONFIRMED + " = '1' AND " + Contract.Transaction.COUNT_IN_TOTAL + " = '1'";
         selection += " AND " + Contract.Transaction.CATEGORY_SHOW_REPORT + " = '1'";
@@ -154,9 +156,18 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
         for (String currency : totalNetIncomes.getCurrencies()) {
             // for each currency we have to iterate the list of period money and generate
             // a valid chart data set for each chart types.
-            List<BarEntry> barEntryList = new ArrayList<>();
-            List<Entry> lineEntryList = new ArrayList<>();
-            List<RadarEntry> radarEntryList = new ArrayList<>();
+            List<BarEntry> totalBarEntryList = new ArrayList<>();
+            List<Entry> totalLineEntryList = new ArrayList<>();
+            List<RadarEntry> totalRadarEntryList = new ArrayList<>();
+
+            List<BarEntry> expenseBarEntryList = new ArrayList<>();
+            List<Entry> expenseLineEntryList = new ArrayList<>();
+            List<RadarEntry> expenseRadarEntryList = new ArrayList<>();
+
+            List<BarEntry> incomeBarEntryList = new ArrayList<>();
+            List<Entry> incomeLineEntryList = new ArrayList<>();
+            List<RadarEntry> incomeRadarEntryList = new ArrayList<>();
+            float totalExpense = 0;
             // iterate period money items
             CurrencyUnit currencyUnit = CurrencyManager.getCurrency(currency);
             double divider = Math.pow(10, currencyUnit.getDecimals());
@@ -164,23 +175,79 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
                 PeriodMoney periodMoney = periodMoneyList.get(i);
                 long money = periodMoney.getNetIncomes().getMoney(currency);
                 float value = (float) ((double) money / divider);
-                barEntryList.add(new BarEntry(i, value));
-                lineEntryList.add(new Entry(i, value));
-                radarEntryList.add(new RadarEntry(value));
+                totalBarEntryList.add(new BarEntry(i, value));
+                totalLineEntryList.add(new Entry(i, value));
+                totalRadarEntryList.add(new RadarEntry(value));
+
+                long expense = periodMoney.getExpenses().getMoney(currency);
+                float valueExpense = (float) ((double) expense / divider);
+                expenseBarEntryList.add(new BarEntry(i, valueExpense));
+                expenseLineEntryList.add(new Entry(i, valueExpense));
+                expenseRadarEntryList.add(new RadarEntry(valueExpense));
+                totalExpense += valueExpense;
+
+                long income = periodMoney.getIncomes().getMoney(currency);
+                float valueIncome = (float) ((double) income / divider);
+                incomeBarEntryList.add(new BarEntry(i, valueIncome));
+                incomeLineEntryList.add(new Entry(i, valueIncome));
+                incomeRadarEntryList.add(new RadarEntry(valueIncome));
             }
             // generate one data set for each chart
-            BarDataSet barDataSet = new BarDataSet(barEntryList, currency);
+            BarDataSet barDataSet = new BarDataSet(totalBarEntryList, "Savings " + currency);
+            barDataSet.setColor(COLOR_PALETTE[barDataSets.size() % COLOR_PALETTE.length]);
+            //barDataSets.add(barDataSet); // DO not need total bar
+            barDataSet = new BarDataSet(expenseBarEntryList, "Expense " + currency);
             barDataSet.setColor(COLOR_PALETTE[barDataSets.size() % COLOR_PALETTE.length]);
             barDataSets.add(barDataSet);
-            LineDataSet lineDataSet = new LineDataSet(lineEntryList, currency);
-            lineDataSet.setColor(COLOR_PALETTE[barDataSets.size() % COLOR_PALETTE.length]);
-            lineDataSet.setCircleColor(COLOR_PALETTE[barDataSets.size() % COLOR_PALETTE.length]);
+            barDataSet = new BarDataSet(incomeBarEntryList, "Income " + currency);
+            barDataSet.setColor(COLOR_PALETTE[barDataSets.size() % COLOR_PALETTE.length]);
+            //barDataSets.add(barDataSet); //do not need income bar
+
+            LineDataSet lineDataSet = new LineDataSet(totalLineEntryList, "Savings " + currency);
+            lineDataSet.setColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet.setCircleColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
             lineDataSet.setCircleRadius(0.3f);
             lineDataSet.setLineWidth(1f);
             lineDataSets.add(lineDataSet);
-            RadarDataSet radarDataSet = new RadarDataSet(radarEntryList, currency);
-            radarDataSet.setColor(COLOR_PALETTE[barDataSets.size() % COLOR_PALETTE.length]);
-            radarDataSet.setFillColor(COLOR_PALETTE[barDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet = new LineDataSet(expenseLineEntryList, "Expense " + currency);
+            lineDataSet.setColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet.setCircleColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet.setCircleRadius(0.3f);
+            lineDataSet.setLineWidth(1f);
+            lineDataSets.add(lineDataSet);
+
+            float avgExpense = totalExpense / expenseLineEntryList.size();
+            List<Entry> avgLine = IntStream.range(0, expenseLineEntryList.size())
+                    .mapToObj(i -> new Entry(i, avgExpense))
+                    .collect(Collectors.toList());
+            lineDataSet = new LineDataSet(avgLine, "Average " + currency);
+            lineDataSet.setColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet.setCircleColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet.setCircleRadius(0.3f);
+            lineDataSet.setLineWidth(1f);
+            lineDataSets.add(lineDataSet);
+
+
+            lineDataSet = new LineDataSet(incomeLineEntryList, "Income " + currency);
+            lineDataSet.setColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet.setCircleColor(COLOR_PALETTE[lineDataSets.size() % COLOR_PALETTE.length]);
+            lineDataSet.setCircleRadius(0.3f);
+            lineDataSet.setLineWidth(1f);
+            // lineDataSets.add(lineDataSet); // Do not need Income line
+
+            RadarDataSet radarDataSet = new RadarDataSet(totalRadarEntryList, "Total " + currency);
+            radarDataSet.setColor(COLOR_PALETTE[radarDataSets.size() % COLOR_PALETTE.length]);
+            radarDataSet.setFillColor(COLOR_PALETTE[radarDataSets.size() % COLOR_PALETTE.length]);
+            radarDataSet.setDrawFilled(true);
+            radarDataSets.add(radarDataSet);
+            radarDataSet = new RadarDataSet(expenseRadarEntryList, "Expense " + currency);
+            radarDataSet.setColor(COLOR_PALETTE[radarDataSets.size() % COLOR_PALETTE.length]);
+            radarDataSet.setFillColor(COLOR_PALETTE[radarDataSets.size() % COLOR_PALETTE.length]);
+            radarDataSet.setDrawFilled(true);
+            radarDataSets.add(radarDataSet);
+            radarDataSet = new RadarDataSet(incomeRadarEntryList, "Income " + currency);
+            radarDataSet.setColor(COLOR_PALETTE[radarDataSets.size() % COLOR_PALETTE.length]);
+            radarDataSet.setFillColor(COLOR_PALETTE[radarDataSets.size() % COLOR_PALETTE.length]);
             radarDataSet.setDrawFilled(true);
             radarDataSets.add(radarDataSet);
         }
@@ -218,6 +285,7 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
 
     /**
      * This method is used to determine if another period must be added to the period list.
+     *
      * @param periodMoney is the last period analyzed.
      * @return true if the end date has not already been reached.
      */

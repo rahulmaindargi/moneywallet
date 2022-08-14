@@ -7,9 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.CallSuper;
-import androidx.annotation.MenuRes;
-import androidx.annotation.NonNull;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -17,6 +14,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -154,10 +155,10 @@ public class NewEditCurrencyActivity extends SinglePanelScrollActivity {
             Cursor cursor = getContentResolver().query(uri, projections, null, null, null);
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
-                    mNameEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Currency.NAME)));
-                    mISOEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Currency.ISO)));
-                    mSymbolEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Currency.SYMBOL)));
-                    mDecimalsEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Currency.DECIMALS)));
+                    mNameEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Currency.NAME)));
+                    mISOEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Currency.ISO)));
+                    mSymbolEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Currency.SYMBOL)));
+                    mDecimalsEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Currency.DECIMALS)));
                 }
                 cursor.close();
             }

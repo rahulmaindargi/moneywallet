@@ -26,12 +26,13 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Category;
@@ -335,18 +336,18 @@ public class NewEditBudgetActivity extends NewEditItemActivity implements MoneyP
                 Cursor cursor = contentResolver.query(uri, projection, null, null, null);
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
-                        type = Contract.BudgetType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Budget.TYPE)));
+                        type = Contract.BudgetType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Budget.TYPE)));
                         if (type == Contract.BudgetType.CATEGORY) {
                             category = new Category(
-                                    cursor.getLong(cursor.getColumnIndex(Contract.Budget.CATEGORY_ID)),
-                                    cursor.getString(cursor.getColumnIndex(Contract.Budget.CATEGORY_NAME)),
-                                    IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Budget.CATEGORY_ICON))),
-                                    Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Budget.CATEGORY_TYPE)))
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_ID)),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_NAME)),
+                                    IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_ICON))),
+                                    Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_TYPE)))
                             );
                         }
-                        money = cursor.getLong(cursor.getColumnIndex(Contract.Budget.MONEY));
-                        startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Budget.START_DATE)));
-                        endDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Budget.END_DATE)));
+                        money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Budget.MONEY));
+                        startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.START_DATE)));
+                        endDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.END_DATE)));
                     }
                     cursor.close();
                 }
@@ -367,11 +368,11 @@ public class NewEditBudgetActivity extends NewEditItemActivity implements MoneyP
                         wallets = new Wallet[cursor.getCount()];
                         for (int i = 0; cursor.moveToPosition(i) && i < cursor.getCount(); i++) {
                             wallets[i] = new Wallet(
-                                    cursor.getLong(cursor.getColumnIndex(Contract.Wallet.ID)),
-                                    cursor.getString(cursor.getColumnIndex(Contract.Wallet.NAME)),
-                                    IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Wallet.ICON))),
-                                    CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Wallet.CURRENCY))),
-                                    cursor.getLong(cursor.getColumnIndex(Contract.Wallet.START_MONEY)), 0);
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.ID)),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NAME)),
+                                    IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.ICON))),
+                                    CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY))),
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY)), 0);
                         }
                     }
                     cursor.close();
@@ -402,12 +403,12 @@ public class NewEditBudgetActivity extends NewEditItemActivity implements MoneyP
                     if (cursor.moveToFirst()) {
                         wallets = new Wallet[] {
                                 new Wallet(
-                                        cursor.getLong(cursor.getColumnIndex(Contract.Wallet.ID)),
-                                        cursor.getString(cursor.getColumnIndex(Contract.Wallet.NAME)),
-                                        IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Wallet.ICON))),
-                                        CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Wallet.CURRENCY))),
-                                        cursor.getLong(cursor.getColumnIndex(Contract.Wallet.START_MONEY)),
-                                        cursor.getLong(cursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY))
+                                        cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.ID)),
+                                        cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NAME)),
+                                        IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.ICON))),
+                                        CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY))),
+                                        cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY)),
+                                        cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY))
                                 )
                         };
                     }

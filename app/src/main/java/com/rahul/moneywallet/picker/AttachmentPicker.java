@@ -30,15 +30,17 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.webkit.MimeTypeMap;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import android.webkit.MimeTypeMap;
 
 import com.rahul.moneywallet.broadcast.LocalAction;
 import com.rahul.moneywallet.model.Attachment;
@@ -64,7 +66,8 @@ public class AttachmentPicker extends Fragment {
     private static final String ARG_OLD_ATTACHMENT_LIST = "AttachmentPicker::Arguments::OldAttachmentList";
 
     private static final String ALL_FILES = "*/*";
-    private static final int REQUEST_CODE_FILE_PICKER = 36347;
+
+    private ActivityResultLauncher<Intent> codeFilePicker;
 
     public static AttachmentPicker createPicker(FragmentManager fragmentManager, String tag, ArrayList<Attachment> attachments) {
         AttachmentPicker picker = (AttachmentPicker) fragmentManager.findFragmentByTag(tag);
@@ -90,7 +93,7 @@ public class AttachmentPicker extends Fragment {
     private ArrayList<Attachment> mNewAttachments;
     private ArrayList<Attachment> mDeletedAttachments;
 
-    private Queue<Uri> mQueuedUris = new ArrayDeque<>();
+    private final Queue<Uri> mQueuedUris = new ArrayDeque<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -116,6 +119,29 @@ public class AttachmentPicker extends Fragment {
             mNewAttachments = new ArrayList<>();
             mDeletedAttachments = new ArrayList<>();
         }
+        codeFilePicker = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        ClipData clipData = data.getClipData();
+                        if (clipData != null) {
+                            for (int i = 0; i < clipData.getItemCount(); i++) {
+                                ClipData.Item item = clipData.getItemAt(i);
+                                Uri uri = item.getUri();
+                                if (uri != null) {
+                                    onFileSelected(uri);
+                                }
+                            }
+                            return;
+                        }
+                        Uri uri = data.getData();
+                        if (uri != null) {
+                            onFileSelected(uri);
+                        }
+                    }
+                }
+        );
     }
 
     @Override
@@ -133,7 +159,7 @@ public class AttachmentPicker extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;
@@ -172,10 +198,9 @@ public class AttachmentPicker extends Fragment {
     public void showPicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType(ALL_FILES);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        }
-        startActivityForResult(intent, REQUEST_CODE_FILE_PICKER);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        codeFilePicker.launch(intent);
+
     }
 
     public void cleanUp(boolean rollback) {
@@ -197,33 +222,6 @@ public class AttachmentPicker extends Fragment {
         return attachments;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_FILE_PICKER) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                    ClipData clipData = data.getClipData();
-                    if (clipData != null) {
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            ClipData.Item item = clipData.getItemAt(i);
-                            Uri uri = item.getUri();
-                            if (uri != null) {
-                                onFileSelected(uri);
-                            }
-                        }
-                        return;
-                    }
-                }
-                Uri uri = data.getData();
-                if (uri != null) {
-                    onFileSelected(uri);
-                }
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
     public void addFileFromUri(@NonNull Uri uri) {
         mQueuedUris.add(uri);
     }
@@ -240,9 +238,9 @@ public class AttachmentPicker extends Fragment {
                     if (cursor.moveToFirst()) {
                         attachment = new Attachment(
                                 0L, Attachment.generateFileUID(),
-                                cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME)),
                                 contentResolver.getType(uri),
-                                cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE)),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE)),
                                 Attachment.Status.PENDING
                         );
                     }
@@ -336,7 +334,7 @@ public class AttachmentPicker extends Fragment {
         void onAttachmentListChanged(List<Attachment> attachments);
     }
 
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {

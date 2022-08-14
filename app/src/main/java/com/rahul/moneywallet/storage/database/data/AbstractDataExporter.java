@@ -2,6 +2,7 @@ package com.rahul.moneywallet.storage.database.data;
 
 import android.content.Context;
 import android.database.Cursor;
+
 import androidx.collection.LongSparseArray;
 
 import com.rahul.moneywallet.model.Wallet;
@@ -44,8 +45,8 @@ public abstract class AbstractDataExporter {
 
     public void cachePeople(Cursor cursor) {
         while (cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndex(Contract.Person.ID));
-            String name = cursor.getString(cursor.getColumnIndex(Contract.Person.NAME));
+            long id = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Person.ID));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.NAME));
             mPeopleCache.put(id, name);
         }
     }

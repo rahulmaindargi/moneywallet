@@ -19,15 +19,19 @@
 
 package com.rahul.moneywallet.storage.database;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
 import android.app.Instrumentation;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.test.RenamingDelegatingContext;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
 
+import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.rahul.moneywallet.R;
@@ -42,9 +46,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 
 /**
  * Created by andrea on 28/08/18.
@@ -61,9 +62,7 @@ public class SQLDatabaseTest {
         Context baseContext = instrumentation.getTargetContext();
         mContext = new RenamingDelegatingContext(baseContext, "test.");
         // load existing databases and files if found
-        if (mContext instanceof RenamingDelegatingContext) {
-            ((RenamingDelegatingContext) mContext).makeExistingFilesAndDbsAccessible();
-        }
+        ((RenamingDelegatingContext) mContext).makeExistingFilesAndDbsAccessible();
         // remove existing database (if any) before starting the test
         mContext.deleteDatabase(SQLDatabase.DATABASE_NAME);
         // create a new database for testing purposes
@@ -117,7 +116,7 @@ public class SQLDatabaseTest {
     private int checkCursorMinSize(Cursor cursor, int minSize) {
         assertNotNull(cursor);
         int cursorSize = cursor.getCount();
-        assertEquals(true, cursorSize >= minSize);
+        assertTrue(cursorSize >= minSize);
         cursor.close();
         return cursorSize;
     }
@@ -168,17 +167,17 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getWallet(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(id, cursor.getLong(cursor.getColumnIndex(Contract.Wallet.ID)));
-        assertEquals(name, cursor.getString(cursor.getColumnIndex(Contract.Wallet.NAME)));
-        assertEquals(icon, cursor.getString(cursor.getColumnIndex(Contract.Wallet.ICON)));
-        assertEquals(currency, cursor.getString(cursor.getColumnIndex(Contract.Wallet.CURRENCY)));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.Wallet.NOTE)));
-        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Wallet.COUNT_IN_TOTAL)));
-        assertEquals(startMoney, cursor.getLong(cursor.getColumnIndex(Contract.Wallet.START_MONEY)));
-        assertEquals(archived, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Wallet.ARCHIVED)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Wallet.TAG)));
-        Money money = Money.parse(cursor.getString(cursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(id, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.ID)));
+        assertEquals(name, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NAME)));
+        assertEquals(icon, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.ICON)));
+        assertEquals(currency, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY)));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NOTE)));
+        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Wallet.COUNT_IN_TOTAL)));
+        assertEquals(startMoney, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY)));
+        assertEquals(archived, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Wallet.ARCHIVED)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.TAG)));
+        Money money = Money.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY)));
         assertEquals(totalMoney, money.getMoney(currency));
         cursor.close();
     }
@@ -218,13 +217,13 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getCategory(categoryId, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(name, cursor.getString(cursor.getColumnIndex(Contract.Category.NAME)));
-        assertEquals(icon, cursor.getString(cursor.getColumnIndex(Contract.Category.ICON)));
-        assertEquals(type, cursor.getInt(cursor.getColumnIndex(Contract.Category.TYPE)));
-        checkNullable(cursor, parentId, cursor.getColumnIndex(Contract.Category.PARENT));
-        assertEquals(showReport, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Category.SHOW_REPORT)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Category.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(name, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.NAME)));
+        assertEquals(icon, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.ICON)));
+        assertEquals(type, cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Category.TYPE)));
+        checkNullable(cursor, parentId, cursor.getColumnIndexOrThrow(Contract.Category.PARENT));
+        assertEquals(showReport, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Category.SHOW_REPORT)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.TAG)));
         cursor.close();
     }
 
@@ -241,13 +240,13 @@ public class SQLDatabaseTest {
     }
 
     private long getSystemCategory(String tag) {
-        String[] projection = new String[] {Contract.Category.ID};
+        String[] projection = new String[]{Contract.Category.ID};
         String selection = Contract.Category.TAG + " = ?";
-        String[] selectionArgs = new String[] {tag};
+        String[] selectionArgs = new String[]{tag};
         Cursor cursor = mDatabase.getCategories(projection, selection, selectionArgs, null);
         assertNotNull(cursor);
-        assertEquals(true, cursor.moveToFirst());
-        long categoryId = cursor.getLong(cursor.getColumnIndex(Contract.Category.ID));
+        assertTrue(cursor.moveToFirst());
+        long categoryId = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Category.ID));
         cursor.close();
         return categoryId;
     }
@@ -269,13 +268,13 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getEvent(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(name, cursor.getString(cursor.getColumnIndex(Contract.Event.NAME)));
-        assertEquals(icon, cursor.getString(cursor.getColumnIndex(Contract.Event.ICON)));
-        assertEquals(DateUtils.getSQLDateString(startDate), cursor.getString(cursor.getColumnIndex(Contract.Event.START_DATE)));
-        assertEquals(DateUtils.getSQLDateString(endDate), cursor.getString(cursor.getColumnIndex(Contract.Event.END_DATE)));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.Event.NOTE)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Event.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(name, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.NAME)));
+        assertEquals(icon, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.ICON)));
+        assertEquals(DateUtils.getSQLDateString(startDate), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.START_DATE)));
+        assertEquals(DateUtils.getSQLDateString(endDate), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.END_DATE)));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.NOTE)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.TAG)));
         cursor.close();
     }
 
@@ -308,13 +307,13 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getPlace(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(name, cursor.getString(cursor.getColumnIndex(Contract.Place.NAME)));
-        assertEquals(icon, cursor.getString(cursor.getColumnIndex(Contract.Place.ICON)));
-        assertEquals(address, cursor.getString(cursor.getColumnIndex(Contract.Place.ADDRESS)));
-        checkNullable(cursor, latitude, cursor.getColumnIndex(Contract.Place.LATITUDE));
-        checkNullable(cursor, longitude, cursor.getColumnIndex(Contract.Place.LONGITUDE));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Place.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(name, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.NAME)));
+        assertEquals(icon, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.ICON)));
+        assertEquals(address, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.ADDRESS)));
+        checkNullable(cursor, latitude, cursor.getColumnIndexOrThrow(Contract.Place.LATITUDE));
+        checkNullable(cursor, longitude, cursor.getColumnIndexOrThrow(Contract.Place.LONGITUDE));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.TAG)));
         cursor.close();
     }
 
@@ -346,11 +345,11 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getPerson(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(name, cursor.getString(cursor.getColumnIndex(Contract.Person.NAME)));
-        assertEquals(icon, cursor.getString(cursor.getColumnIndex(Contract.Person.ICON)));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.Person.NOTE)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Person.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(name, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.NAME)));
+        assertEquals(icon, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.ICON)));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.NOTE)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.TAG)));
         cursor.close();
     }
 
@@ -377,12 +376,12 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getAttachment(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(file, cursor.getString(cursor.getColumnIndex(Contract.Attachment.FILE)));
-        assertEquals(name, cursor.getString(cursor.getColumnIndex(Contract.Attachment.NAME)));
-        assertEquals(type, cursor.getString(cursor.getColumnIndex(Contract.Attachment.TYPE)));
-        assertEquals(size, cursor.getLong(cursor.getColumnIndex(Contract.Attachment.SIZE)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Attachment.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(file, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Attachment.FILE)));
+        assertEquals(name, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Attachment.NAME)));
+        assertEquals(type, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Attachment.TYPE)));
+        assertEquals(size, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Attachment.SIZE)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Attachment.TAG)));
         cursor.close();
     }
 
@@ -413,19 +412,19 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getDebt(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(type, cursor.getInt(cursor.getColumnIndex(Contract.Debt.TYPE)));
-        assertEquals(icon, cursor.getString(cursor.getColumnIndex(Contract.Debt.ICON)));
-        assertEquals(description, cursor.getString(cursor.getColumnIndex(Contract.Debt.DESCRIPTION)));
-        assertEquals(DateUtils.getSQLDateString(date), cursor.getString(cursor.getColumnIndex(Contract.Debt.DATE)));
-        checkNullable(cursor, exp != null ? DateUtils.getSQLDateString(exp) : null, cursor.getColumnIndex(Contract.Debt.EXPIRATION_DATE));
-        assertEquals(walletId, cursor.getLong(cursor.getColumnIndex(Contract.Debt.WALLET_ID)));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.Debt.NOTE)));
-        checkNullable(cursor, placeId, cursor.getColumnIndex(Contract.Debt.PLACE_ID));
-        assertEquals(money, cursor.getLong(cursor.getColumnIndex(Contract.Debt.MONEY)));
-        assertEquals(archived, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Debt.ARCHIVED)));
-        assertEquals(getObjectIds(peopleIds), cursor.getString(cursor.getColumnIndex(Contract.Debt.PEOPLE_IDS)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Debt.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(type, cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Debt.TYPE)));
+        assertEquals(icon, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.ICON)));
+        assertEquals(description, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.DESCRIPTION)));
+        assertEquals(DateUtils.getSQLDateString(date), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.DATE)));
+        checkNullable(cursor, exp != null ? DateUtils.getSQLDateString(exp) : null, cursor.getColumnIndexOrThrow(Contract.Debt.EXPIRATION_DATE));
+        assertEquals(walletId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Debt.WALLET_ID)));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.NOTE)));
+        checkNullable(cursor, placeId, cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_ID));
+        assertEquals(money, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Debt.MONEY)));
+        assertEquals(archived, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Debt.ARCHIVED)));
+        assertEquals(getObjectIds(peopleIds), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.PEOPLE_IDS)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.TAG)));
         cursor.close();
     }
 
@@ -473,16 +472,16 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getBudget(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(type, cursor.getInt(cursor.getColumnIndex(Contract.Budget.TYPE)));
-        checkNullable(cursor, categoryId, cursor.getColumnIndex(Contract.Budget.CATEGORY_ID));
-        assertEquals(DateUtils.getSQLDateString(startDate), cursor.getString(cursor.getColumnIndex(Contract.Budget.START_DATE)));
-        assertEquals(DateUtils.getSQLDateString(endDate), cursor.getString(cursor.getColumnIndex(Contract.Budget.END_DATE)));
-        assertEquals(money, cursor.getLong(cursor.getColumnIndex(Contract.Budget.MONEY)));
-        assertEquals(currency, cursor.getString(cursor.getColumnIndex(Contract.Budget.CURRENCY)));
-        assertEquals(getObjectIds(walletIds), cursor.getString(cursor.getColumnIndex(Contract.Budget.WALLET_IDS)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Budget.TAG)));
-        assertEquals(progress, cursor.getLong(cursor.getColumnIndex(Contract.Budget.PROGRESS)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(type, cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Budget.TYPE)));
+        checkNullable(cursor, categoryId, cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_ID));
+        assertEquals(DateUtils.getSQLDateString(startDate), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.START_DATE)));
+        assertEquals(DateUtils.getSQLDateString(endDate), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.END_DATE)));
+        assertEquals(money, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Budget.MONEY)));
+        assertEquals(currency, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.CURRENCY)));
+        assertEquals(getObjectIds(walletIds), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.WALLET_IDS)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.TAG)));
+        assertEquals(progress, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Budget.PROGRESS)));
         cursor.close();
     }
 
@@ -522,16 +521,16 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getSaving(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(description, cursor.getString(cursor.getColumnIndex(Contract.Saving.DESCRIPTION)));
-        assertEquals(icon, cursor.getString(cursor.getColumnIndex(Contract.Saving.ICON)));
-        assertEquals(startMoney, cursor.getLong(cursor.getColumnIndex(Contract.Saving.START_MONEY)));
-        assertEquals(endMoney, cursor.getLong(cursor.getColumnIndex(Contract.Saving.END_MONEY)));
-        assertEquals(walletId, cursor.getLong(cursor.getColumnIndex(Contract.Saving.WALLET_ID)));
-        checkNullable(cursor, exp != null ? DateUtils.getSQLDateString(exp) : null, cursor.getColumnIndex(Contract.Saving.END_DATE));
-        assertEquals(completed, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Saving.COMPLETE)));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.Saving.NOTE)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Saving.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(description, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.DESCRIPTION)));
+        assertEquals(icon, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.ICON)));
+        assertEquals(startMoney, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Saving.START_MONEY)));
+        assertEquals(endMoney, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Saving.END_MONEY)));
+        assertEquals(walletId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Saving.WALLET_ID)));
+        checkNullable(cursor, exp != null ? DateUtils.getSQLDateString(exp) : null, cursor.getColumnIndexOrThrow(Contract.Saving.END_DATE));
+        assertEquals(completed, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Saving.COMPLETE)));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.NOTE)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.TAG)));
         cursor.close();
     }
 
@@ -573,23 +572,23 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getTransaction(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(money, cursor.getLong(cursor.getColumnIndex(Contract.Transaction.MONEY)));
-        assertEquals(DateUtils.getSQLDateTimeString(datetime), cursor.getString(cursor.getColumnIndex(Contract.Transaction.DATE)));
-        assertEquals(description, cursor.getString(cursor.getColumnIndex(Contract.Transaction.DESCRIPTION)));
-        assertEquals(categoryId, cursor.getLong(cursor.getColumnIndex(Contract.Transaction.CATEGORY_ID)));
-        assertEquals(direction, cursor.getInt(cursor.getColumnIndex(Contract.Transaction.DIRECTION)));
-        assertEquals(type, cursor.getInt(cursor.getColumnIndex(Contract.Transaction.TYPE)));
-        assertEquals(walletId, cursor.getLong(cursor.getColumnIndex(Contract.Transaction.WALLET_ID)));
-        checkNullable(cursor, placeId, cursor.getColumnIndex(Contract.Transaction.PLACE_ID));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.Transaction.NOTE)));
-        checkNullable(cursor, eventId, cursor.getColumnIndex(Contract.Transaction.EVENT_ID));
-        checkNullable(cursor, savingId, cursor.getColumnIndex(Contract.Transaction.SAVING_ID));
-        checkNullable(cursor, debtId, cursor.getColumnIndex(Contract.Transaction.DEBT_ID));
-        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Transaction.CONFIRMED)));
-        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Transaction.COUNT_IN_TOTAL)));
-        assertEquals(getObjectIds(peopleIds), cursor.getString(cursor.getColumnIndex(Contract.Transaction.PEOPLE_IDS)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Transaction.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(money, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.MONEY)));
+        assertEquals(DateUtils.getSQLDateTimeString(datetime), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DATE)));
+        assertEquals(description, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DESCRIPTION)));
+        assertEquals(categoryId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_ID)));
+        assertEquals(direction, cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transaction.DIRECTION)));
+        assertEquals(type, cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transaction.TYPE)));
+        assertEquals(walletId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_ID)));
+        checkNullable(cursor, placeId, cursor.getColumnIndexOrThrow(Contract.Transaction.PLACE_ID));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.NOTE)));
+        checkNullable(cursor, eventId, cursor.getColumnIndexOrThrow(Contract.Transaction.EVENT_ID));
+        checkNullable(cursor, savingId, cursor.getColumnIndexOrThrow(Contract.Transaction.SAVING_ID));
+        checkNullable(cursor, debtId, cursor.getColumnIndexOrThrow(Contract.Transaction.DEBT_ID));
+        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transaction.CONFIRMED)));
+        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transaction.COUNT_IN_TOTAL)));
+        assertEquals(getObjectIds(peopleIds), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.PEOPLE_IDS)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.TAG)));
         cursor.close();
     }
 
@@ -653,22 +652,22 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getTransfer(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(description, cursor.getString(cursor.getColumnIndex(Contract.Transfer.DESCRIPTION)));
-        assertEquals(DateUtils.getSQLDateTimeString(datetime), cursor.getString(cursor.getColumnIndex(Contract.Transfer.DATE)));
-        assertEquals(walletFromId, cursor.getLong(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_WALLET_ID)));
-        assertEquals(walletToId, cursor.getLong(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TO_WALLET_ID)));
-        checkNullable(cursor, walletTaxId, cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TAX_WALLET_ID));
-        assertEquals(moneyFrom, cursor.getLong(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_MONEY)));
-        assertEquals(moneyTo, cursor.getLong(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TO_MONEY)));
-        assertEquals(moneyTax, cursor.getLong(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TAX_MONEY)));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.Transfer.NOTE)));
-        checkNullable(cursor, placeId, cursor.getColumnIndex(Contract.Transfer.PLACE_ID));
-        checkNullable(cursor, eventId, cursor.getColumnIndex(Contract.Transfer.EVENT_ID));
-        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Transfer.CONFIRMED)));
-        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndex(Contract.Transfer.COUNT_IN_TOTAL)));
-        assertEquals(getObjectIds(peopleIds), cursor.getString(cursor.getColumnIndex(Contract.Transfer.PEOPLE_IDS)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.Transfer.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(description, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.DESCRIPTION)));
+        assertEquals(DateUtils.getSQLDateTimeString(datetime), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.DATE)));
+        assertEquals(walletFromId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_WALLET_ID)));
+        assertEquals(walletToId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TO_WALLET_ID)));
+        checkNullable(cursor, walletTaxId, cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TAX_WALLET_ID));
+        assertEquals(moneyFrom, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_MONEY)));
+        assertEquals(moneyTo, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TO_MONEY)));
+        assertEquals(moneyTax, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TAX_MONEY)));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.NOTE)));
+        checkNullable(cursor, placeId, cursor.getColumnIndexOrThrow(Contract.Transfer.PLACE_ID));
+        checkNullable(cursor, eventId, cursor.getColumnIndexOrThrow(Contract.Transfer.EVENT_ID));
+        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transfer.CONFIRMED)));
+        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transfer.COUNT_IN_TOTAL)));
+        assertEquals(getObjectIds(peopleIds), cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.PEOPLE_IDS)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.TAG)));
         cursor.close();
     }
 
@@ -729,18 +728,18 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getTransactionModel(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(money, cursor.getLong(cursor.getColumnIndex(Contract.TransactionModel.MONEY)));
-        assertEquals(description, cursor.getString(cursor.getColumnIndex(Contract.TransactionModel.DESCRIPTION)));
-        assertEquals(categoryId, cursor.getLong(cursor.getColumnIndex(Contract.TransactionModel.CATEGORY_ID)));
-        assertEquals(direction, cursor.getInt(cursor.getColumnIndex(Contract.TransactionModel.DIRECTION)));
-        assertEquals(walletId, cursor.getLong(cursor.getColumnIndex(Contract.TransactionModel.WALLET_ID)));
-        checkNullable(cursor, placeId, cursor.getColumnIndex(Contract.TransactionModel.PLACE_ID));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.TransactionModel.NOTE)));
-        checkNullable(cursor, eventId, cursor.getColumnIndex(Contract.TransactionModel.EVENT_ID));
-        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndex(Contract.TransactionModel.CONFIRMED)));
-        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndex(Contract.TransactionModel.COUNT_IN_TOTAL)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.TransactionModel.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(money, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransactionModel.MONEY)));
+        assertEquals(description, cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransactionModel.DESCRIPTION)));
+        assertEquals(categoryId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransactionModel.CATEGORY_ID)));
+        assertEquals(direction, cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransactionModel.DIRECTION)));
+        assertEquals(walletId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransactionModel.WALLET_ID)));
+        checkNullable(cursor, placeId, cursor.getColumnIndexOrThrow(Contract.TransactionModel.PLACE_ID));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransactionModel.NOTE)));
+        checkNullable(cursor, eventId, cursor.getColumnIndexOrThrow(Contract.TransactionModel.EVENT_ID));
+        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransactionModel.CONFIRMED)));
+        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransactionModel.COUNT_IN_TOTAL)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransactionModel.TAG)));
         cursor.close();
     }
 
@@ -789,19 +788,19 @@ public class SQLDatabaseTest {
         Cursor cursor = mDatabase.getTransferModel(id, null);
         assertNotNull(cursor);
         assertEquals(1, cursor.getCount());
-        assertEquals(true, cursor.moveToFirst());
-        assertEquals(description, cursor.getString(cursor.getColumnIndex(Contract.TransferModel.DESCRIPTION)));
-        assertEquals(walletFromId, cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.WALLET_FROM_ID)));
-        assertEquals(walletToId, cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.WALLET_TO_ID)));
-        assertEquals(moneyFrom, cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_FROM)));
-        assertEquals(moneyTo, cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_TO)));
-        assertEquals(moneyTax, cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_TAX)));
-        assertEquals(note, cursor.getString(cursor.getColumnIndex(Contract.TransferModel.NOTE)));
-        checkNullable(cursor, placeId, cursor.getColumnIndex(Contract.TransferModel.PLACE_ID));
-        checkNullable(cursor, eventId, cursor.getColumnIndex(Contract.TransferModel.EVENT_ID));
-        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndex(Contract.TransferModel.CONFIRMED)));
-        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndex(Contract.TransferModel.COUNT_IN_TOTAL)));
-        assertEquals(tag, cursor.getString(cursor.getColumnIndex(Contract.TransferModel.TAG)));
+        assertTrue(cursor.moveToFirst());
+        assertEquals(description, cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.DESCRIPTION)));
+        assertEquals(walletFromId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_FROM_ID)));
+        assertEquals(walletToId, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_TO_ID)));
+        assertEquals(moneyFrom, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_FROM)));
+        assertEquals(moneyTo, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_TO)));
+        assertEquals(moneyTax, cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_TAX)));
+        assertEquals(note, cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.NOTE)));
+        checkNullable(cursor, placeId, cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_ID));
+        checkNullable(cursor, eventId, cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_ID));
+        assertEquals(confirmed, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransferModel.CONFIRMED)));
+        assertEquals(countInTotal, 1 == cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransferModel.COUNT_IN_TOTAL)));
+        assertEquals(tag, cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.TAG)));
         cursor.close();
     }
 
@@ -851,7 +850,7 @@ public class SQLDatabaseTest {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void insertWallet() throws Exception {
+    public void insertWallet() {
         // insert 4 wallets and then query for each one and check the returned id
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "USD", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
@@ -865,7 +864,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updateWallet() throws Exception {
+    public void updateWallet() {
         // insert 4 wallets and then query for each one and check the returned id
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "USD", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
@@ -884,7 +883,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteWallet() throws Exception {
+    public void deleteWallet() {
         // insert 4 wallets and then query for each one and check the returned id
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "USD", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
@@ -928,7 +927,7 @@ public class SQLDatabaseTest {
     }
 
     @Test(expected = SQLiteDataException.class)
-    public void deleteWalletInTransfer() throws Exception {
+    public void deleteWalletInTransfer() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertTransfer("desc", new Date(), id1, id2, null, 10L, 10L, 0L, "note", null, null, true, true, null, null, "tag");
@@ -937,7 +936,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertTransaction() throws Exception {
+    public void insertTransaction() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertCategory("Test category 2", "encoded-icon-2", Contract.CategoryType.INCOME.getValue(), null, true, "tag-category-2");
         long id3 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
@@ -946,14 +945,14 @@ public class SQLDatabaseTest {
         long id6 = insertAttachment("path1", "name-1", "mime-type-1", 90L, "tag-1");
         long id7 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         Date date = new Date();
-        Long[] peopleIds = new Long[] {id4, id5};
-        Long[] attachmentIds = new Long[] {id6, id7};
+        Long[] peopleIds = new Long[]{id4, id5};
+        Long[] attachmentIds = new Long[]{id6, id7};
         long id8 = insertTransaction(2000L, date, "desc", id2, Contract.Direction.INCOME, 0, id1, id3, "note", null, null, null, true, true, peopleIds, attachmentIds, "tag");
         checkTransactionId(id8, 2000L, date, "desc", id2, Contract.Direction.INCOME, 0, id1, id3, "note", null, null, null, true, true, peopleIds, "tag");
     }
 
     @Test
-    public void updateTransaction() throws Exception {
+    public void updateTransaction() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertCategory("Test category 2", "encoded-icon-2", Contract.CategoryType.INCOME.getValue(), null, true, "tag-category-2");
         long id3 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
@@ -962,21 +961,21 @@ public class SQLDatabaseTest {
         long id6 = insertAttachment("path1", "name-1", "mime-type-1", 90L, "tag-1");
         long id7 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         Date date = new Date();
-        Long[] peopleIds = new Long[] {id4, id5};
-        Long[] attachmentIds = new Long[] {id6, id7};
+        Long[] peopleIds = new Long[]{id4, id5};
+        Long[] attachmentIds = new Long[]{id6, id7};
         long id8 = insertTransaction(2000L, date, "desc", id2, Contract.Direction.INCOME, 0, id1, id3, "note", null, null, null, true, true, peopleIds, attachmentIds, "tag");
         // now modify the transaction
         long id9 = insertWallet("Test wallet 9", "encoded-icon-9", "USD", "note-wallet-9", false, 2000L, false, "tag-wallet-9");
         long id10 = insertCategory("Test category 10", "encoded-icon-10", Contract.CategoryType.EXPENSE.getValue(), null, true, "tag-category-10");
         long id11 = insertPerson("person-11", "encoded-icon-11", "note-11", "tag-11");
-        peopleIds = new Long[] {id4, id5, id11};
+        peopleIds = new Long[]{id4, id5, id11};
         assertEquals(1, updateTransaction(id8, 4000L, date, "desc-edited", id10, Contract.Direction.EXPENSE, 0, id9, null, "note-edited", null, null, null, true, false, peopleIds, null, "tag-edited"));
         // now check if transaction has been properly edited
         checkTransactionId(id8, 4000L, date, "desc-edited", id10, Contract.Direction.EXPENSE, 0, id9, null, "note-edited", null, null, null, true, false, peopleIds, "tag-edited");
     }
 
     @Test
-    public void deleteTransaction() throws Exception {
+    public void deleteTransaction() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertCategory("Test category 2", "encoded-icon-2", Contract.CategoryType.INCOME.getValue(), null, true, "tag-category-2");
         long id3 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
@@ -985,8 +984,8 @@ public class SQLDatabaseTest {
         long id6 = insertAttachment("path1", "name-1", "mime-type-1", 90L, "tag-1");
         long id7 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         Date date = new Date();
-        Long[] peopleIds = new Long[] {id4, id5};
-        Long[] attachmentIds = new Long[] {id6, id7};
+        Long[] peopleIds = new Long[]{id4, id5};
+        Long[] attachmentIds = new Long[]{id6, id7};
         long id8 = insertTransaction(2000L, date, "desc", id2, Contract.Direction.INCOME, 0, id1, id3, "note", null, null, null, true, true, peopleIds, attachmentIds, "tag");
         // check the transaction count
         checkCursorSize(mDatabase.getTransactions(null, null, null, null), 1);
@@ -998,7 +997,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertTransfer() throws Exception {
+    public void insertTransfer() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
@@ -1008,15 +1007,15 @@ public class SQLDatabaseTest {
         long id7 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         long id8 = insertEvent("event-8", "encoded-icon-8", new Date(), new Date(), "note-8", "tag-8");
         Date date = new Date();
-        Long[] peopleIds = new Long[] {id4, id5};
-        Long[] attachmentIds = new Long[] {id6, id7};
+        Long[] peopleIds = new Long[]{id4, id5};
+        Long[] attachmentIds = new Long[]{id6, id7};
         long id9 = insertTransfer("desc", date, id1, id2, id1, 10L, 10L, 4L, "note", id3, id8, true, true, peopleIds, attachmentIds, "tag");
         checkTransferId(id9, "desc", date, id1, id2, id1, 10L, 10L, 4L, "note", id3, id8, true, true, peopleIds, "tag");
         checkCursorSize(mDatabase.getTransactions(null, null, null, null), 3);
     }
 
     @Test
-    public void updateTransfer() throws Exception {
+    public void updateTransfer() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
@@ -1026,8 +1025,8 @@ public class SQLDatabaseTest {
         long id7 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         long id8 = insertEvent("event-8", "encoded-icon-8", new Date(), new Date(), "note-8", "tag-8");
         Date date = new Date();
-        Long[] peopleIds = new Long[] {id4, id5};
-        Long[] attachmentIds = new Long[] {id6, id7};
+        Long[] peopleIds = new Long[]{id4, id5};
+        Long[] attachmentIds = new Long[]{id6, id7};
         long id9 = insertTransfer("desc", date, id1, id2, null, 10L, 10L, 0L, "note", id3, id8, true, true, peopleIds, attachmentIds, "tag");
         checkCursorSize(mDatabase.getTransactions(null, null, null, null), 2);
         // now we update the transfer adding the tax
@@ -1049,7 +1048,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteTransfer() throws Exception {
+    public void deleteTransfer() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
@@ -1059,8 +1058,8 @@ public class SQLDatabaseTest {
         long id7 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         long id8 = insertEvent("event-8", "encoded-icon-8", new Date(), new Date(), "note-8", "tag-8");
         Date date = new Date();
-        Long[] peopleIds = new Long[] {id4, id5};
-        Long[] attachmentIds = new Long[] {id6, id7};
+        Long[] peopleIds = new Long[]{id4, id5};
+        Long[] attachmentIds = new Long[]{id6, id7};
         long id9 = insertTransfer("desc", date, id1, id2, id1, 10L, 10L, 2L, "note", id3, id8, true, true, peopleIds, attachmentIds, "tag");
         checkCursorSize(mDatabase.getTransfers(null, null, null, null), 1);
         checkCursorSize(mDatabase.getTransactions(null, null, null, null), 3);
@@ -1074,7 +1073,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertCategory() throws Exception {
+    public void insertCategory() {
         long id1 = insertCategory("category 1", "encoded-icon-1", 0, null, true, "category-tag-1");
         long id2 = insertCategory("category 2", "encoded-icon-2", 0, id1, false, "category-tag-2");
         long id3 = insertCategory("category 3", "encoded-icon-3", 1, null, true, "category-tag-3");
@@ -1101,7 +1100,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updateCategory() throws Exception {
+    public void updateCategory() {
         long id1 = insertCategory("category 1", "encoded-icon-1", 0, null, true, "category-tag-1");
         long id2 = insertCategory("category 2", "encoded-icon-2", 0, id1, false, "category-tag-2");
         long id3 = insertCategory("category 3", "encoded-icon-3", 1, null, true, "category-tag-3");
@@ -1155,7 +1154,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteCategory() throws Exception {
+    public void deleteCategory() {
         long id1 = insertCategory("category 1", "encoded-icon-1", 0, null, true, "category-tag-1");
         long id2 = insertCategory("category 2", "encoded-icon-2", 0, id1, false, "category-tag-2");
         long id3 = insertCategory("category 3", "encoded-icon-3", 0, id1, false, "category-tag-3");
@@ -1212,14 +1211,14 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertDebt() throws Exception {
+    public void insertDebt() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
         long id3 = insertPerson("person-1", "encoded-icon-1", "note-1", "tag-1");
         long id4 = insertPerson("person-2", "encoded-icon-2", "note-2", "tag-2");
         long id5 = insertPerson("person-3", "encoded-icon-3", "note-3", "tag-3");
         Date date = new Date();
-        Long[] peopleIds1 = new Long[] {id3, id4, id5};
+        Long[] peopleIds1 = new Long[]{id3, id4, id5};
         long id6 = insertDebt(Contract.DebtType.DEBT.getValue(), "encoded-icon-1", "desc-1", date, null, id1, "note-1", id2, 2000L, false, peopleIds1, "tag-1", false);
         checkDebtId(id6, Contract.DebtType.DEBT.getValue(), "encoded-icon-1", "desc-1", date, null, id1, "note-1", id2, 2000L, false, peopleIds1, "tag-1");
         checkCursorSize(mDatabase.getTransactions(null, null, null, null), 0);
@@ -1229,14 +1228,14 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updateDebt() throws Exception {
+    public void updateDebt() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
         long id3 = insertPerson("person-1", "encoded-icon-1", "note-1", "tag-1");
         long id4 = insertPerson("person-2", "encoded-icon-2", "note-2", "tag-2");
         long id5 = insertPerson("person-3", "encoded-icon-3", "note-3", "tag-3");
         Date date = new Date();
-        Long[] peopleIds1 = new Long[] {id3, id4};
+        Long[] peopleIds1 = new Long[]{id3, id4};
         long id6 = insertDebt(Contract.DebtType.DEBT.getValue(), "encoded-icon-1", "desc-1", date, null, id1, "note-1", id2, 2000L, false, peopleIds1, "tag-1", false);
         long id7 = insertDebt(Contract.DebtType.CREDIT.getValue(), "encoded-icon-1", "desc-1", date, date, id1, "note-1", id2, 3000L, true, null, "tag-2", true);
         checkDebtId(id6, Contract.DebtType.DEBT.getValue(), "encoded-icon-1", "desc-1", date, null, id1, "note-1", id2, 2000L, false, peopleIds1, "tag-1");
@@ -1253,7 +1252,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteDebt() throws Exception {
+    public void deleteDebt() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
         long id3 = insertPerson("person-1", "encoded-icon-1", "note-1", "tag-1");
@@ -1261,9 +1260,9 @@ public class SQLDatabaseTest {
         long id5 = insertPerson("person-3", "encoded-icon-3", "note-3", "tag-3");
         long id6 = getSystemCategory(Contract.CategoryTag.PAID_DEBT);
         Date date = new Date();
-        Long[] peopleIds1 = new Long[] {id3, id4};
+        Long[] peopleIds1 = new Long[]{id3, id4};
         long id7 = insertDebt(Contract.DebtType.DEBT.getValue(), "encoded-icon-1", "desc-1", date, null, id1, "note-1", id2, 2000L, false, peopleIds1, "tag-1", true);
-        long id8 = insertTransaction(10, date, "desc", id6, Contract.Direction.EXPENSE, Contract.TransactionType.DEBT, id1, null, null, null, null, id7, true, true, new Long[] {id5}, null, "tag");
+        long id8 = insertTransaction(10, date, "desc", id6, Contract.Direction.EXPENSE, Contract.TransactionType.DEBT, id1, null, null, null, null, id7, true, true, new Long[]{id5}, null, "tag");
         long id9 = insertTransaction(10, date, "desc", id6, Contract.Direction.EXPENSE, Contract.TransactionType.DEBT, id1, id2, null, null, null, id7, true, true, null, null, "tag");
         long id10 = insertTransaction(10, date, "desc", id6, Contract.Direction.EXPENSE, Contract.TransactionType.DEBT, id1, null, null, null, null, id7, true, true, new Long[] {id3, id4}, null, "tag");
         long id11 = insertTransaction(10, date, "desc", id6, Contract.Direction.EXPENSE, Contract.TransactionType.DEBT, id1, id2, null, null, null, id7, true, true, null, null, "tag");
@@ -1276,7 +1275,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertBudget() throws Exception {
+    public void insertBudget() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertWallet("Test wallet 3", "encoded-icon-3", "EUR", "note-wallet-3", true, 1000L, true, "tag-wallet-3");
@@ -1302,7 +1301,7 @@ public class SQLDatabaseTest {
     }
 
     @Test(expected = SQLiteDataException.class)
-    public void insertBudgetWithNoWallets() throws Exception {
+    public void insertBudgetWithNoWallets() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -3);
         Date startDate = calendar.getTime();
@@ -1312,7 +1311,7 @@ public class SQLDatabaseTest {
     }
 
     @Test(expected = SQLiteDataException.class)
-    public void insertBudgetWithNotConsistentWallets() throws Exception {
+    public void insertBudgetWithNotConsistentWallets() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertWallet("Test wallet 3", "encoded-icon-3", "EUR", "note-wallet-3", true, 1000L, true, "tag-wallet-3");
@@ -1330,7 +1329,7 @@ public class SQLDatabaseTest {
     }
 
     @Test(expected = SQLiteDataException.class)
-    public void insertBudgetWithInvalidWallet() throws Exception {
+    public void insertBudgetWithInvalidWallet() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         Calendar calendar = Calendar.getInstance();
@@ -1338,12 +1337,12 @@ public class SQLDatabaseTest {
         Date startDate = calendar.getTime();
         calendar.add(Calendar.MONTH, 6);
         Date endDate = calendar.getTime();
-        Long[] walletIds = new Long[] {id1, id2, id1 + id2};
+        Long[] walletIds = new Long[]{id1, id2, id1 + id2};
         insertBudget(Schema.BudgetType.INCOMES, null, startDate, endDate, 5000L, "EUR", walletIds, "tag-1");
     }
 
     @Test
-    public void updateBudget() throws Exception {
+    public void updateBudget() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertWallet("Test wallet 3", "encoded-icon-3", "EUR", "note-wallet-3", true, 1000L, true, "tag-wallet-3");
@@ -1379,7 +1378,7 @@ public class SQLDatabaseTest {
     }
 
     @Test(expected = SQLiteDataException.class)
-    public void updateBudgetWithNoWallets() throws Exception {
+    public void updateBudgetWithNoWallets() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id4 = insertWallet("Test wallet 4", "encoded-icon-4", "USD", "note-wallet-4", true, 2300L, true, "tag-wallet-4");
@@ -1389,7 +1388,7 @@ public class SQLDatabaseTest {
         Date startDate = calendar.getTime();
         calendar.add(Calendar.MONTH, 6);
         Date endDate = calendar.getTime();
-        Long[] walletIds = new Long[] {id1, id2};
+        Long[] walletIds = new Long[]{id1, id2};
         long id7 = insertBudget(Schema.BudgetType.INCOMES, null, startDate, endDate, 5000L, "EUR", walletIds, "tag-1");
         // now update the budget with no wallets
         updateBudget(id7, Schema.BudgetType.INCOMES, null, startDate, endDate, 5000L, "EUR", null, "tag-1");
@@ -1414,7 +1413,7 @@ public class SQLDatabaseTest {
     }
 
     @Test(expected = SQLiteDataException.class)
-    public void updateBudgetWithInvalidWallet() throws Exception {
+    public void updateBudgetWithInvalidWallet() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id4 = insertWallet("Test wallet 4", "encoded-icon-4", "USD", "note-wallet-4", true, 2300L, true, "tag-wallet-4");
@@ -1424,7 +1423,7 @@ public class SQLDatabaseTest {
         Date startDate = calendar.getTime();
         calendar.add(Calendar.MONTH, 6);
         Date endDate = calendar.getTime();
-        Long[] walletIds = new Long[] {id1, id2};
+        Long[] walletIds = new Long[]{id1, id2};
         long id7 = insertBudget(Schema.BudgetType.INCOMES, null, startDate, endDate, 5000L, "EUR", walletIds, "tag-1");
         // now update the budget with no wallets
         walletIds = new Long[] {id1, id2, id1 + id2 + id4};
@@ -1432,7 +1431,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteBudget() throws Exception {
+    public void deleteBudget() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertWallet("Test wallet 3", "encoded-icon-3", "EUR", "note-wallet-3", true, 1000L, true, "tag-wallet-3");
@@ -1473,7 +1472,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void considerExternalTransactionsInIncomeBudget() throws Exception {
+    public void considerExternalTransactionsInIncomeBudget() {
         // Setup wallets
         long wallet1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long wallet2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, false, "tag-wallet-2");
@@ -1499,7 +1498,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void considerExternalTransactionsInExpenseBudget() throws Exception {
+    public void considerExternalTransactionsInExpenseBudget() {
         // Setup wallets
         long wallet1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long wallet2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, false, "tag-wallet-2");
@@ -1525,7 +1524,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void ignoreInternalTransactionsInBudget() throws Exception {
+    public void ignoreInternalTransactionsInBudget() {
         // Setup wallets
         long wallet1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long wallet2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, false, "tag-wallet-2");
@@ -1535,7 +1534,7 @@ public class SQLDatabaseTest {
         Date startDate = calendar.getTime();
         calendar.add(Calendar.MONTH, 6);
         Date endDate = calendar.getTime();
-        Long[] wallets = new Long[] {wallet1, wallet2};
+        Long[] wallets = new Long[]{wallet1, wallet2};
 
         // Setup budget of type income
         long incomeBudget = insertBudget(Schema.BudgetType.INCOMES, null, startDate, endDate, 5000L, "EUR", wallets, "tag-1");
@@ -1553,7 +1552,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void considerTransactionsWithinBudgetDurationOnly() throws Exception {
+    public void considerTransactionsWithinBudgetDurationOnly() {
         // Setup wallets
         long wallet1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long wallet2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, false, "tag-wallet-2");
@@ -1586,7 +1585,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void getBudgetTransactions() throws Exception {
+    public void getBudgetTransactions() {
         // Setup wallets
         long wallet1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long wallet2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, false, "tag-wallet-2");
@@ -1621,16 +1620,16 @@ public class SQLDatabaseTest {
 
         Cursor transactions = mDatabase.getBudgetTransactions(budget, null, null, null, null);
         assertEquals(4, transactions.getCount());
-        assertEquals(true, transactions.moveToFirst());
+        assertTrue(transactions.moveToFirst());
         assertEquals(mContext.getString(R.string.system_category_transfer_tax), transactions.getString(transactions.getColumnIndex(Contract.Transaction.CATEGORY_NAME)));
-        assertEquals(true, transactions.moveToNext());
+        assertTrue(transactions.moveToNext());
         assertEquals(mContext.getString(R.string.system_category_transfer), transactions.getString(transactions.getColumnIndex(Contract.Transaction.CATEGORY_NAME)));
-        assertEquals(true, transactions.moveToNext());
+        assertTrue(transactions.moveToNext());
         assertEquals(mContext.getString(R.string.system_category_transfer_tax), transactions.getString(transactions.getColumnIndex(Contract.Transaction.CATEGORY_NAME)));
     }
 
     @Test
-    public void insertSaving() throws Exception {
+    public void insertSaving() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         Date exp = new Date();
         long id2 = insertSaving("desc-1", "encoded-icon", 0L, 10000L, id1, null, false, "note-1", "tag-1");
@@ -1640,7 +1639,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updateSaving() throws Exception {
+    public void updateSaving() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         Date exp = new Date();
         long id2 = insertSaving("desc-1", "encoded-icon", 0L, 10000L, id1, null, false, "note-1", "tag-1");
@@ -1654,7 +1653,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteSaving() throws Exception {
+    public void deleteSaving() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         Date exp = new Date();
         long id2 = insertSaving("desc-1", "encoded-icon", 0L, 10000L, id1, null, false, "note-1", "tag-1");
@@ -1678,7 +1677,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertEvent() throws Exception {
+    public void insertEvent() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -4);
         Date startDate = calendar.getTime();
@@ -1687,12 +1686,12 @@ public class SQLDatabaseTest {
         long id2 = insertEvent("Event 2", "encoded-icon-2", startDate, endDate, "note-2", "tag-2");
         long id3 = insertEvent("Event 3", "encoded-icon-3", startDate, endDate, "note-3", "tag-3");
         checkEventId(id1, "Event 1", "encoded-icon-1", startDate, endDate, "note-1", "tag-1");
-        checkEventId(id2, "Event 2", "encoded-icon-2",startDate, endDate, "note-2", "tag-2");
+        checkEventId(id2, "Event 2", "encoded-icon-2", startDate, endDate, "note-2", "tag-2");
         checkEventId(id3, "Event 3", "encoded-icon-3", startDate, endDate, "note-3", "tag-3");
     }
 
     @Test
-    public void updateEvent() throws Exception {
+    public void updateEvent() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -4);
         Date startDate = calendar.getTime();
@@ -1713,7 +1712,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteEvent() throws Exception {
+    public void deleteEvent() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -4);
         Date startDate = calendar.getTime();
@@ -1735,7 +1734,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertTransactionModel() throws Exception {
+    public void insertTransactionModel() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertCategory("Test category 1", "encoded-icon-1", 0, null, true, "tag-1");
         long id3 = insertTransactionModel(302, "desc-1", id2, Contract.Direction.INCOME, id1, null, "note-1", null, true, true, "tag-1");
@@ -1745,7 +1744,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updateTransactionModel() throws Exception {
+    public void updateTransactionModel() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertCategory("Test category 1", "encoded-icon-1", 0, null, true, "tag-1");
         long id3 = insertTransactionModel(302, "desc-1", id2, Contract.Direction.INCOME, id1, null, "note-1", null, true, true, "tag-1");
@@ -1758,7 +1757,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteTransactionModel() throws Exception {
+    public void deleteTransactionModel() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertCategory("Test category 1", "encoded-icon-1", 0, null, true, "tag-1");
         long id3 = insertTransactionModel(302, "desc-1", id2, Contract.Direction.INCOME, id1, null, "note-1", null, true, true, "tag-1");
@@ -1773,7 +1772,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertTransferModel() throws Exception {
+    public void insertTransferModel() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertTransferModel("desc-1", id1, id2, 10L, 10L, 0L, "note-1", null, null, true, true, "tag-1");
@@ -1783,7 +1782,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updateTransferModel() throws Exception {
+    public void updateTransferModel() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertTransferModel("desc-1", id1, id2, 10L, 10L, 0L, "note-1", null, null, true, true, "tag-1");
@@ -1796,7 +1795,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteTransferModel() throws Exception {
+    public void deleteTransferModel() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertTransferModel("desc-1", id1, id2, 10L, 10L, 0L, "note-1", null, null, true, true, "tag-1");
@@ -1811,7 +1810,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertPlace() throws Exception {
+    public void insertPlace() {
         long id1 = insertPlace("place-1", "encoded-icon-1", "fake-address-1", null, null, "tag-1");
         long id2 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
         checkPlaceId(id1, "place-1", "encoded-icon-1", "fake-address-1", null, null, "tag-1");
@@ -1819,7 +1818,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updatePlace() throws Exception {
+    public void updatePlace() {
         long id1 = insertPlace("place-1", "encoded-icon-1", "fake-address-1", null, null, "tag-1");
         long id2 = insertPlace("place-2", "encoded-icon-2", "fake-address-2", 7.3467, 8.364, "tag-2");
         // now update place 2
@@ -1830,7 +1829,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deletePlace() throws Exception {
+    public void deletePlace() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertCategory("Test category 1", "encoded-icon-1", 0, null, true, "tag-1");
@@ -1854,7 +1853,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void insertPerson() throws Exception {
+    public void insertPerson() {
         long id1 = insertPerson("person-1", "encoded-icon-1", "note-1", "tag-1");
         long id2 = insertPerson("person-2", "encoded-icon-2", "note-2", "tag-2");
         checkPersonId(id1, "person-1", "encoded-icon-1", "note-1", "tag-1");
@@ -1862,7 +1861,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updatePerson() throws Exception {
+    public void updatePerson() {
         long id1 = insertPerson("person-1", "encoded-icon-1", "note-1", "tag-1");
         long id2 = insertPerson("person-2", "encoded-icon-2", "note-2", "tag-2");
         // now update person 2
@@ -1873,7 +1872,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deletePerson() throws Exception {
+    public void deletePerson() {
         long id1 = insertWallet("Test wallet 1", "encoded-icon-1", "EUR", "note-wallet-1", true, 2000L, false, "tag-wallet-1");
         long id2 = insertWallet("Test wallet 2", "encoded-icon-2", "EUR", "note-wallet-2", true, 3000L, true, "tag-wallet-2");
         long id3 = insertCategory("Test category 1", "encoded-icon-1", 0, null, true, "tag-1");
@@ -1882,20 +1881,20 @@ public class SQLDatabaseTest {
         long id6 = insertPerson("person-3", "encoded-icon-3", "note-3", "tag-3");
         // now attach the person 5 to every item that supports it
         Date date = new Date();
-        long id7 = insertDebt(Contract.DebtType.DEBT.getValue(), "icon", "desc", date, null, id1, null, null, 10000L, false, new Long[] {id5, id6}, null, false);
-        long id8 = insertTransaction(10, date, "desc", id3, Contract.Direction.INCOME, 0, id1, null, null, null, null, null, true, true, new Long[] {id4, id5}, null, null);
-        long id9 = insertTransfer("desc", date, id1, id2, null, 10, 10, 0, null, null, null, true, true, new Long[] {id5}, null, null);
+        long id7 = insertDebt(Contract.DebtType.DEBT.getValue(), "icon", "desc", date, null, id1, null, null, 10000L, false, new Long[]{id5, id6}, null, false);
+        long id8 = insertTransaction(10, date, "desc", id3, Contract.Direction.INCOME, 0, id1, null, null, null, null, null, true, true, new Long[]{id4, id5}, null, null);
+        long id9 = insertTransfer("desc", date, id1, id2, null, 10, 10, 0, null, null, null, true, true, new Long[]{id5}, null, null);
         // now delete the person 5
         assertEquals(1, mDatabase.deletePerson(id5));
         checkCursorSize(mDatabase.getPeople(null, null, null, null), 2);
         // now check that every item has no more person 5 in list
-        checkDebtId(id7, Contract.DebtType.DEBT.getValue(), "icon", "desc", date, null, id1, null, null, 10000L, false, new Long[] {id6}, null);
-        checkTransactionId(id8, 10, date, "desc", id3, Contract.Direction.INCOME, 0, id1, null, null, null, null, null, true, true, new Long[] {id4}, null);
+        checkDebtId(id7, Contract.DebtType.DEBT.getValue(), "icon", "desc", date, null, id1, null, null, 10000L, false, new Long[]{id6}, null);
+        checkTransactionId(id8, 10, date, "desc", id3, Contract.Direction.INCOME, 0, id1, null, null, null, null, null, true, true, new Long[]{id4}, null);
         checkTransferId(id9, "desc", date, id1, id2, null, 10, 10, 0, null, null, null, true, true, null, null);
     }
 
     @Test
-    public void insertAttachment() throws Exception {
+    public void insertAttachment() {
         long id1 = insertAttachment("path1", "name-1", "mime-type-1", 90L, "tag-1");
         long id2 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         checkAttachmentId(id1, "path1", "name-1", "mime-type-1", 90L, "tag-1");
@@ -1903,7 +1902,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void updateAttachment() throws Exception {
+    public void updateAttachment() {
         long id1 = insertAttachment("path1", "name-1", "mime-type-1", 90L, "tag-1");
         long id2 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         // now update attachment 2
@@ -1914,7 +1913,7 @@ public class SQLDatabaseTest {
     }
 
     @Test
-    public void deleteAttachment() throws Exception {
+    public void deleteAttachment() {
         long id1 = insertAttachment("path1", "name-1", "mime-type-1", 90L, "tag-1");
         long id2 = insertAttachment("path2", "name-2", "mime-type-2", 4560L, "tag-2");
         checkCursorSize(mDatabase.getAttachments(null, null, null, null), 2);

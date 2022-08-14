@@ -25,13 +25,14 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -286,47 +287,47 @@ public class NewEditTransferModelActivity extends NewEditItemActivity implements
                 Cursor cursor = contentResolver.query(uri, projection, null, null, null);
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
-                        mDescriptionEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.DESCRIPTION)));
+                        mDescriptionEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.DESCRIPTION)));
                         walletFrom = new Wallet(
-                                cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.WALLET_FROM_ID)),
-                                cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_FROM_NAME)),
-                                IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_FROM_ICON))),
-                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_FROM_CURRENCY))),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_FROM_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_FROM_NAME)),
+                                IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_FROM_ICON))),
+                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_FROM_CURRENCY))),
                                 0L, 0L
                         );
                         walletTo = new Wallet(
-                                cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.WALLET_TO_ID)),
-                                cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_TO_NAME)),
-                                IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_TO_ICON))),
-                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_TO_CURRENCY))),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_TO_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_TO_NAME)),
+                                IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_TO_ICON))),
+                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_TO_CURRENCY))),
                                 0L, 0L
                         );
-                        moneyFrom = cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_FROM));
-                        long moneyTo = cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_TO));
-                        tax = cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_TAX));
-                        if (!cursor.isNull(cursor.getColumnIndex(Contract.TransferModel.PLACE_ID))) {
+                        moneyFrom = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_FROM));
+                        long moneyTo = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_TO));
+                        tax = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_TAX));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_ID))) {
                             place = new Place(
-                                    cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.PLACE_ID)),
-                                    cursor.getString(cursor.getColumnIndex(Contract.TransferModel.PLACE_NAME)),
-                                    IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.PLACE_ICON))),
-                                    cursor.getString(cursor.getColumnIndex(Contract.TransferModel.PLACE_ADDRESS)),
-                                    cursor.isNull(cursor.getColumnIndex(Contract.TransferModel.PLACE_LATITUDE)) ? null : cursor.getDouble(cursor.getColumnIndex(Contract.TransferModel.PLACE_LATITUDE)),
-                                    cursor.isNull(cursor.getColumnIndex(Contract.TransferModel.PLACE_LONGITUDE)) ? null : cursor.getDouble(cursor.getColumnIndex(Contract.TransferModel.PLACE_LONGITUDE))
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_ID)),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_NAME)),
+                                    IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_ICON))),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_ADDRESS)),
+                                    cursor.isNull(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_LATITUDE)) ? null : cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_LATITUDE)),
+                                    cursor.isNull(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_LONGITUDE)) ? null : cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_LONGITUDE))
                             );
                         }
-                        mNoteEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.NOTE)));
-                        if (!cursor.isNull(cursor.getColumnIndex(Contract.TransferModel.EVENT_ID))) {
+                        mNoteEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.NOTE)));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_ID))) {
                             event = new Event(
-                                    cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.EVENT_ID)),
-                                    cursor.getString(cursor.getColumnIndex(Contract.TransferModel.EVENT_NAME)),
-                                    IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.EVENT_ICON))),
-                                    DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.EVENT_START_DATE))),
-                                    DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.TransferModel.EVENT_END_DATE)))
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_ID)),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_NAME)),
+                                    IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_ICON))),
+                                    DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_START_DATE))),
+                                    DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_END_DATE)))
                             );
                         }
                         conversionRate = (double) moneyTo / moneyFrom;
-                        mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.TransferModel.CONFIRMED)) == 1);
-                        mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.TransferModel.COUNT_IN_TOTAL)) == 1);
+                        mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransferModel.CONFIRMED)) == 1);
+                        mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransferModel.COUNT_IN_TOTAL)) == 1);
                     }
                     cursor.close();
                 }
@@ -351,12 +352,12 @@ public class NewEditTransferModelActivity extends NewEditItemActivity implements
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
                         walletFrom = new Wallet(
-                                cursor.getLong(cursor.getColumnIndex(Contract.Wallet.ID)),
-                                cursor.getString(cursor.getColumnIndex(Contract.Wallet.NAME)),
-                                IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Wallet.ICON))),
-                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Wallet.CURRENCY))),
-                                cursor.getLong(cursor.getColumnIndex(Contract.Wallet.START_MONEY)),
-                                cursor.getLong(cursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY))
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NAME)),
+                                IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.ICON))),
+                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY))),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY)),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY))
                         );
                     }
                     cursor.close();

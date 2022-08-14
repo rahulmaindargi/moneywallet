@@ -23,6 +23,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -45,6 +48,7 @@ public class CurrencyPicker extends Fragment {
     private Controller mController;
 
     private CurrencyUnit mCurrentCurrency;
+    private ActivityResultLauncher<Intent> requestCurrencyPicker;
 
     public static CurrencyPicker createPicker(FragmentManager fragmentManager, String tag) {
         return createPicker(fragmentManager, tag, CurrencyManager.getDefaultCurrency());
@@ -63,7 +67,7 @@ public class CurrencyPicker extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;
@@ -83,6 +87,15 @@ public class CurrencyPicker extends Fragment {
                 mCurrentCurrency = CurrencyManager.getDefaultCurrency();
             }
         }
+        requestCurrencyPicker = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        mCurrentCurrency = result.getData().getParcelableExtra(CurrencyListActivity.RESULT_CURRENCY);
+                        fireCallbackSafely();
+                    }
+                }
+        );
     }
 
     @Override
@@ -119,25 +132,14 @@ public class CurrencyPicker extends Fragment {
     public void showPicker() {
         Intent intent = new Intent(getActivity(), CurrencyListActivity.class);
         intent.putExtra(CurrencyListActivity.ACTIVITY_MODE, CurrencyListActivity.CURRENCY_PICKER);
-        startActivityForResult(intent, REQUEST_CURRENCY_PICKER);
+
+        requestCurrencyPicker.launch(intent);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mController = null;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == REQUEST_CURRENCY_PICKER) {
-            if (resultCode == Activity.RESULT_OK) {
-                mCurrentCurrency = intent.getParcelableExtra(CurrencyListActivity.RESULT_CURRENCY);
-                fireCallbackSafely();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, intent);
-        }
     }
 
     public interface Controller {

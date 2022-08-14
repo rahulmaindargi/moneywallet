@@ -20,13 +20,14 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -66,14 +67,14 @@ public class RecurrentTransactionCursorAdapter extends AbstractCursorAdapter<Rec
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexId = cursor.getColumnIndex(Contract.RecurrentTransaction.ID);
-        mIndexCategoryName = cursor.getColumnIndex(Contract.RecurrentTransaction.CATEGORY_NAME);
-        mIndexCategoryIcon = cursor.getColumnIndex(Contract.RecurrentTransaction.CATEGORY_ICON);
-        mIndexWalletCurrency = cursor.getColumnIndex(Contract.RecurrentTransaction.WALLET_CURRENCY);
-        mIndexDirection = cursor.getColumnIndex(Contract.RecurrentTransaction.DIRECTION);
-        mIndexMoney = cursor.getColumnIndex(Contract.RecurrentTransaction.MONEY);
-        mIndexDescription = cursor.getColumnIndex(Contract.RecurrentTransaction.DESCRIPTION);
-        mIndexNextOccurrence = cursor.getColumnIndex(Contract.RecurrentTransaction.NEXT_OCCURRENCE);
+        mIndexId = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.ID);
+        mIndexCategoryName = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.CATEGORY_NAME);
+        mIndexCategoryIcon = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.CATEGORY_ICON);
+        mIndexWalletCurrency = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.WALLET_CURRENCY);
+        mIndexDirection = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.DIRECTION);
+        mIndexMoney = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.MONEY);
+        mIndexDescription = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.DESCRIPTION);
+        mIndexNextOccurrence = cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.NEXT_OCCURRENCE);
     }
 
     @Override

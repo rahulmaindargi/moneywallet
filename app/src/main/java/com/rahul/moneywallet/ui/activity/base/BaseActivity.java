@@ -20,6 +20,10 @@
 package com.rahul.moneywallet.ui.activity.base;
 
 import android.content.Intent;
+import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.rahul.moneywallet.model.LockMode;
 import com.rahul.moneywallet.storage.preference.PreferenceManager;
@@ -30,13 +34,31 @@ import com.rahul.moneywallet.ui.activity.LockActivity;
  */
 public abstract class BaseActivity extends ThemedActivity {
 
-    private static final int REQUEST_CODE_LOCK_ACTIVITY = 20;
 
     private static final long MAX_LOCK_TIME_INTERVAL = 1000;
 
     boolean mActivityLocked = true;
     boolean mActivityLockEnabled = true;
     boolean mActivityResultOk = true;
+    private ActivityResultLauncher<Intent> requestCodeLock;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestCodeLock = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() != RESULT_OK) {
+                        moveTaskToBack(true);
+                        mActivityResultOk = false;
+                    } else {
+                        mActivityResultOk = true;
+                    }
+                }
+        );
+
+    }
 
     @Override
     protected void onResume() {
@@ -46,7 +68,7 @@ public abstract class BaseActivity extends ThemedActivity {
                 mActivityLocked = true;
                 if (mActivityResultOk) {
                     Intent intent = new Intent(this, LockActivity.class);
-                    startActivityForResult(new Intent(this, LockActivity.class), REQUEST_CODE_LOCK_ACTIVITY);
+                    requestCodeLock.launch(intent);
                 } else {
                     mActivityResultOk = true;
                 }
@@ -60,19 +82,6 @@ public abstract class BaseActivity extends ThemedActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_LOCK_ACTIVITY) {
-            if (resultCode != RESULT_OK) {
-                moveTaskToBack(true);
-                mActivityResultOk = false;
-            } else {
-                mActivityResultOk = true;
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
 
     @Override
     protected void onPause() {

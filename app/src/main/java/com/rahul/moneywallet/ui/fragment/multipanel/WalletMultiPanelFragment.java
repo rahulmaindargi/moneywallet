@@ -24,6 +24,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
 import androidx.annotation.MenuRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,13 +37,8 @@ import androidx.annotation.StringRes;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Money;
@@ -155,10 +156,10 @@ public class WalletMultiPanelFragment extends MultiPanelAppBarItemFragment imple
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null) {
             Money money = new Money();
-            int indexCurrency = cursor.getColumnIndex(Contract.Wallet.CURRENCY);
-            int indexInTotal = cursor.getColumnIndex(Contract.Wallet.COUNT_IN_TOTAL);
-            int indexWalletInitial = cursor.getColumnIndex(Contract.Wallet.START_MONEY);
-            int indexWalletTotal = cursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY);
+            int indexCurrency = cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY);
+            int indexInTotal = cursor.getColumnIndexOrThrow(Contract.Wallet.COUNT_IN_TOTAL);
+            int indexWalletInitial = cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY);
+            int indexWalletTotal = cursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY);
             for (int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToPosition(i);
                 if (cursor.getInt(indexInTotal) == 1) {

@@ -27,11 +27,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -39,6 +34,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -181,12 +182,12 @@ public class EventItemFragment extends SecondaryPanelFragment implements LoaderM
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.moveToFirst()) {
-            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Event.ICON)));
+            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.ICON)));
             IconLoader.loadInto(icon, mAvatarImageView);
-            mNameTextView.setText(cursor.getString(cursor.getColumnIndex(Contract.Event.NAME)));
-            DateFormatter.applyDate(mStartDateTextView, DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Event.START_DATE))));
-            DateFormatter.applyDate(mEndDateTextView, DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Event.END_DATE))));
-            String note = cursor.getString(cursor.getColumnIndex(Contract.Event.NOTE));
+            mNameTextView.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.NAME)));
+            DateFormatter.applyDate(mStartDateTextView, DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.START_DATE))));
+            DateFormatter.applyDate(mEndDateTextView, DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.END_DATE))));
+            String note = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.NOTE));
             if (!TextUtils.isEmpty(note)) {
                 mNoteTextView.setText(note);
                 mNoteTextView.setVisibility(View.VISIBLE);

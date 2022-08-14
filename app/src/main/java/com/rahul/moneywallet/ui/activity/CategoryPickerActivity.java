@@ -25,11 +25,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.PagerAdapter;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Category;
@@ -107,10 +108,10 @@ public class CategoryPickerActivity extends SinglePanelViewPagerActivity impleme
             Category category = null;
             if (cursor.moveToFirst()) {
                 category = new Category(
-                        cursor.getLong(cursor.getColumnIndex(Contract.Category.ID)),
-                        cursor.getString(cursor.getColumnIndex(Contract.Category.NAME)),
-                        IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Category.ICON))),
-                        Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Category.TYPE)))
+                        cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Category.ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.NAME)),
+                        IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.ICON))),
+                        Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Category.TYPE)))
                 );
             }
             cursor.close();

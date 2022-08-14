@@ -23,6 +23,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -30,8 +33,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.model.LatLng;
 import com.rahul.moneywallet.model.Place;
 
 /**
@@ -49,6 +52,7 @@ public class MapPlacePicker extends Fragment {
     private Controller mController;
 
     private Place mCurrentPlace;
+    private ActivityResultLauncher<Intent> requestPlacePicker;
 
     public static MapPlacePicker createPicker(FragmentManager fragmentManager, String tag, Place defaultPlace) {
         MapPlacePicker mapPlacePicker = (MapPlacePicker) fragmentManager.findFragmentByTag(tag);
@@ -63,7 +67,7 @@ public class MapPlacePicker extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof MapPlacePicker.Controller) {
             mController = (MapPlacePicker.Controller) context;
@@ -81,6 +85,20 @@ public class MapPlacePicker extends Fragment {
                 mCurrentPlace = arguments.getParcelable(ARG_DEFAULT_PLACE);
             }
         }
+        requestPlacePicker = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Activity activity = getActivity();
+                    if (activity != null && result.getResultCode() == Activity.RESULT_OK) {
+                        com.google.android.gms.location.places.Place place = com.google.android.gms.location.places.ui.PlacePicker.getPlace(activity, result.getData());
+                        String name = place.getName().toString();
+                        String address = place.getAddress() != null ? place.getAddress().toString() : null;
+                        LatLng coordinates = place.getLatLng();
+                        mCurrentPlace = new Place(0, name, null, address, coordinates.latitude, coordinates.longitude);
+                        fireCallbackSafely();
+                    }
+                }
+        );
     }
 
     @Override
@@ -124,7 +142,7 @@ public class MapPlacePicker extends Fragment {
             try {
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
                 Intent intent = builder.build(getActivity());
-                startActivityForResult(intent, REQUEST_PLACE_PICKER);
+                requestPlacePicker.launch(intent);
             } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
                 e.printStackTrace();
             }
@@ -135,23 +153,6 @@ public class MapPlacePicker extends Fragment {
     public void onDetach() {
         super.onDetach();
         mController = null;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_PLACE_PICKER) {
-            Activity activity = getActivity();
-            if (activity != null && resultCode == Activity.RESULT_OK) {
-                com.google.android.gms.location.places.Place place = com.google.android.gms.location.places.ui.PlacePicker.getPlace(activity, data);
-                String name = place.getName().toString();
-                String address = place.getAddress() != null ? place.getAddress().toString() : null;
-                LatLng coordinates = place.getLatLng();
-                mCurrentPlace = new Place(0, name, null, address, coordinates.latitude, coordinates.longitude);
-                fireCallbackSafely();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
     }
 
     public interface Controller {

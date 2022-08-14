@@ -20,13 +20,14 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Icon;
@@ -62,11 +63,11 @@ public class EventCursorAdapter extends AbstractCursorAdapter<EventCursorAdapter
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexId = cursor.getColumnIndex(Contract.Event.ID);
-        mIndexIcon = cursor.getColumnIndex(Contract.Event.ICON);
-        mIndexName = cursor.getColumnIndex(Contract.Event.NAME);
-        mIndexEndDate = cursor.getColumnIndex(Contract.Event.END_DATE);
-        mIndexProgress = cursor.getColumnIndex(Contract.Event.PROGRESS);
+        mIndexId = cursor.getColumnIndexOrThrow(Contract.Event.ID);
+        mIndexIcon = cursor.getColumnIndexOrThrow(Contract.Event.ICON);
+        mIndexName = cursor.getColumnIndexOrThrow(Contract.Event.NAME);
+        mIndexEndDate = cursor.getColumnIndexOrThrow(Contract.Event.END_DATE);
+        mIndexProgress = cursor.getColumnIndexOrThrow(Contract.Event.PROGRESS);
     }
 
     @Override

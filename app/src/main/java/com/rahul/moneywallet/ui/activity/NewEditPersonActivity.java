@@ -25,11 +25,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import androidx.fragment.app.FragmentManager;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Icon;
@@ -93,9 +94,9 @@ public class NewEditPersonActivity extends NewEditItemActivity implements IconPi
                 Cursor cursor = contentResolver.query(uri, projection, null, null, null);
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
-                        mNameEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Person.NAME)));
-                        icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Person.ICON)));
-                        mNoteEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Person.NOTE)));
+                        mNameEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.NAME)));
+                        icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.ICON)));
+                        mNoteEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.NOTE)));
                     }
                     cursor.close();
                 }

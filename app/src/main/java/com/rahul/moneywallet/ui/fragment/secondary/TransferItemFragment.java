@@ -27,11 +27,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -39,6 +34,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -234,58 +235,58 @@ public class TransferItemFragment extends SecondaryPanelFragment implements Atta
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (loader.getId() == TRANSFER_LOADER_ID) {
             if (cursor != null && cursor.moveToFirst()) {
-                String iso = cursor.getString(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_WALLET_CURRENCY));
+                String iso = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_WALLET_CURRENCY));
                 CurrencyUnit currency = CurrencyManager.getCurrency(iso);
                 if (currency != null) {
                     mCurrencyTextView.setText(currency.getSymbol());
                 } else {
                     mCurrencyTextView.setText("?");
                 }
-                long money = cursor.getLong(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_MONEY));
+                long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_MONEY));
                 mMoneyTextView.setText(mMoneyFormatter.getNotTintedString(currency, money, MoneyFormatter.CurrencyMode.ALWAYS_HIDDEN));
-                String description = cursor.getString(cursor.getColumnIndex(Contract.Transfer.DESCRIPTION));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.DESCRIPTION));
                 if (!TextUtils.isEmpty(description)) {
                     mDescriptionTextView.setText(description);
                     mDescriptionTextView.setVisibility(View.VISIBLE);
                 } else {
                     mDescriptionTextView.setVisibility(View.GONE);
                 }
-                Date datetime = DateUtils.getDateFromSQLDateTimeString(cursor.getString(cursor.getColumnIndex(Contract.Transfer.DATE)));
+                Date datetime = DateUtils.getDateFromSQLDateTimeString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.DATE)));
                 DateFormatter.applyDateTime(mDateTimeTextView, datetime);
-                String walletFrom = cursor.getString(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_WALLET_NAME));
-                String walletTo = cursor.getString(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TO_WALLET_NAME));
+                String walletFrom = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_WALLET_NAME));
+                String walletTo = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TO_WALLET_NAME));
                 mWalletFromTextView.setText(walletFrom);
                 mWalletToTextView.setText(walletTo);
-                if (!cursor.isNull(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TAX_ID))) {
-                    long tax = cursor.getLong(cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TAX_MONEY));
+                if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TAX_ID))) {
+                    long tax = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TAX_MONEY));
                     mTaxTextView.setText(mMoneyFormatter.getNotTintedString(currency, tax));
                     mTaxTextView.setVisibility(View.VISIBLE);
                 } else {
                     mTaxTextView.setVisibility(View.GONE);
                 }
-                String event = cursor.getString(cursor.getColumnIndex(Contract.Transfer.EVENT_NAME));
+                String event = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.EVENT_NAME));
                 if (!TextUtils.isEmpty(event)) {
                     mEventTextView.setText(event);
                     mEventTextView.setVisibility(View.VISIBLE);
                 } else {
                     mEventTextView.setVisibility(View.GONE);
                 }
-                String place = cursor.getString(cursor.getColumnIndex(Contract.Transfer.PLACE_NAME));
+                String place = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.PLACE_NAME));
                 if (!TextUtils.isEmpty(place)) {
                     mPlaceTextView.setText(place);
                     mPlaceTextView.setVisibility(View.VISIBLE);
                 } else {
                     mPlaceTextView.setVisibility(View.GONE);
                 }
-                String note = cursor.getString(cursor.getColumnIndex(Contract.Transfer.NOTE));
+                String note = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transfer.NOTE));
                 if (!TextUtils.isEmpty(note)) {
                     mNoteTextView.setText(note);
                     mNoteTextView.setVisibility(View.VISIBLE);
                 } else {
                     mNoteTextView.setVisibility(View.GONE);
                 }
-                mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.Transfer.CONFIRMED)) == 1);
-                mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.Transfer.COUNT_IN_TOTAL)) == 1);
+                mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transfer.CONFIRMED)) == 1);
+                mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transfer.COUNT_IN_TOTAL)) == 1);
             } else {
                 showItemId(0L);
             }
@@ -297,7 +298,7 @@ public class TransferItemFragment extends SecondaryPanelFragment implements Atta
                     if (i != 0) {
                         builder.append(", ");
                     }
-                    String name = cursor.getString(cursor.getColumnIndex(Contract.Person.NAME));
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.NAME));
                     builder.append(name);
                 }
                 mPeopleTextView.setText(builder);
@@ -310,11 +311,11 @@ public class TransferItemFragment extends SecondaryPanelFragment implements Atta
                 List<Attachment> attachments = new ArrayList<>();
                 for (int i = 0; cursor.moveToPosition(i) && i < cursor.getCount(); i++) {
                     attachments.add(new Attachment(
-                            cursor.getLong(cursor.getColumnIndex(Contract.Attachment.ID)),
-                            cursor.getString(cursor.getColumnIndex(Contract.Attachment.FILE)),
-                            cursor.getString(cursor.getColumnIndex(Contract.Attachment.NAME)),
-                            cursor.getString(cursor.getColumnIndex(Contract.Attachment.TYPE)),
-                            cursor.getLong(cursor.getColumnIndex(Contract.Attachment.SIZE))
+                            cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Attachment.ID)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(Contract.Attachment.FILE)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(Contract.Attachment.NAME)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(Contract.Attachment.TYPE)),
+                            cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Attachment.SIZE))
                     ));
                 }
                 mAttachmentView.setAttachments(attachments);

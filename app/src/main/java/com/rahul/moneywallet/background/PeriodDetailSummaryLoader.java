@@ -98,11 +98,11 @@ public class PeriodDetailSummaryLoader extends AbstractGenericLoader<PeriodDetai
                 currentPeriod = getNextPeriod(currentPeriod);
                 if (!cursor.isAfterLast()) {
                     do {
-                        Date date = DateUtils.getDateFromSQLDateTimeString(cursor.getString(cursor.getColumnIndex(Contract.Transaction.DATE)));
+                        Date date = DateUtils.getDateFromSQLDateTimeString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DATE)));
                         if (belongToPeriod(currentPeriod, date)) {
-                            int direction = cursor.getInt(cursor.getColumnIndex(Contract.Transaction.DIRECTION));
-                            String currency = cursor.getString(cursor.getColumnIndex(Contract.Transaction.WALLET_CURRENCY));
-                            long money = cursor.getLong(cursor.getColumnIndex(Contract.Transaction.MONEY));
+                            int direction = cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transaction.DIRECTION));
+                            String currency = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_CURRENCY));
+                            long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.MONEY));
                             if (direction == Contract.Direction.INCOME) {
                                 currentPeriod.addIncome(currency, money);
                                 totalNetIncomes.addMoney(currency, money);

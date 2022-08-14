@@ -605,13 +605,13 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
         int selectedTextColor = theme.getColorPrimary();
         int selectedColor = theme.isDark() ? Color.parseColor("#202020") : Color.parseColor("#E8E8E8");
         if (mCursor != null) {
-            int indexWalletId = mCursor.getColumnIndex(Contract.Wallet.ID);
-            int indexWalletName = mCursor.getColumnIndex(Contract.Wallet.NAME);
-            int indexWalletIcon = mCursor.getColumnIndex(Contract.Wallet.ICON);
-            int indexCurrency = mCursor.getColumnIndex(Contract.Wallet.CURRENCY);
-            int indexWalletInitial = mCursor.getColumnIndex(Contract.Wallet.START_MONEY);
-            int indexWalletTotal = mCursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY);
-            int indexWalletArchived = mCursor.getColumnIndex(Contract.Wallet.ARCHIVED);
+            int indexWalletId = mCursor.getColumnIndexOrThrow(Contract.Wallet.ID);
+            int indexWalletName = mCursor.getColumnIndexOrThrow(Contract.Wallet.NAME);
+            int indexWalletIcon = mCursor.getColumnIndexOrThrow(Contract.Wallet.ICON);
+            int indexCurrency = mCursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY);
+            int indexWalletInitial = mCursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY);
+            int indexWalletTotal = mCursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY);
+            int indexWalletArchived = mCursor.getColumnIndexOrThrow(Contract.Wallet.ARCHIVED);
             for (int i = 0, c = 0; i < mCursor.getCount(); i++) {
                 mCursor.moveToPosition(i);
                 if (cursor.getInt(indexWalletArchived) == 0) {
@@ -684,10 +684,10 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
      */
     private ProfileDrawerItem createTotalWalletAccount(@NonNull Cursor cursor) {
         Money money = new Money();
-        int indexCurrency = mCursor.getColumnIndex(Contract.Wallet.CURRENCY);
-        int indexInTotal = mCursor.getColumnIndex(Contract.Wallet.COUNT_IN_TOTAL);
-        int indexWalletInitial = mCursor.getColumnIndex(Contract.Wallet.START_MONEY);
-        int indexWalletTotal = mCursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY);
+        int indexCurrency = mCursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY);
+        int indexInTotal = mCursor.getColumnIndexOrThrow(Contract.Wallet.COUNT_IN_TOTAL);
+        int indexWalletInitial = mCursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY);
+        int indexWalletTotal = mCursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY);
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToPosition(i);
             if (cursor.getInt(indexInTotal) == 1) {

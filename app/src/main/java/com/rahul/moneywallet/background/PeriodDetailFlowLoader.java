@@ -116,13 +116,13 @@ public class PeriodDetailFlowLoader extends AbstractGenericLoader<PeriodDetailFl
             if (cursor.moveToFirst()) {
                 do {
                     long categoryId;
-                    if (cursor.isNull(cursor.getColumnIndex(Contract.Transaction.CATEGORY_PARENT_ID))) {
-                        categoryId = cursor.getLong(cursor.getColumnIndex(Contract.Transaction.CATEGORY_ID));
+                    if (cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_PARENT_ID))) {
+                        categoryId = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_ID));
                     } else {
-                        categoryId = cursor.getLong(cursor.getColumnIndex(Contract.Transaction.CATEGORY_PARENT_ID));
+                        categoryId = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_PARENT_ID));
                     }
-                    long money = cursor.getLong(cursor.getColumnIndex(Contract.Transaction.MONEY));
-                    String iso = cursor.getString(cursor.getColumnIndex(Contract.Transaction.WALLET_CURRENCY));
+                    long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.MONEY));
+                    String iso = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_CURRENCY));
                     if (categoryMoneyMap.containsKey(categoryId)) {
                         CategoryMoney categoryMoney = categoryMoneyMap.get(categoryId);
                         categoryMoney.getMoney().addMoney(iso, money);
@@ -209,11 +209,11 @@ public class PeriodDetailFlowLoader extends AbstractGenericLoader<PeriodDetailFl
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    long categoryId = cursor.getLong(cursor.getColumnIndex(Contract.Category.ID));
+                    long categoryId = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Category.ID));
                     Category category = new Category(categoryId,
-                            cursor.getString(cursor.getColumnIndex(Contract.Category.NAME)),
-                            IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Category.ICON))),
-                            Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Category.TYPE)))
+                            cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.NAME)),
+                            IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.ICON))),
+                            Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Category.TYPE)))
                     );
                     cache.put(categoryId, category);
                 } while (cursor.moveToNext());

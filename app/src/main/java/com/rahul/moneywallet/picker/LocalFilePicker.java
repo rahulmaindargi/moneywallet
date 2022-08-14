@@ -25,11 +25,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.core.content.ContextCompat;
 
 import com.rahul.moneywallet.api.BackendServiceFactory;
 import com.rahul.moneywallet.model.LocalFile;
@@ -48,13 +51,12 @@ public class LocalFilePicker extends Fragment {
 
     private static final String ARG_PICKER_MODE = "LocalFilePicker::Argument::PickerMode";
 
-    private static final int REQUEST_FILE_PICKER = 23;
-    private static final int REQUEST_PERMISSION = 35;
-
     private Controller mController;
 
     private int mPickerMode;
     private LocalFile mCurrentFile;
+    private ActivityResultLauncher<Intent> requestFilePicker;
+    private ActivityResultLauncher<String> permissionLauncher;
 
     public static LocalFilePicker createPicker(FragmentManager fragmentManager, String tag, int mode) {
         LocalFilePicker filePicker = (LocalFilePicker) fragmentManager.findFragmentByTag(tag);
@@ -69,7 +71,7 @@ public class LocalFilePicker extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;
@@ -91,6 +93,20 @@ public class LocalFilePicker extends Fragment {
             }
             mCurrentFile = null;
         }
+        requestFilePicker = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        mCurrentFile = result.getData().getParcelableExtra(BackendExplorerActivity.RESULT_FILE);
+                        fireCallbackSafely();
+                    }
+                }
+        );
+        permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
+            if (result) {
+                startPicker(getActivity());
+            }
+        });
     }
 
     @Override
@@ -123,18 +139,12 @@ public class LocalFilePicker extends Fragment {
     public void showPicker() {
         Activity activity = getActivity();
         if (activity != null) {
-            if (isPermissionGranted(activity)) {
+            if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 startPicker(activity);
             } else {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
+                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             }
         }
-    }
-
-    private boolean isPermissionGranted(Context context) {
-        String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-        int result = ContextCompat.checkSelfPermission(context, permission);
-        return result == PackageManager.PERMISSION_GRANTED;
     }
 
     private void startPicker(Context context) {
@@ -148,7 +158,7 @@ public class LocalFilePicker extends Fragment {
                 intent.putExtra(BackendExplorerActivity.MODE, BackendExplorerActivity.MODE_FOLDER_PICKER);
                 break;
         }
-        startActivityForResult(intent, REQUEST_FILE_PICKER);
+        requestFilePicker.launch(intent);
     }
 
     @Override
@@ -157,27 +167,7 @@ public class LocalFilePicker extends Fragment {
         mController = null;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == REQUEST_FILE_PICKER) {
-            if (resultCode == Activity.RESULT_OK) {
-                mCurrentFile = intent.getParcelableExtra(BackendExplorerActivity.RESULT_FILE);
-                fireCallbackSafely();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, intent);
-        }
-    }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_PERMISSION) {
-            if (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startPicker(getActivity());
-            }
-        }
-    }
 
     public interface Controller {
 

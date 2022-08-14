@@ -21,13 +21,14 @@ package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.content.Context;
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -77,20 +78,20 @@ public class DebtCursorAdapter extends AbstractCursorAdapter {
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexType = cursor.getColumnIndex(DebtHeaderCursor.COLUMN_ITEM_TYPE);
-        mIndexHeaderType = cursor.getColumnIndex(DebtHeaderCursor.COLUMN_HEADER_TYPE);
-        mIndexHeaderMoney = cursor.getColumnIndex(DebtHeaderCursor.COLUMN_HEADER_MONEY);
-        mIndexId = cursor.getColumnIndex(Contract.Debt.ID);
-        mIndexDebtType = cursor.getColumnIndex(Contract.Debt.TYPE);
-        mIndexIcon = cursor.getColumnIndex(Contract.Debt.ICON);
-        mIndexDescription = cursor.getColumnIndex(Contract.Debt.DESCRIPTION);
-        mIndexMoney = cursor.getColumnIndex(Contract.Debt.MONEY);
-        mIndexProgress = cursor.getColumnIndex(Contract.Debt.PROGRESS);
-        mIndexCurrency = cursor.getColumnIndex(Contract.Debt.WALLET_CURRENCY);
-        mIndexExpirationDate = cursor.getColumnIndex(Contract.Debt.EXPIRATION_DATE);
-        mIndexArchived = cursor.getColumnIndex(Contract.Debt.ARCHIVED);
-        mIndexPlaceId = cursor.getColumnIndex(Contract.Debt.PLACE_ID);
-        mIndexPlaceName = cursor.getColumnIndex(Contract.Debt.PLACE_NAME);
+        mIndexType = cursor.getColumnIndexOrThrow(DebtHeaderCursor.COLUMN_ITEM_TYPE);
+        mIndexHeaderType = cursor.getColumnIndexOrThrow(DebtHeaderCursor.COLUMN_HEADER_TYPE);
+        mIndexHeaderMoney = cursor.getColumnIndexOrThrow(DebtHeaderCursor.COLUMN_HEADER_MONEY);
+        mIndexId = cursor.getColumnIndexOrThrow(Contract.Debt.ID);
+        mIndexDebtType = cursor.getColumnIndexOrThrow(Contract.Debt.TYPE);
+        mIndexIcon = cursor.getColumnIndexOrThrow(Contract.Debt.ICON);
+        mIndexDescription = cursor.getColumnIndexOrThrow(Contract.Debt.DESCRIPTION);
+        mIndexMoney = cursor.getColumnIndexOrThrow(Contract.Debt.MONEY);
+        mIndexProgress = cursor.getColumnIndexOrThrow(Contract.Debt.PROGRESS);
+        mIndexCurrency = cursor.getColumnIndexOrThrow(Contract.Debt.WALLET_CURRENCY);
+        mIndexExpirationDate = cursor.getColumnIndexOrThrow(Contract.Debt.EXPIRATION_DATE);
+        mIndexArchived = cursor.getColumnIndexOrThrow(Contract.Debt.ARCHIVED);
+        mIndexPlaceId = cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_ID);
+        mIndexPlaceName = cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_NAME);
     }
 
     @Override

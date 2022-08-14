@@ -164,15 +164,16 @@ public class TutorialActivity extends AppIntro2 {
         getPager().setCurrentItem(getSlides().size() - 1, true);
     }
 
-    ActivityResultLauncher<Intent> intentActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> onActivityResult(REQUEST_NEW_WALLET, result.getResultCode(), result.getData()));
+    ActivityResultLauncher<Intent> intentActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> onActivityResult(REQUEST_NEW_WALLET, result.getResultCode(), result.getData()));
+
     @Override
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);
 
         Intent intent = new Intent(this, NewEditWalletActivity.class);
         intentActivityResultLauncher.launch(intent);
-        // TODO: Remove if above works.
-        //startActivityForResult(new Intent(this, NewEditWalletActivity.class), REQUEST_NEW_WALLET);
+
     }
 
     @Override

@@ -26,10 +26,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
-import android.view.View;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -289,10 +290,10 @@ public class OverviewSettingDialog extends DialogFragment implements DateTimePic
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 category = new Category(
-                        cursor.getLong(cursor.getColumnIndex(Contract.Category.ID)),
-                        cursor.getString(cursor.getColumnIndex(Contract.Category.NAME)),
-                        IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Category.ICON))),
-                        Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Category.TYPE)))
+                        cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Category.ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.NAME)),
+                        IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.ICON))),
+                        Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Category.TYPE)))
                 );
             }
             cursor.close();

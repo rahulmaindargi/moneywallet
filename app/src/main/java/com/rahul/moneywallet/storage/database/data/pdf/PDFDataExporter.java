@@ -138,31 +138,31 @@ public class PDFDataExporter extends AbstractDataExporter {
                 String label = null;
                 switch (column) {
                     case Constants.COLUMN_DATETIME:
-                        label = cursor.getString(cursor.getColumnIndex(Contract.Transaction.DATE));
+                        label = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DATE));
                         break;
                     case Constants.COLUMN_CATEGORY:
-                        label = cursor.getString(cursor.getColumnIndex(Contract.Transaction.CATEGORY_NAME));
+                        label = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_NAME));
                         break;
                     case Constants.COLUMN_MONEY:
-                        CurrencyUnit currencyUnit = CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Transaction.WALLET_CURRENCY)));
-                        long money = cursor.getLong(cursor.getColumnIndex(Contract.Transaction.MONEY));
-                        int direction = cursor.getInt(cursor.getColumnIndex(Contract.Transaction.DIRECTION));
+                        CurrencyUnit currencyUnit = CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_CURRENCY)));
+                        long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Transaction.MONEY));
+                        int direction = cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Transaction.DIRECTION));
                         if (direction == Contract.Direction.EXPENSE) {
                             money *= -1;
                         }
                         label = mMoneyFormatter.getNotTintedString(currencyUnit, money);
                         break;
                     case Constants.COLUMN_WALLET:
-                        label = cursor.getString(cursor.getColumnIndex(Contract.Transaction.WALLET_NAME));
+                        label = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_NAME));
                         break;
                     case Constants.COLUMN_DESCRIPTION:
-                        label = cursor.getString(cursor.getColumnIndex(Contract.Transaction.DESCRIPTION));
+                        label = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.DESCRIPTION));
                         break;
                     case Constants.COLUMN_EVENT:
-                        label = cursor.getString(cursor.getColumnIndex(Contract.Transaction.EVENT_NAME));
+                        label = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.EVENT_NAME));
                         break;
                     case Constants.COLUMN_PEOPLE:
-                        List<Long> peopleIds = Contract.parseObjectIds(cursor.getString(cursor.getColumnIndex(Contract.Transaction.PEOPLE_IDS)));
+                        List<Long> peopleIds = Contract.parseObjectIds(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.PEOPLE_IDS)));
                         if (peopleIds != null && !peopleIds.isEmpty()) {
                             StringBuilder builder = new StringBuilder();
                             for (Long personId : peopleIds) {
@@ -180,10 +180,10 @@ public class PDFDataExporter extends AbstractDataExporter {
                         }
                         break;
                     case Constants.COLUMN_PLACE:
-                        label = cursor.getString(cursor.getColumnIndex(Contract.Transaction.PLACE_NAME));
+                        label = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.PLACE_NAME));
                         break;
                     case Constants.COLUMN_NOTE:
-                        label = cursor.getString(cursor.getColumnIndex(Contract.Transaction.NOTE));
+                        label = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Transaction.NOTE));
                         break;
                 }
                 table.addCell(label);

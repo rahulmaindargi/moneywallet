@@ -23,17 +23,19 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.api.BackendServiceFactory;
@@ -51,7 +53,6 @@ public class AutoBackupSettingDialog extends DialogFragment {
     private static final String SS_BACKEND_ID = "AutoBackupSettingDialog::SavedState::BackendId";
     private static final String SS_FOLDER = "AutoBackupSettingDialog::SavedState::Folder";
 
-    private static final int REQUEST_CODE_FOLDER_PICKER = 35625;
 
     private static final int OFFSET_MIN_HOURS = 24;
     private static final int OFFSET_MAX_HOURS = 168;
@@ -85,14 +86,7 @@ public class AutoBackupSettingDialog extends DialogFragment {
                 .customView(R.layout.dialog_auto_backup_setting, true)
                 .positiveText(android.R.string.ok)
                 .negativeText(android.R.string.cancel)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        onSaveSetting();
-                    }
-
-                })
+                .onPositive((dialog1, which) -> onSaveSetting())
                 .build();
         View view = dialog.getCustomView();
         if (view != null) {
@@ -123,19 +117,23 @@ public class AutoBackupSettingDialog extends DialogFragment {
                 }
 
             });
-            mFolderTextView.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    Activity activity = getActivity();
-                    if (activity != null) {
-                        Intent intent = new Intent(activity, BackendExplorerActivity.class);
-                        intent.putExtra(BackendExplorerActivity.BACKEND_ID, mBackendId);
-                        intent.putExtra(BackendExplorerActivity.MODE, BackendExplorerActivity.MODE_FOLDER_PICKER);
-                        startActivityForResult(intent, REQUEST_CODE_FOLDER_PICKER);
+            ActivityResultLauncher<Intent> requestFolderPicker = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            mFolder = result.getData().getParcelableExtra(BackendExplorerActivity.RESULT_FILE);
+                            onFolderChanged();
+                        }
                     }
+            );
+            mFolderTextView.setOnClickListener(v -> {
+                Activity activity1 = getActivity();
+                if (activity1 != null) {
+                    Intent intent = new Intent(activity1, BackendExplorerActivity.class);
+                    intent.putExtra(BackendExplorerActivity.BACKEND_ID, mBackendId);
+                    intent.putExtra(BackendExplorerActivity.MODE, BackendExplorerActivity.MODE_FOLDER_PICKER);
+                    requestFolderPicker.launch(intent);
                 }
-
             });
             if (savedInstanceState == null) {
                 mServiceEnabledSwitchCompat.setChecked(BackendManager.isAutoBackupEnabled(mBackendId));
@@ -152,7 +150,7 @@ public class AutoBackupSettingDialog extends DialogFragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SS_BACKEND_ID, mBackendId);
         outState.putParcelable(SS_FOLDER, mFolder);
@@ -186,15 +184,4 @@ public class AutoBackupSettingDialog extends DialogFragment {
         AutoBackupBroadcastReceiver.scheduleAutoBackupTask(getActivity());
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_FOLDER_PICKER) {
-            if (resultCode == Activity.RESULT_OK) {
-                mFolder = data.getParcelableExtra(BackendExplorerActivity.RESULT_FILE);
-                onFolderChanged();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
 }

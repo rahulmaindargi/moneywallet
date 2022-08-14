@@ -21,13 +21,14 @@ package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.content.Context;
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.ColorIcon;
@@ -72,14 +73,14 @@ public class BudgetCursorAdapter extends AbstractCursorAdapter<BudgetCursorAdapt
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexId = cursor.getColumnIndex(Contract.Budget.ID);
-        mIndexType = cursor.getColumnIndex(Contract.Budget.TYPE);
-        mIndexTarget = cursor.getColumnIndex(Contract.Budget.MONEY);
-        mIndexEndDate = cursor.getColumnIndex(Contract.Budget.END_DATE);
-        mIndexCategoryIcon = cursor.getColumnIndex(Contract.Budget.CATEGORY_ICON);
-        mIndexCategoryName = cursor.getColumnIndex(Contract.Budget.CATEGORY_NAME);
-        mIndexCurrency = cursor.getColumnIndex(Contract.Budget.CURRENCY);
-        mIndexProgress = cursor.getColumnIndex(Contract.Budget.PROGRESS);
+        mIndexId = cursor.getColumnIndexOrThrow(Contract.Budget.ID);
+        mIndexType = cursor.getColumnIndexOrThrow(Contract.Budget.TYPE);
+        mIndexTarget = cursor.getColumnIndexOrThrow(Contract.Budget.MONEY);
+        mIndexEndDate = cursor.getColumnIndexOrThrow(Contract.Budget.END_DATE);
+        mIndexCategoryIcon = cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_ICON);
+        mIndexCategoryName = cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_NAME);
+        mIndexCurrency = cursor.getColumnIndexOrThrow(Contract.Budget.CURRENCY);
+        mIndexProgress = cursor.getColumnIndexOrThrow(Contract.Budget.PROGRESS);
     }
 
     @Override

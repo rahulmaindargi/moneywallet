@@ -27,11 +27,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -39,6 +34,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -194,56 +195,56 @@ public class TransferModelItemFragment extends SecondaryPanelFragment implements
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.moveToFirst()) {
-            String iso = cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_FROM_CURRENCY));
+            String iso = cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_FROM_CURRENCY));
             CurrencyUnit currency = CurrencyManager.getCurrency(iso);
             if (currency != null) {
                 mCurrencyTextView.setText(currency.getSymbol());
             } else {
                 mCurrencyTextView.setText("?");
             }
-            long money = cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_FROM));
+            long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_FROM));
             mMoneyTextView.setText(mMoneyFormatter.getNotTintedString(currency, money, MoneyFormatter.CurrencyMode.ALWAYS_HIDDEN));
-            String description = cursor.getString(cursor.getColumnIndex(Contract.TransferModel.DESCRIPTION));
+            String description = cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.DESCRIPTION));
             if (!TextUtils.isEmpty(description)) {
                 mDescriptionTextView.setText(description);
                 mDescriptionTextView.setVisibility(View.VISIBLE);
             } else {
                 mDescriptionTextView.setVisibility(View.GONE);
             }
-            String walletFrom = cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_FROM_NAME));
-            String walletTo = cursor.getString(cursor.getColumnIndex(Contract.TransferModel.WALLET_TO_NAME));
+            String walletFrom = cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_FROM_NAME));
+            String walletTo = cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.WALLET_TO_NAME));
             mWalletFromTextView.setText(walletFrom);
             mWalletToTextView.setText(walletTo);
-            if (cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_TAX)) > 0L) {
-                long tax = cursor.getLong(cursor.getColumnIndex(Contract.TransferModel.MONEY_TAX));
+            if (cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_TAX)) > 0L) {
+                long tax = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.TransferModel.MONEY_TAX));
                 mTaxTextView.setText(mMoneyFormatter.getNotTintedString(currency, tax));
                 mTaxTextView.setVisibility(View.VISIBLE);
             } else {
                 mTaxTextView.setVisibility(View.GONE);
             }
-            String event = cursor.getString(cursor.getColumnIndex(Contract.TransferModel.EVENT_NAME));
+            String event = cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.EVENT_NAME));
             if (!TextUtils.isEmpty(event)) {
                 mEventTextView.setText(event);
                 mEventTextView.setVisibility(View.VISIBLE);
             } else {
                 mEventTextView.setVisibility(View.GONE);
             }
-            String place = cursor.getString(cursor.getColumnIndex(Contract.TransferModel.PLACE_NAME));
+            String place = cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.PLACE_NAME));
             if (!TextUtils.isEmpty(place)) {
                 mPlaceTextView.setText(place);
                 mPlaceTextView.setVisibility(View.VISIBLE);
             } else {
                 mPlaceTextView.setVisibility(View.GONE);
             }
-            String note = cursor.getString(cursor.getColumnIndex(Contract.TransferModel.NOTE));
+            String note = cursor.getString(cursor.getColumnIndexOrThrow(Contract.TransferModel.NOTE));
             if (!TextUtils.isEmpty(note)) {
                 mNoteTextView.setText(note);
                 mNoteTextView.setVisibility(View.VISIBLE);
             } else {
                 mNoteTextView.setVisibility(View.GONE);
             }
-            mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.TransferModel.CONFIRMED)) == 1);
-            mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.TransferModel.COUNT_IN_TOTAL)) == 1);
+            mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransferModel.CONFIRMED)) == 1);
+            mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.TransferModel.COUNT_IN_TOTAL)) == 1);
         } else {
             showItemId(0L);
         }

@@ -25,18 +25,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.core.hardware.fingerprint.FingerprintManagerCompat;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.hardware.fingerprint.FingerprintManagerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.broadcast.LocalAction;
@@ -56,8 +59,6 @@ import java.util.Date;
  */
 public class UtilitySettingFragment extends PreferenceFragmentCompat {
 
-    private static final int REQUEST_CODE_LOCK_ACTIVITY = 8239;
-
     private ThemedListPreference mDailyReminderPreference;
     private ThemedListPreference mSecurityModeListPreference;
     private Preference mSecurityModeChangeKeyPreference;
@@ -65,6 +66,7 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
     private ThemedInputPreference mExchangeRateCustomApiKey;
     private Preference mExchangeRateUpdatePreference;
     private Preference mCurrencyManagementPreference;
+    private ActivityResultLauncher<Intent> requestLockActivity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,10 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
             LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(activity);
             broadcastManager.registerReceiver(mLocalBroadcastReceiver, new IntentFilter(LocalAction.ACTION_EXCHANGE_RATES_UPDATED));
         }
+        requestLockActivity = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> setupCurrentLockMode()
+        );
     }
 
     @Override
@@ -142,7 +148,7 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
         mExchangeRateServiceListPreference.setEntries(new String[] {
                 getString(R.string.setting_item_utility_exchange_rates_service_oer)
         });
-        mExchangeRateServiceListPreference.setEntryValues(new String[] {
+        mExchangeRateServiceListPreference.setEntryValues(new String[]{
                 String.valueOf(PreferenceManager.SERVICE_OPEN_EXCHANGE_RATE)
         });
         // setup current (or default) values
@@ -152,114 +158,80 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
         setupCurrentExchangeRateCustomApiKey();
         setupCurrentExchangeRateUpdate();
         // attach a listener to get notified when values changes
-        mDailyReminderPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                int hour = Integer.parseInt((String) newValue);
-                PreferenceManager.setCurrentDailyReminder(getActivity(), hour);
-                setupCurrentDailyReminder();
-                return false;
-            }
-
+        mDailyReminderPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+            int hour = Integer.parseInt((String) newValue);
+            PreferenceManager.setCurrentDailyReminder(getActivity(), hour);
+            setupCurrentDailyReminder();
+            return false;
         });
-        mSecurityModeListPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                String oldValue = ((ThemedListPreference) preference).getValue();
-                String value = (String) newValue;
-                if (TextUtils.equals(oldValue, value)) {
-                    // the value is not changed
-                    return false;
-                }
-                Intent intent = null;
-                int integerValue = Integer.parseInt(value);
-                switch (integerValue) {
-                    case PreferenceManager.LOCK_MODE_NONE:
-                        intent = LockActivity.disableLock(getActivity());
-                        break;
-                    case PreferenceManager.LOCK_MODE_PIN:
-                    case PreferenceManager.LOCK_MODE_SEQUENCE:
-                    case PreferenceManager.LOCK_MODE_FINGERPRINT:
-                        if (Integer.parseInt(oldValue) == PreferenceManager.LOCK_MODE_NONE) {
-                            intent = LockActivity.enableLock(getActivity(), LockMode.get(integerValue));
-                        } else {
-                            intent = LockActivity.changeMode(getActivity(), LockMode.get(integerValue));
-                        }
-                        break;
-                }
-                if (intent != null) {
-                    startActivityForResult(intent, REQUEST_CODE_LOCK_ACTIVITY);
-                }
+        mSecurityModeListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+            String oldValue = ((ThemedListPreference) preference).getValue();
+            String value = (String) newValue;
+            if (TextUtils.equals(oldValue, value)) {
+                // the value is not changed
                 return false;
             }
-
+            Intent intent = null;
+            int integerValue = Integer.parseInt(value);
+            switch (integerValue) {
+                case PreferenceManager.LOCK_MODE_NONE:
+                    intent = LockActivity.disableLock(getActivity());
+                    break;
+                case PreferenceManager.LOCK_MODE_PIN:
+                case PreferenceManager.LOCK_MODE_SEQUENCE:
+                case PreferenceManager.LOCK_MODE_FINGERPRINT:
+                    if (Integer.parseInt(oldValue) == PreferenceManager.LOCK_MODE_NONE) {
+                        intent = LockActivity.enableLock(getActivity(), LockMode.get(integerValue));
+                    } else {
+                        intent = LockActivity.changeMode(getActivity(), LockMode.get(integerValue));
+                    }
+                    break;
+            }
+            if (intent != null) {
+                requestLockActivity.launch(intent);
+            }
+            return false;
         });
-        mSecurityModeChangeKeyPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                startActivity(LockActivity.changeKey(getActivity()));
-                return false;
-            }
-
+        mSecurityModeChangeKeyPreference.setOnPreferenceClickListener(preference -> {
+            startActivity(LockActivity.changeKey(getActivity()));
+            return false;
         });
-        mExchangeRateServiceListPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                int index = Integer.parseInt((String) newValue);
-                PreferenceManager.setCurrentExchangeRateService(index);
-                setupCurrentExchangeRateService();
-                setupCurrentExchangeRateCustomApiKey();
-                return false;
-            }
-
+        mExchangeRateServiceListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+            int index = Integer.parseInt((String) newValue);
+            PreferenceManager.setCurrentExchangeRateService(index);
+            setupCurrentExchangeRateService();
+            setupCurrentExchangeRateCustomApiKey();
+            return false;
         });
         mExchangeRateCustomApiKey.setInput(R.string.setting_item_utility_exchange_rates_custom_api_key_hint, true, InputType.TYPE_CLASS_TEXT);
-        mExchangeRateCustomApiKey.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                int service = PreferenceManager.getCurrentExchangeRateService();
-                PreferenceManager.setServiceApiKey(service, (String) newValue);
-                setupCurrentExchangeRateCustomApiKey();
-                return false;
-            }
-
+        mExchangeRateCustomApiKey.setOnPreferenceChangeListener((preference, newValue) -> {
+            int service = PreferenceManager.getCurrentExchangeRateService();
+            PreferenceManager.setServiceApiKey(service, (String) newValue);
+            setupCurrentExchangeRateCustomApiKey();
+            return false;
         });
-        mExchangeRateUpdatePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                Activity activity = getActivity();
-                if (activity != null) {
-                    Intent intent = AbstractCurrencyRateDownloadIntentService.buildIntent(activity);
-                    activity.startService(intent);
-                }
-                return false;
+        mExchangeRateUpdatePreference.setOnPreferenceClickListener(preference -> {
+            Activity activity = getActivity();
+            if (activity != null) {
+                Intent intent = AbstractCurrencyRateDownloadIntentService.buildIntent(activity);
+                activity.startService(intent);
             }
-
+            return false;
         });
-        mCurrencyManagementPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                Activity activity = getActivity();
-                if (activity != null) {
-                    Intent intent = new Intent(activity, CurrencyListActivity.class);
-                    intent.putExtra(CurrencyListActivity.ACTIVITY_MODE, CurrencyListActivity.CURRENCY_MANAGER);
-                    startActivity(intent);
-                }
-                return false;
+        mCurrencyManagementPreference.setOnPreferenceClickListener(preference -> {
+            Activity activity = getActivity();
+            if (activity != null) {
+                Intent intent = new Intent(activity, CurrencyListActivity.class);
+                intent.putExtra(CurrencyListActivity.ACTIVITY_MODE, CurrencyListActivity.CURRENCY_MANAGER);
+                startActivity(intent);
             }
-
+            return false;
         });
     }
 
+    @NonNull
     @Override
-    public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+    public RecyclerView onCreateRecyclerView(@NonNull LayoutInflater inflater, @NonNull ViewGroup parent, Bundle savedInstanceState) {
         RecyclerView recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState);
         recyclerView.setPadding(0, 0, 0, 0);
         return recyclerView;
@@ -308,17 +280,11 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
     private void setupCurrentExchangeRateService() {
         int index = PreferenceManager.getCurrentExchangeRateService();
         mExchangeRateServiceListPreference.setValue(String.valueOf(index));
-        switch (index) {
-            case PreferenceManager.SERVICE_OPEN_EXCHANGE_RATE:
-                mExchangeRateServiceListPreference.setSummary(R.string.setting_item_utility_exchange_rates_service_oer);
-                mExchangeRateCustomApiKey.setContent(R.string.setting_item_utility_exchange_rates_service_oer_custom_api_key_message);
-                break;
+        if (index == PreferenceManager.SERVICE_OPEN_EXCHANGE_RATE) {
+            mExchangeRateServiceListPreference.setSummary(R.string.setting_item_utility_exchange_rates_service_oer);
+            mExchangeRateCustomApiKey.setContent(R.string.setting_item_utility_exchange_rates_service_oer_custom_api_key_message);
         }
-        if (PreferenceManager.hasCurrentExchangeRateServiceDefaultApiKey()) {
-            mExchangeRateCustomApiKey.setVisible(false);
-        } else {
-            mExchangeRateCustomApiKey.setVisible(true);
-        }
+        mExchangeRateCustomApiKey.setVisible(!PreferenceManager.hasCurrentExchangeRateServiceDefaultApiKey());
     }
 
     private void setupCurrentExchangeRateCustomApiKey() {
@@ -344,16 +310,8 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
         mExchangeRateUpdatePreference.setSummary(fullSummary);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_LOCK_ACTIVITY) {
-            setupCurrentLockMode();
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
 
-    private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {

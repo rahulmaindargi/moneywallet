@@ -62,12 +62,12 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
 
     @Override
     protected void generateHeaders(Cursor cursor) {
-        int indexTransactionDirection = cursor.getColumnIndex(Contract.Transaction.DIRECTION);
-        int indexTransactionDate = cursor.getColumnIndex(Contract.Transaction.DATE);
-        int indexTransactionMoney = cursor.getColumnIndex(Contract.Transaction.MONEY);
-        int indexCurrency = cursor.getColumnIndex(Contract.Transaction.WALLET_CURRENCY);
-        int indexTransactionConfirmed = cursor.getColumnIndex(Contract.Transaction.CONFIRMED);
-        int indexTransactionCountInTotal = cursor.getColumnIndex(Contract.Transaction.COUNT_IN_TOTAL);
+        int indexTransactionDirection = cursor.getColumnIndexOrThrow(Contract.Transaction.DIRECTION);
+        int indexTransactionDate = cursor.getColumnIndexOrThrow(Contract.Transaction.DATE);
+        int indexTransactionMoney = cursor.getColumnIndexOrThrow(Contract.Transaction.MONEY);
+        int indexCurrency = cursor.getColumnIndexOrThrow(Contract.Transaction.WALLET_CURRENCY);
+        int indexTransactionConfirmed = cursor.getColumnIndexOrThrow(Contract.Transaction.CONFIRMED);
+        int indexTransactionCountInTotal = cursor.getColumnIndexOrThrow(Contract.Transaction.COUNT_IN_TOTAL);
         if (cursor.moveToFirst()) {
             Header header = null;
             do {

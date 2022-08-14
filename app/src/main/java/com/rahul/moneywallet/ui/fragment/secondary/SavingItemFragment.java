@@ -28,11 +28,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -40,6 +35,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -261,43 +262,43 @@ public class SavingItemFragment extends SecondaryPanelFragment implements Loader
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (loader.getId() == SAVING_LOADER_ID) {
             if (cursor != null && cursor.moveToFirst()) {
-                Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Saving.ICON)));
+                Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.ICON)));
                 IconLoader.loadInto(icon, mAvatarImageView);
-                String iso = cursor.getString(cursor.getColumnIndex(Contract.Saving.WALLET_CURRENCY));
+                String iso = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.WALLET_CURRENCY));
                 CurrencyUnit currency = CurrencyManager.getCurrency(iso);
                 if (currency != null) {
                     mCurrencyTextView.setText(currency.getSymbol());
                 } else {
                     mCurrencyTextView.setText("?");
                 }
-                long money = cursor.getLong(cursor.getColumnIndex(Contract.Saving.END_MONEY));
+                long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Saving.END_MONEY));
                 mMoneyTextView.setText(mMoneyFormatter.getNotTintedString(currency, money, MoneyFormatter.CurrencyMode.ALWAYS_HIDDEN));
-                String description = cursor.getString(cursor.getColumnIndex(Contract.Saving.DESCRIPTION));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.DESCRIPTION));
                 if (!TextUtils.isEmpty(description)) {
                     mDescriptionTextView.setText(description);
                     mDescriptionTextView.setVisibility(View.VISIBLE);
                 } else {
                     mDescriptionTextView.setVisibility(View.GONE);
                 }
-                long startMoney = cursor.getLong(cursor.getColumnIndex(Contract.Saving.START_MONEY));
+                long startMoney = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Saving.START_MONEY));
                 mStartMoneyTextView.setText(mMoneyFormatter.getNotTintedString(currency, startMoney, MoneyFormatter.CurrencyMode.ALWAYS_SHOWN));
-                String expirationDate = cursor.getString(cursor.getColumnIndex(Contract.Saving.END_DATE));
+                String expirationDate = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.END_DATE));
                 if (!TextUtils.isEmpty(expirationDate)) {
                     DateFormatter.applyDate(mExpirationDateTextView, DateUtils.getDateFromSQLDateString(expirationDate));
                     mExpirationDateTextView.setVisibility(View.VISIBLE);
                 } else {
                     mExpirationDateTextView.setVisibility(View.GONE);
                 }
-                String wallet = cursor.getString(cursor.getColumnIndex(Contract.Saving.WALLET_NAME));
+                String wallet = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.WALLET_NAME));
                 mWalletTextView.setText(wallet);
-                String note = cursor.getString(cursor.getColumnIndex(Contract.Saving.NOTE));
+                String note = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Saving.NOTE));
                 if (!TextUtils.isEmpty(note)) {
                     mNoteTextView.setText(note);
                     mNoteTextView.setVisibility(View.VISIBLE);
                 } else {
                     mNoteTextView.setVisibility(View.GONE);
                 }
-                if (cursor.getInt(cursor.getColumnIndex(Contract.Saving.COMPLETE)) == 1) {
+                if (cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Saving.COMPLETE)) == 1) {
                     setMenuItemVisibility(R.id.action_archive_item, false);
                     setMenuItemVisibility(R.id.action_unarchive_item, true);
                 } else {

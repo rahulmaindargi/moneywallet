@@ -53,9 +53,9 @@ public class ExchangeRateCache {
         if (cursor != null) {
             while (cursor.moveToNext()){
                 CacheObj cacheObj = new CacheObj();
-                cacheObj.mCurrency = cursor.getString(cursor.getColumnIndex(SQLCache.ExchangeRateT.CURRENCY_ISO));
-                cacheObj.mRate = cursor.getDouble(cursor.getColumnIndex(SQLCache.ExchangeRateT.RATE));
-                cacheObj.mTimestamp = cursor.getLong(cursor.getColumnIndex(SQLCache.ExchangeRateT.TIMESTAMP));
+                cacheObj.mCurrency = cursor.getString(cursor.getColumnIndexOrThrow(SQLCache.ExchangeRateT.CURRENCY_ISO));
+                cacheObj.mRate = cursor.getDouble(cursor.getColumnIndexOrThrow(SQLCache.ExchangeRateT.RATE));
+                cacheObj.mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(SQLCache.ExchangeRateT.TIMESTAMP));
                 mCacheMemory.put(cacheObj.mCurrency, cacheObj);
             }
             cursor.close();

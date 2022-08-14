@@ -130,11 +130,11 @@ public class MapActivity extends SinglePanelActivity implements LoaderManager.Lo
             if (mMapView.isMapReady() && cursor.moveToFirst()) {
                 List<Place> placeList = new ArrayList<>();
                 do {
-                    long id = cursor.getLong(cursor.getColumnIndex(Contract.Place.ID));
-                    String name = cursor.getString(cursor.getColumnIndex(Contract.Place.NAME));
-                    String address = cursor.getString(cursor.getColumnIndex(Contract.Place.ADDRESS));
-                    double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Place.LATITUDE));
-                    double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Place.LONGITUDE));
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Place.ID));
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.NAME));
+                    String address = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.ADDRESS));
+                    double latitude = cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Place.LATITUDE));
+                    double longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Place.LONGITUDE));
                     placeList.add(new Place(id, name, null, address, latitude, longitude));
                 } while (cursor.moveToNext());
                 // display the list of places on map

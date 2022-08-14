@@ -101,10 +101,10 @@ public class CurrencyManager {
         };
         Cursor cursor = contentResolver.query(DataContentProvider.CONTENT_CURRENCIES, projections, null, null, null);
         if (cursor != null) {
-            int indexIso = cursor.getColumnIndex(Contract.Currency.ISO);
-            int indexName = cursor.getColumnIndex(Contract.Currency.NAME);
-            int indexSymbol = cursor.getColumnIndex(Contract.Currency.SYMBOL);
-            int indexDecimals = cursor.getColumnIndex(Contract.Currency.DECIMALS);
+            int indexIso = cursor.getColumnIndexOrThrow(Contract.Currency.ISO);
+            int indexName = cursor.getColumnIndexOrThrow(Contract.Currency.NAME);
+            int indexSymbol = cursor.getColumnIndexOrThrow(Contract.Currency.SYMBOL);
+            int indexDecimals = cursor.getColumnIndexOrThrow(Contract.Currency.DECIMALS);
             while (cursor.moveToNext()) {
                 CurrencyUnit currencyUnit = new CurrencyUnit(
                         cursor.getString(indexIso),

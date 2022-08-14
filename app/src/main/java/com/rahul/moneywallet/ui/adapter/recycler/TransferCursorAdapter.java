@@ -20,13 +20,14 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -76,22 +77,22 @@ public class TransferCursorAdapter extends AbstractCursorAdapter<RecyclerView.Vi
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexType = cursor.getColumnIndex(TransferHeaderCursor.COLUMN_ITEM_TYPE);
-        mIndexHeaderStartDate = cursor.getColumnIndex(TransferHeaderCursor.COLUMN_HEADER_START_DATE);
-        mIndexHeaderEndDate = cursor.getColumnIndex(TransferHeaderCursor.COLUMN_HEADER_END_DATE);
-        mIndexHeaderGroupType = cursor.getColumnIndex(TransferHeaderCursor.COLUMN_HEADER_GROUP_TYPE);
-        mIndexTransferId = cursor.getColumnIndex(Contract.Transfer.ID);
-        mIndexWalletFromName = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_WALLET_NAME);
-        mIndexWalletFromIcon = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_WALLET_ICON);
-        mIndexWalletFromCurrency = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_WALLET_CURRENCY);
-        mIndexWalletToName = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TO_WALLET_NAME);
-        mIndexWalletToIcon = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TO_WALLET_ICON);
-        mIndexWalletToCurrency = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TO_WALLET_CURRENCY);
-        mIndexMoneyFrom = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_FROM_MONEY);
-        mIndexMoneyTo = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TO_MONEY);
-        mIndexMoneyTax = cursor.getColumnIndex(Contract.Transfer.TRANSACTION_TAX_MONEY);
-        mIndexDate = cursor.getColumnIndex(Contract.Transfer.DATE);
-        mIndexDescription = cursor.getColumnIndex(Contract.Transfer.DESCRIPTION);
+        mIndexType = cursor.getColumnIndexOrThrow(TransferHeaderCursor.COLUMN_ITEM_TYPE);
+        mIndexHeaderStartDate = cursor.getColumnIndexOrThrow(TransferHeaderCursor.COLUMN_HEADER_START_DATE);
+        mIndexHeaderEndDate = cursor.getColumnIndexOrThrow(TransferHeaderCursor.COLUMN_HEADER_END_DATE);
+        mIndexHeaderGroupType = cursor.getColumnIndexOrThrow(TransferHeaderCursor.COLUMN_HEADER_GROUP_TYPE);
+        mIndexTransferId = cursor.getColumnIndexOrThrow(Contract.Transfer.ID);
+        mIndexWalletFromName = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_WALLET_NAME);
+        mIndexWalletFromIcon = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_WALLET_ICON);
+        mIndexWalletFromCurrency = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_WALLET_CURRENCY);
+        mIndexWalletToName = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TO_WALLET_NAME);
+        mIndexWalletToIcon = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TO_WALLET_ICON);
+        mIndexWalletToCurrency = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TO_WALLET_CURRENCY);
+        mIndexMoneyFrom = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_FROM_MONEY);
+        mIndexMoneyTo = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TO_MONEY);
+        mIndexMoneyTax = cursor.getColumnIndexOrThrow(Contract.Transfer.TRANSACTION_TAX_MONEY);
+        mIndexDate = cursor.getColumnIndexOrThrow(Contract.Transfer.DATE);
+        mIndexDescription = cursor.getColumnIndexOrThrow(Contract.Transfer.DESCRIPTION);
     }
 
     @Override

@@ -20,14 +20,15 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Icon;
@@ -56,12 +57,12 @@ public class PlaceSelectorCursorAdapter extends AbstractCursorAdapter<PlaceSelec
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexId = cursor.getColumnIndex(Contract.Place.ID);
-        mIndexName = cursor.getColumnIndex(Contract.Place.NAME);
-        mIndexIcon = cursor.getColumnIndex(Contract.Place.ICON);
-        mIndexAddress = cursor.getColumnIndex(Contract.Place.ADDRESS);
-        mIndexLatitude = cursor.getColumnIndex(Contract.Place.LATITUDE);
-        mIndexLongitude = cursor.getColumnIndex(Contract.Place.LONGITUDE);
+        mIndexId = cursor.getColumnIndexOrThrow(Contract.Place.ID);
+        mIndexName = cursor.getColumnIndexOrThrow(Contract.Place.NAME);
+        mIndexIcon = cursor.getColumnIndexOrThrow(Contract.Place.ICON);
+        mIndexAddress = cursor.getColumnIndexOrThrow(Contract.Place.ADDRESS);
+        mIndexLatitude = cursor.getColumnIndexOrThrow(Contract.Place.LATITUDE);
+        mIndexLongitude = cursor.getColumnIndexOrThrow(Contract.Place.LONGITUDE);
     }
 
     @Override

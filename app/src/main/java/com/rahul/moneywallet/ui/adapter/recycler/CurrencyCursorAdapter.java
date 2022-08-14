@@ -21,14 +21,15 @@ package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.content.Context;
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.rahul.moneywallet.R;
@@ -56,10 +57,10 @@ public class CurrencyCursorAdapter extends AbstractCursorAdapter<CurrencyCursorA
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexIso = cursor.getColumnIndex(Contract.Currency.ISO);
-        mIndexName = cursor.getColumnIndex(Contract.Currency.NAME);
-        mIndexSymbol = cursor.getColumnIndex(Contract.Currency.SYMBOL);
-        mIndexFavourite = cursor.getColumnIndex(Contract.Currency.FAVOURITE);
+        mIndexIso = cursor.getColumnIndexOrThrow(Contract.Currency.ISO);
+        mIndexName = cursor.getColumnIndexOrThrow(Contract.Currency.NAME);
+        mIndexSymbol = cursor.getColumnIndexOrThrow(Contract.Currency.SYMBOL);
+        mIndexFavourite = cursor.getColumnIndexOrThrow(Contract.Currency.FAVOURITE);
     }
 
     @Override

@@ -20,14 +20,15 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Icon;
@@ -58,9 +59,9 @@ public class CategorySortCursorAdapter extends AbstractCursorAdapter<CategorySor
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexCategoryId = cursor.getColumnIndex(Contract.Category.ID);
-        mIndexCategoryIcon = cursor.getColumnIndex(Contract.Category.ICON);
-        mIndexCategoryName = cursor.getColumnIndex(Contract.Category.NAME);
+        mIndexCategoryId = cursor.getColumnIndexOrThrow(Contract.Category.ID);
+        mIndexCategoryIcon = cursor.getColumnIndexOrThrow(Contract.Category.ICON);
+        mIndexCategoryName = cursor.getColumnIndexOrThrow(Contract.Category.NAME);
     }
 
     @Override

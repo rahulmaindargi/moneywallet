@@ -26,12 +26,13 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Icon;
@@ -218,11 +219,11 @@ public class NewEditEventActivity extends NewEditItemActivity implements IconPic
             Cursor cursor = contentResolver.query(uri, projection, null, null, null);
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
-                    name = cursor.getString(cursor.getColumnIndex(Contract.Event.NAME));
-                    icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Event.ICON)));
-                    startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Event.START_DATE)));
-                    endDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Event.END_DATE)));
-                    mNoteEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Event.NOTE)));
+                    name = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.NAME));
+                    icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.ICON)));
+                    startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.START_DATE)));
+                    endDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.END_DATE)));
+                    mNoteEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Event.NOTE)));
                 }
                 cursor.close();
             }

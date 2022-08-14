@@ -55,7 +55,7 @@ public class TransferHeaderCursor extends AbstractHeaderCursor<DateRangeHeader> 
 
     @Override
     protected void generateHeaders(Cursor cursor) {
-        int indexTransactionDate = cursor.getColumnIndex(Contract.Transfer.DATE);
+        int indexTransactionDate = cursor.getColumnIndexOrThrow(Contract.Transfer.DATE);
         if (cursor.moveToFirst()) {
             DateRangeHeader header = null;
             do {

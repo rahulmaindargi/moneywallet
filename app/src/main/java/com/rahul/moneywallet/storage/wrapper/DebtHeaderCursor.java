@@ -50,16 +50,16 @@ public class DebtHeaderCursor extends AbstractHeaderCursor<DebtHeaderCursor.Head
     public DebtHeaderCursor(Cursor cursor, Contract.DebtType debtType) {
         super(cursor);
         generateHeaders(cursor);
-        mIndexDebtType = getHeaderColumnNames().length + cursor.getColumnIndex(Contract.Debt.TYPE);
+        mIndexDebtType = getHeaderColumnNames().length + cursor.getColumnIndexOrThrow(Contract.Debt.TYPE);
         mDebtType = debtType;
     }
 
     @Override
     protected void generateHeaders(Cursor cursor) {
-        int indexDebtCurrency = cursor.getColumnIndex(Contract.Debt.WALLET_CURRENCY);
-        int indexDebtMoney = cursor.getColumnIndex(Contract.Debt.MONEY);
-        int indexDebtProgress = cursor.getColumnIndex(Contract.Debt.PROGRESS);
-        int indexDebtArchived = cursor.getColumnIndex(Contract.Debt.ARCHIVED);
+        int indexDebtCurrency = cursor.getColumnIndexOrThrow(Contract.Debt.WALLET_CURRENCY);
+        int indexDebtMoney = cursor.getColumnIndexOrThrow(Contract.Debt.MONEY);
+        int indexDebtProgress = cursor.getColumnIndexOrThrow(Contract.Debt.PROGRESS);
+        int indexDebtArchived = cursor.getColumnIndexOrThrow(Contract.Debt.ARCHIVED);
         if (cursor.moveToFirst()) {
             Header header = null;
             do {

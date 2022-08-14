@@ -26,13 +26,14 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -296,30 +297,30 @@ public class NewEditDebtActivity extends NewEditItemActivity implements IconPick
                 Cursor cursor = contentResolver.query(uri, projection, null, null, null);
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
-                        mDebtType = Contract.DebtType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Debt.TYPE)));
-                        mDescriptionEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Debt.DESCRIPTION)));
-                        mNoteEditText.setText(cursor.getString(cursor.getColumnIndex(Contract.Debt.NOTE)));
-                        icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Debt.ICON)));
-                        money = cursor.getLong(cursor.getColumnIndex(Contract.Debt.MONEY));
-                        date = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Debt.DATE)));
-                        if (!cursor.isNull(cursor.getColumnIndex(Contract.Debt.EXPIRATION_DATE))) {
-                            expirationDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Debt.EXPIRATION_DATE)));
+                        mDebtType = Contract.DebtType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Debt.TYPE)));
+                        mDescriptionEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.DESCRIPTION)));
+                        mNoteEditText.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.NOTE)));
+                        icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.ICON)));
+                        money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Debt.MONEY));
+                        date = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.DATE)));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Debt.EXPIRATION_DATE))) {
+                            expirationDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.EXPIRATION_DATE)));
                         }
                         wallet = new Wallet(
-                                cursor.getLong(cursor.getColumnIndex(Contract.Debt.WALLET_ID)),
-                                cursor.getString(cursor.getColumnIndex(Contract.Debt.WALLET_NAME)),
-                                IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Debt.WALLET_ICON))),
-                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Debt.WALLET_CURRENCY))),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Debt.WALLET_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.WALLET_NAME)),
+                                IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.WALLET_ICON))),
+                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.WALLET_CURRENCY))),
                                 0L,0L
                         );
-                        if (!cursor.isNull(cursor.getColumnIndex(Contract.Debt.PLACE_ID))) {
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_ID))) {
                             place = new Place(
-                                    cursor.getLong(cursor.getColumnIndex(Contract.Debt.PLACE_ID)),
-                                    cursor.getString(cursor.getColumnIndex(Contract.Debt.PLACE_NAME)),
-                                    IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Debt.PLACE_ICON))),
-                                    cursor.getString(cursor.getColumnIndex(Contract.Debt.PLACE_ADDRESS)),
-                                    cursor.isNull(cursor.getColumnIndex(Contract.Debt.PLACE_LATITUDE)) ? null : cursor.getDouble(cursor.getColumnIndex(Contract.Debt.PLACE_LATITUDE)),
-                                    cursor.isNull(cursor.getColumnIndex(Contract.Debt.PLACE_LONGITUDE)) ? null : cursor.getDouble(cursor.getColumnIndex(Contract.Debt.PLACE_LONGITUDE))
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_ID)),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_NAME)),
+                                    IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_ICON))),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_ADDRESS)),
+                                    cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_LATITUDE)) ? null : cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_LATITUDE)),
+                                    cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_LONGITUDE)) ? null : cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Debt.PLACE_LONGITUDE))
                             );
                         }
                     }
@@ -340,9 +341,9 @@ public class NewEditDebtActivity extends NewEditItemActivity implements IconPick
                         people = new Person[cursor.getCount()];
                         for (int i = 0; cursor.moveToPosition(i) && i < cursor.getCount(); i++) {
                             people[i] = new Person(
-                                    cursor.getLong(cursor.getColumnIndex(Contract.Person.ID)),
-                                    cursor.getString(cursor.getColumnIndex(Contract.Person.NAME)),
-                                    IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Person.ICON)))
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Person.ID)),
+                                    cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.NAME)),
+                                    IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Person.ICON)))
                             );
                         }
                     }
@@ -370,12 +371,12 @@ public class NewEditDebtActivity extends NewEditItemActivity implements IconPick
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
                         wallet = new Wallet(
-                                cursor.getLong(cursor.getColumnIndex(Contract.Wallet.ID)),
-                                cursor.getString(cursor.getColumnIndex(Contract.Wallet.NAME)),
-                                IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Wallet.ICON))),
-                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Wallet.CURRENCY))),
-                                cursor.getLong(cursor.getColumnIndex(Contract.Wallet.START_MONEY)),
-                                cursor.getLong(cursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY))
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NAME)),
+                                IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.ICON))),
+                                CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY))),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY)),
+                                cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY))
                         );
                     }
                     cursor.close();

@@ -20,13 +20,14 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -66,13 +67,13 @@ public class RecurrentTransferCursorAdapter extends AbstractCursorAdapter<Recurr
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexId = cursor.getColumnIndex(Contract.RecurrentTransfer.ID);
-        mIndexWalletFromName = cursor.getColumnIndex(Contract.RecurrentTransfer.WALLET_FROM_NAME);
-        mIndexWalletFromCurrency = cursor.getColumnIndex(Contract.RecurrentTransfer.WALLET_FROM_CURRENCY);
-        mIndexWalletToName = cursor.getColumnIndex(Contract.RecurrentTransfer.WALLET_TO_NAME);
-        mIndexWalletToIcon = cursor.getColumnIndex(Contract.RecurrentTransfer.WALLET_TO_ICON);
-        mIndexMoneyFrom = cursor.getColumnIndex(Contract.RecurrentTransfer.MONEY_FROM);
-        mIndexNextOccurrence = cursor.getColumnIndex(Contract.RecurrentTransfer.NEXT_OCCURRENCE);
+        mIndexId = cursor.getColumnIndexOrThrow(Contract.RecurrentTransfer.ID);
+        mIndexWalletFromName = cursor.getColumnIndexOrThrow(Contract.RecurrentTransfer.WALLET_FROM_NAME);
+        mIndexWalletFromCurrency = cursor.getColumnIndexOrThrow(Contract.RecurrentTransfer.WALLET_FROM_CURRENCY);
+        mIndexWalletToName = cursor.getColumnIndexOrThrow(Contract.RecurrentTransfer.WALLET_TO_NAME);
+        mIndexWalletToIcon = cursor.getColumnIndexOrThrow(Contract.RecurrentTransfer.WALLET_TO_ICON);
+        mIndexMoneyFrom = cursor.getColumnIndexOrThrow(Contract.RecurrentTransfer.MONEY_FROM);
+        mIndexNextOccurrence = cursor.getColumnIndexOrThrow(Contract.RecurrentTransfer.NEXT_OCCURRENCE);
     }
 
     @Override

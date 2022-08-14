@@ -23,6 +23,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -48,6 +51,7 @@ public class CategoryPicker extends Fragment implements ParentCategoryPickerDial
     private Category mCurrentCategory;
 
     private ParentCategoryPickerDialog mParentCategoryPickerDialog;
+    private ActivityResultLauncher<Intent> requestCategoryPicker;
 
     public static CategoryPicker createPicker(FragmentManager fragmentManager, String tag, Category defaultCategory) {
         CategoryPicker categoryPicker = (CategoryPicker) fragmentManager.findFragmentByTag(tag);
@@ -62,7 +66,7 @@ public class CategoryPicker extends Fragment implements ParentCategoryPickerDial
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;
@@ -89,6 +93,16 @@ public class CategoryPicker extends Fragment implements ParentCategoryPickerDial
             mParentCategoryPickerDialog = ParentCategoryPickerDialog.newInstance();
         }
         mParentCategoryPickerDialog.setCallback(this);
+        requestCategoryPicker = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        mCurrentCategory = result.getData().getParcelableExtra(CategoryPickerActivity.RESULT_CATEGORY);
+                        fireCallbackSafely();
+                    }
+                }
+        );
+
     }
 
     @Override
@@ -134,23 +148,11 @@ public class CategoryPicker extends Fragment implements ParentCategoryPickerDial
         Intent intent = new Intent(getActivity(), CategoryPickerActivity.class);
         intent.putExtra(CategoryPickerActivity.SHOW_SUB_CATEGORIES, showSubCategories);
         intent.putExtra(CategoryPickerActivity.SHOW_SYSTEM_CATEGORIES, showSystemCategories);
-        startActivityForResult(intent, REQUEST_CATEGORY_PICKER);
+        requestCategoryPicker.launch(intent);
     }
 
     public void showParentPicker(long categoryId, Contract.CategoryType type) {
         mParentCategoryPickerDialog.showPicker(getChildFragmentManager(), getDialogTag(), mCurrentCategory, categoryId, type);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CATEGORY_PICKER) {
-            if (resultCode == Activity.RESULT_OK) {
-                mCurrentCategory = data.getParcelableExtra(CategoryPickerActivity.RESULT_CATEGORY);
-                fireCallbackSafely();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
     }
 
     @Override

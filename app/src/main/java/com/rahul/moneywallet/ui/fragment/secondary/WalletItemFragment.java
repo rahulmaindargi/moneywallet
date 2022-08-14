@@ -28,11 +28,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -41,6 +36,12 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -260,28 +261,28 @@ public class WalletItemFragment extends SecondaryPanelFragment implements Loader
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.moveToFirst()) {
-            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Wallet.ICON)));
+            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.ICON)));
             IconLoader.loadInto(icon, mAvatarImageView);
-            mNameTextView.setText(cursor.getString(cursor.getColumnIndex(Contract.Wallet.NAME)));
-            CurrencyUnit currency = CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndex(Contract.Wallet.CURRENCY)));
+            mNameTextView.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NAME)));
+            CurrencyUnit currency = CurrencyManager.getCurrency(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY)));
             mCurrencyTextView.setText(currency.getName());
-            long startMoney = cursor.getLong(cursor.getColumnIndex(Contract.Wallet.START_MONEY));
+            long startMoney = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY));
             mMoneyFormatter.applyNotTinted(mStartMoneyTextView, currency, startMoney);
-            String note = cursor.getString(cursor.getColumnIndex(Contract.Wallet.NOTE));
+            String note = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NOTE));
             if (!TextUtils.isEmpty(note)) {
                 mNoteTextView.setText(note);
                 mNoteTextView.setVisibility(View.VISIBLE);
             } else {
                 mNoteTextView.setVisibility(View.GONE);
             }
-            if (cursor.getInt(cursor.getColumnIndex(Contract.Wallet.ARCHIVED)) == 1) {
+            if (cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Wallet.ARCHIVED)) == 1) {
                 setMenuItemVisibility(R.id.action_archive_item, false);
                 setMenuItemVisibility(R.id.action_unarchive_item, true);
             } else {
                 setMenuItemVisibility(R.id.action_archive_item, true);
                 setMenuItemVisibility(R.id.action_unarchive_item, false);
             }
-            mNotExcludeTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.Wallet.COUNT_IN_TOTAL)) == 1);
+            mNotExcludeTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Wallet.COUNT_IN_TOTAL)) == 1);
         } else {
             showItemId(0L);
         }

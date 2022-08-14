@@ -26,11 +26,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -38,6 +33,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -194,57 +195,57 @@ public class RecurrentTransactionItemFragment extends SecondaryPanelFragment imp
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.moveToFirst()) {
-            String iso = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.WALLET_CURRENCY));
+            String iso = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.WALLET_CURRENCY));
             CurrencyUnit currency = CurrencyManager.getCurrency(iso);
             if (currency != null) {
                 mCurrencyTextView.setText(currency.getSymbol());
             } else {
                 mCurrencyTextView.setText("?");
             }
-            long money = cursor.getLong(cursor.getColumnIndex(Contract.RecurrentTransaction.MONEY));
+            long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.MONEY));
             mMoneyTextView.setText(mMoneyFormatter.getNotTintedString(currency, money, MoneyFormatter.CurrencyMode.ALWAYS_HIDDEN));
-            String description = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.DESCRIPTION));
+            String description = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.DESCRIPTION));
             if (!TextUtils.isEmpty(description)) {
                 mDescriptionTextView.setText(description);
                 mDescriptionTextView.setVisibility(View.VISIBLE);
             } else {
                 mDescriptionTextView.setVisibility(View.GONE);
             }
-            String category = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.CATEGORY_NAME));
+            String category = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.CATEGORY_NAME));
             mCategoryTextView.setText(category);
-            String wallet = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.WALLET_NAME));
+            String wallet = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.WALLET_NAME));
             mWalletTextView.setText(wallet);
             try {
-                Date startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.START_DATE)));
-                String rule = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.RULE));
+                Date startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.START_DATE)));
+                String rule = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.RULE));
                 RecurrenceSetting recurrenceSetting = RecurrenceSetting.build(startDate, rule);
                 mRecurrenceTextView.setText(recurrenceSetting.getUserReadableString(getActivity()));
             } catch (InvalidRecurrenceRuleException e) {
                 mRecurrenceTextView.setText(R.string.hint_recurrence_invalid);
             }
-            String event = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.EVENT_NAME));
+            String event = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.EVENT_NAME));
             if (!TextUtils.isEmpty(event)) {
                 mEventTextView.setText(event);
                 mEventTextView.setVisibility(View.VISIBLE);
             } else {
                 mEventTextView.setVisibility(View.GONE);
             }
-            String place = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.PLACE_NAME));
+            String place = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.PLACE_NAME));
             if (!TextUtils.isEmpty(place)) {
                 mPlaceTextView.setText(place);
                 mPlaceTextView.setVisibility(View.VISIBLE);
             } else {
                 mPlaceTextView.setVisibility(View.GONE);
             }
-            String note = cursor.getString(cursor.getColumnIndex(Contract.RecurrentTransaction.NOTE));
+            String note = cursor.getString(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.NOTE));
             if (!TextUtils.isEmpty(note)) {
                 mNoteTextView.setText(note);
                 mNoteTextView.setVisibility(View.VISIBLE);
             } else {
                 mNoteTextView.setVisibility(View.GONE);
             }
-            mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.RecurrentTransaction.CONFIRMED)) == 1);
-            mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndex(Contract.RecurrentTransaction.COUNT_IN_TOTAL)) == 1);
+            mConfirmedCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.CONFIRMED)) == 1);
+            mCountInTotalCheckBox.setChecked(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.RecurrentTransaction.COUNT_IN_TOTAL)) == 1);
         } else {
             showItemId(0L);
         }

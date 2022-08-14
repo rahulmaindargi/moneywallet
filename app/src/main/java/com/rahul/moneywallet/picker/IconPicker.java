@@ -24,19 +24,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.widget.EditText;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.view.MenuItem;
-import android.widget.EditText;
 
 import com.afollestad.materialdialogs.color.ColorChooserDialog;
 import com.github.rubensousa.bottomsheetbuilder.BottomSheetBuilder;
-import com.github.rubensousa.bottomsheetbuilder.adapter.BottomSheetItemClickListener;
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.ColorIcon;
 import com.rahul.moneywallet.model.Icon;
@@ -64,6 +65,7 @@ public class IconPicker extends Fragment implements ColorChooserDialog.ColorCall
     private String mLastBackgroundColor;
 
     private EditText mBindEditText;
+    private ActivityResultLauncher<Intent> requestIconPicker;
 
     public static IconPicker createPicker(FragmentManager fragmentManager, String tag) {
         return createPicker(fragmentManager, tag, new ColorIcon(DEFAULT_BACKGROUND_COLOR, "?"));
@@ -82,7 +84,7 @@ public class IconPicker extends Fragment implements ColorChooserDialog.ColorCall
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;
@@ -114,6 +116,15 @@ public class IconPicker extends Fragment implements ColorChooserDialog.ColorCall
                 mLastBackgroundColor = DEFAULT_BACKGROUND_COLOR;
             }
         }
+        requestIconPicker = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        mCurrentIcon = result.getData().getParcelableExtra(IconListActivity.RESULT_ICON);
+                        fireCallbackSafely();
+                    }
+                }
+        );
     }
 
     @Override
@@ -200,20 +211,15 @@ public class IconPicker extends Fragment implements ColorChooserDialog.ColorCall
                         .addTitleItem(R.string.bottom_sheet_icon_picker_title)
                         .addItem(1, R.string.bottom_sheet_icon_picker_action_select_icon, R.drawable.ic_add_24dp)
                         .addItem(2, R.string.bottom_sheet_icon_picker_action_change_bg_color, R.drawable.ic_format_color_fill_black_24dp)
-                        .setItemClickListener(new BottomSheetItemClickListener() {
-
-                            @Override
-                            public void onBottomSheetItemClick(MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case 1:
-                                        startIconPickerActivity();
-                                        break;
-                                    case 2:
-                                        openColorPicker();
-                                        break;
-                                }
+                        .setItemClickListener(item -> {
+                            switch (item.getItemId()) {
+                                case 1:
+                                    startIconPickerActivity();
+                                    break;
+                                case 2:
+                                    openColorPicker();
+                                    break;
                             }
-
                         })
                         .createDialog()
                         .show();
@@ -223,20 +229,15 @@ public class IconPicker extends Fragment implements ColorChooserDialog.ColorCall
                         .addTitleItem(R.string.bottom_sheet_icon_picker_title)
                         .addItem(1, R.string.bottom_sheet_icon_picker_action_change_icon, R.drawable.ic_add_24dp)
                         .addItem(2, R.string.bottom_sheet_icon_picker_action_remove_icon, R.drawable.ic_format_color_fill_black_24dp)
-                        .setItemClickListener(new BottomSheetItemClickListener() {
-
-                            @Override
-                            public void onBottomSheetItemClick(MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case 1:
-                                        startIconPickerActivity();
-                                        break;
-                                    case 2:
-                                        restoreColorIcon();
-                                        break;
-                                }
+                        .setItemClickListener(item -> {
+                            switch (item.getItemId()) {
+                                case 1:
+                                    startIconPickerActivity();
+                                    break;
+                                case 2:
+                                    restoreColorIcon();
+                                    break;
                             }
-
                         })
                         .createDialog()
                         .show();
@@ -246,7 +247,8 @@ public class IconPicker extends Fragment implements ColorChooserDialog.ColorCall
 
     private void startIconPickerActivity() {
         Intent intent = new Intent(getActivity(), IconListActivity.class);
-        startActivityForResult(intent, REQUEST_ICON_PICKER);
+
+        requestIconPicker.launch(intent);
     }
 
     private void openColorPicker() {
@@ -289,18 +291,6 @@ public class IconPicker extends Fragment implements ColorChooserDialog.ColorCall
     public void onColorChooserDismissed(@NonNull ColorChooserDialog dialog) {
         // do nothing here: if the user dismiss the picker, it means that he don't want to change
         // the color at the moment.
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == REQUEST_ICON_PICKER) {
-            if (resultCode == Activity.RESULT_OK) {
-                mCurrentIcon = intent.getParcelableExtra(IconListActivity.RESULT_ICON);
-                fireCallbackSafely();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, intent);
-        }
     }
 
     public interface Controller {

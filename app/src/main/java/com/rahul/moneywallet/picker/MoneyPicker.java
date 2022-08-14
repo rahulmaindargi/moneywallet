@@ -23,6 +23,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -48,6 +51,7 @@ public class MoneyPicker extends Fragment {
 
     private CurrencyUnit mCurrentCurrency;
     private long mCurrentMoney;
+    private ActivityResultLauncher<Intent> requestMoneyPicker;
 
     public static MoneyPicker createPicker(FragmentManager fragmentManager, String tag, CurrencyUnit currency, long money) {
         MoneyPicker moneyPicker = (MoneyPicker) fragmentManager.findFragmentByTag(tag);
@@ -63,7 +67,7 @@ public class MoneyPicker extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;
@@ -86,6 +90,16 @@ public class MoneyPicker extends Fragment {
                 mCurrentMoney = 0L;
             }
         }
+
+        requestMoneyPicker = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        mCurrentMoney = result.getData().getLongExtra(CalculatorActivity.MONEY, mCurrentMoney);
+                        fireCallbackSafely();
+                    }
+                }
+        );
     }
 
     @Override
@@ -157,19 +171,7 @@ public class MoneyPicker extends Fragment {
         intent.putExtra(CalculatorActivity.ACTIVITY_MODE, CalculatorActivity.MODE_KEYPAD);
         intent.putExtra(CalculatorActivity.CURRENCY, mCurrentCurrency);
         intent.putExtra(CalculatorActivity.MONEY, mCurrentMoney);
-        startActivityForResult(intent, REQUEST_MONEY_PICKER);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_MONEY_PICKER) {
-            if (resultCode == Activity.RESULT_OK) {
-                mCurrentMoney = data.getLongExtra(CalculatorActivity.MONEY, mCurrentMoney);
-                fireCallbackSafely();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        requestMoneyPicker.launch(intent);
     }
 
     @Override

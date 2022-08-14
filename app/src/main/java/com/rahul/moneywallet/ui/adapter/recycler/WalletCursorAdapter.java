@@ -20,13 +20,14 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -60,13 +61,13 @@ public class WalletCursorAdapter extends AbstractCursorAdapter<WalletCursorAdapt
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexId = cursor.getColumnIndex(Contract.Wallet.ID);
-        mIndexName = cursor.getColumnIndex(Contract.Wallet.NAME);
-        mIndexIcon = cursor.getColumnIndex(Contract.Wallet.ICON);
-        mIndexCurrency = cursor.getColumnIndex(Contract.Wallet.CURRENCY);
-        mIndexStartMoney = cursor.getColumnIndex(Contract.Wallet.START_MONEY);
-        mIndexTotalMoney = cursor.getColumnIndex(Contract.Wallet.TOTAL_MONEY);
-        mIndexCountInTotal = cursor.getColumnIndex(Contract.Wallet.COUNT_IN_TOTAL);
+        mIndexId = cursor.getColumnIndexOrThrow(Contract.Wallet.ID);
+        mIndexName = cursor.getColumnIndexOrThrow(Contract.Wallet.NAME);
+        mIndexIcon = cursor.getColumnIndexOrThrow(Contract.Wallet.ICON);
+        mIndexCurrency = cursor.getColumnIndexOrThrow(Contract.Wallet.CURRENCY);
+        mIndexStartMoney = cursor.getColumnIndexOrThrow(Contract.Wallet.START_MONEY);
+        mIndexTotalMoney = cursor.getColumnIndexOrThrow(Contract.Wallet.TOTAL_MONEY);
+        mIndexCountInTotal = cursor.getColumnIndexOrThrow(Contract.Wallet.COUNT_IN_TOTAL);
     }
 
     @Override

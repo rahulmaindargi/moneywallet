@@ -27,11 +27,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +36,12 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -209,16 +210,16 @@ public class CategoryItemFragment extends SecondaryPanelFragment implements Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.moveToFirst()) {
-            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Category.ICON)));
+            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.ICON)));
             IconLoader.loadInto(icon, mAvatarImageView);
-            mNameTextView.setText(cursor.getString(cursor.getColumnIndex(Contract.Category.NAME)));
-            if (!cursor.isNull(cursor.getColumnIndex(Contract.Category.PARENT))) {
-                mParentCategoryTextView.setText(cursor.getString(cursor.getColumnIndex(Contract.Category.PARENT_NAME)));
+            mNameTextView.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.NAME)));
+            if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Category.PARENT))) {
+                mParentCategoryTextView.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Category.PARENT_NAME)));
                 mParentCategoryTextView.setVisibility(View.VISIBLE);
             } else {
                 mParentCategoryTextView.setVisibility(View.GONE);
             }
-            Contract.CategoryType type = Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Category.TYPE)));
+            Contract.CategoryType type = Contract.CategoryType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Category.TYPE)));
             if (type != null) {
                 switch (type) {
                     case INCOME:
@@ -236,7 +237,7 @@ public class CategoryItemFragment extends SecondaryPanelFragment implements Load
             } else {
                 mCategoryTypeRadioGroup.setVisibility(View.GONE);
             }
-            if (cursor.getInt(cursor.getColumnIndex(Contract.Category.SHOW_REPORT)) == 1) {
+            if (cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Category.SHOW_REPORT)) == 1) {
                 mShowReportCheckBox.setChecked(true);
                 mShowReportCheckBox.setText(R.string.hint_show_category_report_on);
             } else {

@@ -25,12 +25,13 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentManager;
-import androidx.cardview.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentManager;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.Coordinates;
@@ -124,15 +125,15 @@ public class NewEditPlaceActivity extends NewEditItemActivity implements IconPic
                 Cursor cursor = contentResolver.query(uri, projection, null, null, null);
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
-                        long id = cursor.getLong(cursor.getColumnIndex(Contract.Place.ID));
-                        String name = cursor.getString(cursor.getColumnIndex(Contract.Place.NAME));
-                        icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Place.ICON)));
-                        String address = cursor.getString(cursor.getColumnIndex(Contract.Place.ADDRESS));
+                        long id = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Place.ID));
+                        String name = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.NAME));
+                        icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.ICON)));
+                        String address = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.ADDRESS));
                         Double latitude = null;
                         Double longitude = null;
-                        if (!cursor.isNull(cursor.getColumnIndex(Contract.Place.LATITUDE)) && !cursor.isNull(cursor.getColumnIndex(Contract.Place.LONGITUDE))) {
-                            latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Place.LATITUDE));
-                            longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Place.LONGITUDE));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Place.LATITUDE)) && !cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Place.LONGITUDE))) {
+                            latitude = cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Place.LATITUDE));
+                            longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Place.LONGITUDE));
                         }
                         place = new Place(id, name, icon, address, latitude, longitude);
                     }

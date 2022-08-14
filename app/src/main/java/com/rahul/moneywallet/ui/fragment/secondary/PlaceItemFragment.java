@@ -28,12 +28,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
-import androidx.cardview.widget.CardView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -41,6 +35,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -256,19 +257,19 @@ public class PlaceItemFragment extends SecondaryPanelFragment implements LoaderM
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.moveToFirst()) {
-            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndex(Contract.Place.ICON)));
+            Icon icon = IconLoader.parse(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.ICON)));
             IconLoader.loadInto(icon, mAvatarImageView);
-            mNameTextView.setText(cursor.getString(cursor.getColumnIndex(Contract.Place.NAME)));
-            String address = cursor.getString(cursor.getColumnIndex(Contract.Place.ADDRESS));
+            mNameTextView.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.NAME)));
+            String address = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Place.ADDRESS));
             if (!TextUtils.isEmpty(address)) {
                 mAddressTextView.setText(address);
             } else {
                 mAddressTextView.setText(R.string.hint_address_unknown);
             }
-            if (!cursor.isNull(cursor.getColumnIndex(Contract.Place.LATITUDE)) && !cursor.isNull(cursor.getColumnIndex(Contract.Place.LONGITUDE))) {
+            if (!cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Place.LATITUDE)) && !cursor.isNull(cursor.getColumnIndexOrThrow(Contract.Place.LONGITUDE))) {
                 mCoordinates = new Coordinates(
-                        cursor.getDouble(cursor.getColumnIndex(Contract.Place.LATITUDE)),
-                        cursor.getDouble(cursor.getColumnIndex(Contract.Place.LONGITUDE))
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Place.LATITUDE)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(Contract.Place.LONGITUDE))
                 );
             } else {
                 mCoordinates = null;

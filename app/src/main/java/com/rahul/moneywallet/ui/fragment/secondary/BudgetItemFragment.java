@@ -27,16 +27,17 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -206,16 +207,16 @@ public class BudgetItemFragment extends SecondaryPanelFragment implements Loader
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (loader.getId() == BUDGET_LOADER_ID) {
             if (cursor != null && cursor.moveToFirst()) {
-                String iso = cursor.getString(cursor.getColumnIndex(Contract.Budget.CURRENCY));
+                String iso = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.CURRENCY));
                 CurrencyUnit currency = CurrencyManager.getCurrency(iso);
                 if (currency != null) {
                     mCurrencyTextView.setText(currency.getSymbol());
                 } else {
                     mCurrencyTextView.setText("?");
                 }
-                long money = cursor.getLong(cursor.getColumnIndex(Contract.Budget.MONEY));
+                long money = cursor.getLong(cursor.getColumnIndexOrThrow(Contract.Budget.MONEY));
                 mMoneyTextView.setText(mMoneyFormatter.getNotTintedString(currency, money, MoneyFormatter.CurrencyMode.ALWAYS_HIDDEN));
-                Contract.BudgetType budgetType = Contract.BudgetType.fromValue(cursor.getInt(cursor.getColumnIndex(Contract.Budget.TYPE)));
+                Contract.BudgetType budgetType = Contract.BudgetType.fromValue(cursor.getInt(cursor.getColumnIndexOrThrow(Contract.Budget.TYPE)));
                 if (budgetType != null) {
                     switch (budgetType) {
                         case INCOMES:
@@ -228,13 +229,13 @@ public class BudgetItemFragment extends SecondaryPanelFragment implements Loader
                             break;
                         case CATEGORY:
                             mTypeTextView.setText(R.string.hint_category);
-                            mCategoryTextView.setText(cursor.getString(cursor.getColumnIndex(Contract.Budget.CATEGORY_NAME)));
+                            mCategoryTextView.setText(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.CATEGORY_NAME)));
                             mCategoryTextView.setVisibility(View.VISIBLE);
                             break;
                     }
                 }
-                Date startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Budget.START_DATE)));
-                Date endDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndex(Contract.Budget.END_DATE)));
+                Date startDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.START_DATE)));
+                Date endDate = DateUtils.getDateFromSQLDateString(cursor.getString(cursor.getColumnIndexOrThrow(Contract.Budget.END_DATE)));
                 DateFormatter.applyDate(mStartDateTextView, startDate);
                 DateFormatter.applyDate(mEndDateTextView, endDate);
             } else {
@@ -248,7 +249,7 @@ public class BudgetItemFragment extends SecondaryPanelFragment implements Loader
                     if (i != 0) {
                         builder.append(", ");
                     }
-                    String name = cursor.getString(cursor.getColumnIndex(Contract.Wallet.NAME));
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(Contract.Wallet.NAME));
                     builder.append(name);
                 }
                 mWalletsTextView.setText(builder);

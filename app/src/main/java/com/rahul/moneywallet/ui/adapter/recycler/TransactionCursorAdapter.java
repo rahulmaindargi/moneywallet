@@ -20,6 +20,7 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,7 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
     private int mIndexHeaderEndDate;
     private int mIndexHeaderMoney;
     private int mIndexHeaderGroupType;
+    private int mIndexHeaderExpense;
     private int mIndexCategoryName;
     private int mIndexCategoryIcon;
     private int mIndexTransactionId;
@@ -64,7 +66,7 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
     private int mIndexTransactionMoney;
     private int mIndexCurrency;
 
-    private MoneyFormatter mMoneyFormatter;
+    private final MoneyFormatter mMoneyFormatter;
 
     public TransactionCursorAdapter(ActionListener actionListener) {
         super(null, Contract.Transaction.ID);
@@ -79,6 +81,7 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
         mIndexHeaderEndDate = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_END_DATE);
         mIndexHeaderMoney = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_MONEY);
         mIndexHeaderGroupType = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_GROUP_TYPE);
+        mIndexHeaderExpense = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_EXPENSE);
         mIndexCategoryName = cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_NAME);
         mIndexCategoryIcon = cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_ICON);
         mIndexTransactionId = cursor.getColumnIndexOrThrow(Contract.Transaction.ID);
@@ -120,8 +123,19 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
         DateFormatter.applyDateRange(holder.mLeftTextView, start, end);
         Money money = Money.parse(cursor.getString(mIndexHeaderMoney));
         mMoneyFormatter.applyTinted(holder.mRightTextView, money);
+        try {
+            Money expense = Money.parse(cursor.getString(mIndexHeaderExpense));
+            mMoneyFormatter.applyTinted(holder.mRightTextExpenseView, expense);
+        } catch (Exception e) {
+
+            // IF Exception just  log to fix but skip showing it. and show existing total as it is
+            Log.e("HeaderMoney", "Cursor missing Header Expense", e);
+            holder.mRightTextView.setText("");
+            mMoneyFormatter.applyTinted(holder.mRightTextExpenseView, money);
+        }
     }
 
+    @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
@@ -147,20 +161,22 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private TextView mLeftTextView;
-        private TextView mRightTextView;
+        private final TextView mLeftTextView;
+        private final TextView mRightTextView;
+        private final TextView mRightTextExpenseView;
 
         /*package-local*/ HeaderViewHolder(View itemView) {
             super(itemView);
             mLeftTextView = itemView.findViewById(R.id.left_text_view);
             mRightTextView = itemView.findViewById(R.id.right_text_view);
+            mRightTextExpenseView = itemView.findViewById(R.id.right_text_view_expense);
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             if (mActionListener != null) {
-                Cursor cursor = getSafeCursor(getAdapterPosition());
+                Cursor cursor = getSafeCursor(getBindingAdapterPosition());
                 if (cursor != null) {
                     Date start = DateUtils.getDateFromSQLDateTimeString(cursor.getString(mIndexHeaderStartDate));
                     Date end = DateUtils.getDateFromSQLDateTimeString(cursor.getString(mIndexHeaderEndDate));
@@ -172,11 +188,11 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
 
     /*package-local*/ class TransactionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private ImageView mAvatarImageView;
-        private TextView mPrimaryTextView;
-        private TextView mMoneyTextView;
-        private TextView mSecondaryTextView;
-        private TextView mDateTextView;
+        private final ImageView mAvatarImageView;
+        private final TextView mPrimaryTextView;
+        private final TextView mMoneyTextView;
+        private final TextView mSecondaryTextView;
+        private final TextView mDateTextView;
 
         /*package-local*/ TransactionViewHolder(View itemView) {
             super(itemView);
@@ -191,7 +207,7 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
         @Override
         public void onClick(View v) {
             if (mActionListener != null) {
-                Cursor cursor = getSafeCursor(getAdapterPosition());
+                Cursor cursor = getSafeCursor(getBindingAdapterPosition());
                 if (cursor != null) {
                     mActionListener.onTransactionClick(cursor.getLong(mIndexTransactionId));
                 }

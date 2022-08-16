@@ -38,6 +38,7 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
     public static final String COLUMN_HEADER_END_DATE = "header_end_date";
     public static final String COLUMN_HEADER_MONEY = "header_money";
     public static final String COLUMN_HEADER_GROUP_TYPE = "header_group_type";
+    public static final String COLUMN_HEADER_EXPENSE = "header_expense";
 
     public final static int TYPE_HEADER = 0;
     public final static int TYPE_ITEM = 1;
@@ -47,6 +48,7 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
     private static final int INDEX_HEADER_END_DATE = 2;
     private static final int INDEX_HEADER_MONEY = 3;
     private static final int INDEX_HEADER_GROUP_TYPE = 4;
+    private static final int INDEX_HEADER_EXPENSE = 5;
 
     private final Group mGroup;
     private final Date mLowerBound;
@@ -92,6 +94,7 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
                     int direction = cursor.getInt(indexTransactionDirection);
                     if (direction == 0) {
                         money *= -1;
+                        header.addExpense(currency, money);
                     }
                     header.addMoney(currency, money);
                 }
@@ -101,12 +104,13 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
 
     @Override
     protected String[] getHeaderColumnNames() {
-        return new String[] {
+        return new String[]{
                 COLUMN_ITEM_TYPE,
                 COLUMN_HEADER_START_DATE,
                 COLUMN_HEADER_END_DATE,
                 COLUMN_HEADER_MONEY,
-                COLUMN_HEADER_GROUP_TYPE
+                COLUMN_HEADER_GROUP_TYPE,
+                COLUMN_HEADER_EXPENSE,
         };
     }
 
@@ -121,6 +125,8 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
                     return DateUtils.getSQLDateTimeString(header.getEndDate());
                 case INDEX_HEADER_MONEY:
                     return header.mMoney.toString();
+                case INDEX_HEADER_EXPENSE:
+                    return header.expense.toString();
             }
         }
         return null;
@@ -165,15 +171,22 @@ public class TransactionHeaderCursor extends AbstractHeaderCursor<TransactionHea
 
     /*package-local*/ static class Header extends DateRangeHeader {
 
-        private Money mMoney;
+        private final Money mMoney;
+
+        private final Money expense;
 
         private Header(Group group, Date lowerBound, Date upperBound, Date date) {
             super(group, lowerBound, upperBound, date);
             mMoney = new Money();
+            expense = new Money();
         }
 
         private void addMoney(String currency, long money) {
             mMoney.addMoney(currency, money);
+        }
+
+        private void addExpense(String currency, long money) {
+            expense.addMoney(currency, money);
         }
     }
 }

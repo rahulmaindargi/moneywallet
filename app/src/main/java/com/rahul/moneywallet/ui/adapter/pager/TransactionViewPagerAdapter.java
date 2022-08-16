@@ -20,13 +20,13 @@
 package com.rahul.moneywallet.ui.adapter.pager;
 
 import android.content.Context;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.ui.fragment.primary.TransactionListFragment;
-import com.rahul.moneywallet.ui.fragment.primary.TransferListFragment;
 
 /**
  * Created by andrea on 02/03/18.
@@ -45,8 +45,8 @@ public class TransactionViewPagerAdapter extends FragmentPagerAdapter {
         switch (position) {
             case 0:
                 return new TransactionListFragment();
-            case 1:
-                return new TransferListFragment();
+//            case 1:
+//                return new TransferListFragment();
             default:
                 throw new IllegalArgumentException("Invalid adapter position: " + position);
         }
@@ -54,7 +54,7 @@ public class TransactionViewPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 2;
+        return 1;
     }
 
     @Override
@@ -62,8 +62,8 @@ public class TransactionViewPagerAdapter extends FragmentPagerAdapter {
         switch (position) {
             case 0:
                 return mContext.getString(R.string.menu_transaction_tab_transactions);
-            case 1:
-                return mContext.getString(R.string.menu_transaction_tab_transfers);
+//            case 1:
+//                return mContext.getString(R.string.menu_transaction_tab_transfers);
         }
         return null;
     }

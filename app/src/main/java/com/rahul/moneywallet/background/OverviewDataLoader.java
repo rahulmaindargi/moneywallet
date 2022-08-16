@@ -294,17 +294,40 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
     }
 
     private PeriodMoney getNextPeriod(PeriodMoney lastPeriod) {
+
+        Calendar firstDate = null;
+        try (Cursor firstTransactionDateC = getContext().getContentResolver().query(DataContentProvider.CONTENT_TRANSACTIONS, new String[]{"DISTINCT " + Contract.Transaction.DATE}, null, null, Contract.Transaction.DATE + " ASC LIMIT 1")) {
+
+            if (firstTransactionDateC != null && firstTransactionDateC.moveToFirst()) {
+                firstDate = Calendar.getInstance();
+                Date date = DateUtils.getDateFromSQLDateString(firstTransactionDateC.getString(firstTransactionDateC.getColumnIndexOrThrow(Contract.Transaction.DATE)));
+                firstDate.setTime(date);
+            }
+        }
+        Calendar lastDate = null;
+        try (Cursor lastTransactionDateC = getContext().getContentResolver().query(DataContentProvider.CONTENT_TRANSACTIONS, new String[]{"DISTINCT " + Contract.Transaction.DATE}, null, null, Contract.Transaction.DATE + " DESC LIMIT 1")) {
+
+            if (lastTransactionDateC != null && lastTransactionDateC.moveToFirst()) {
+                lastDate = Calendar.getInstance();
+                Date date = DateUtils.getDateFromSQLDateString(lastTransactionDateC.getString(lastTransactionDateC.getColumnIndexOrThrow(Contract.Transaction.DATE)));
+                lastDate.setTime(date);
+            }
+        }
+
         Calendar startCalendar = Calendar.getInstance();
         if (lastPeriod != null) {
             startCalendar.setTime(lastPeriod.getEndDate());
             startCalendar.add(Calendar.MILLISECOND, 1);
+            startCalendar = firstDate != null && firstDate.after(startCalendar) ? firstDate : startCalendar;
         } else {
             startCalendar.setTime(mOverviewSetting.getStartDate());
             startCalendar.set(Calendar.HOUR_OF_DAY, 0);
             startCalendar.set(Calendar.MINUTE, 0);
             startCalendar.set(Calendar.SECOND, 0);
             startCalendar.set(Calendar.MILLISECOND, 0);
+            startCalendar = firstDate != null && firstDate.after(startCalendar) ? firstDate : startCalendar;
         }
+
         Date startDate = startCalendar.getTime();
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.setTime(startDate);
@@ -313,6 +336,7 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
                 // the end date is the last day of the same year of the start date
                 endCalendar.set(Calendar.MONTH, Calendar.DECEMBER);
                 endCalendar.set(Calendar.DAY_OF_MONTH, 31);
+                endCalendar = lastDate != null && lastDate.before(endCalendar) ? lastDate : endCalendar;
                 break;
             case MONTHLY:
                 // the end date is generally the last day of the same month of the start month
@@ -330,6 +354,7 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
                 // step 4: we move to the first day of month and then we move one day first
                 endCalendar.set(Calendar.DAY_OF_MONTH, firstDayOfMonth);
                 endCalendar.add(Calendar.DAY_OF_MONTH, -1);
+                endCalendar = lastDate != null && lastDate.before(endCalendar) ? lastDate : endCalendar;
                 break;
             case WEEKLY:
                 // we can check which day of week is the start date and count how many days are
@@ -346,6 +371,7 @@ public class OverviewDataLoader extends AbstractGenericLoader<OverviewData> {
                 int requiredDays = offset - 1;
                 // step 3: add those days to the current start date
                 endCalendar.add(Calendar.DAY_OF_MONTH, requiredDays);
+                endCalendar = lastDate != null && lastDate.before(endCalendar) ? lastDate : endCalendar;
                 break;
             case DAILY:
                 // no special calculation is needed

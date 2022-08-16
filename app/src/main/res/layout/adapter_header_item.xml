@@ -51,6 +51,20 @@
         android:textSize="@dimen/material_component_lists_header_text_size"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/right_text_view_expense"
+        tools:text="This is the right text" />
+
+    <TextView
+        android:id="@+id/right_text_view_expense"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/material_component_lists_header_start_margin"
+        android:layout_marginStart="@dimen/material_component_lists_header_start_margin"
+        android:layout_marginRight="@dimen/material_component_lists_header_end_margin"
+        android:layout_marginEnd="@dimen/material_component_lists_header_end_margin"
+        android:textSize="@dimen/material_component_lists_header_text_size"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:text="This is the right text" />
 

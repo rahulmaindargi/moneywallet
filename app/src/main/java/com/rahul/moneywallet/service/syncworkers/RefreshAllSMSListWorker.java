@@ -69,7 +69,7 @@ public class RefreshAllSMSListWorker extends Worker {
                                 long dateVal = Long.parseLong(date_sent);
                                 Runnable runnable = () -> {
                                     long finalDate = (dateVal / 1000) * 1000;
-                                    handler.handleSMS(getApplicationContext(), address, address, body, finalDate);
+                                    handler.handleSMS(getApplicationContext(), address, address, body, finalDate, false);
                                 };
                                 futureList.add(executorService.submit(runnable));
                                 // handler.handleSMS(getApplicationContext(), address, address, body, dateVal);

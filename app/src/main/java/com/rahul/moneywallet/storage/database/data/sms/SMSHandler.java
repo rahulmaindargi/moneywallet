@@ -1,14 +1,23 @@
 package com.rahul.moneywallet.storage.database.data.sms;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
+import com.rahul.moneywallet.R;
+import com.rahul.moneywallet.broadcast.LocalAction;
+import com.rahul.moneywallet.broadcast.Message;
 import com.rahul.moneywallet.model.CurrencyUnit;
 import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.storage.database.SyncContentProvider;
@@ -45,7 +54,23 @@ import java.util.stream.Stream;
 
 public class SMSHandler {
 
-    public void handleSMS(Context context, String originatingAddress, String dispOriginatingAddress, String message, long timestampMillis) {
+    public static final String TRANSACTION_ADDED = "TRANSACTION_ADDED";
+
+    private void createNotificationChannel(Context context) {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        CharSequence name = "Transaction Notification Channel";
+        String description = "Notification about transaction added";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(TRANSACTION_ADDED, name, importance);
+        channel.setDescription(description);
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+    }
+
+    public void handleSMS(Context context, String originatingAddress, String dispOriginatingAddress, String message, long timestampMillis, boolean showNotification) {
         Log.d("SMSHandler", "handleSMS");
         ContentResolver contentResolver = context.getContentResolver();
         ParsedDetails details = getParsedDetails(SyncContentProvider.CONTENT_SMS_FORMAT, contentResolver, originatingAddress,
@@ -64,11 +89,38 @@ public class SMSHandler {
             BigDecimal decimalMultiply = BigDecimal.valueOf(Math.pow(10, currencyUnit.getDecimals()));
             BigDecimal moneyDecimal = decimalMultiply.multiply(new BigDecimal(details.amount));
             long money = moneyDecimal.longValue();
-            dataImporter.insertTransaction(details.account, currencyUnit, "Misc",
+            Uri insertedUri = dataImporter.insertTransaction(details.account, currencyUnit, "Misc",
                     Date.from(details.dateTime.atZone(ZoneId.systemDefault()).toInstant())
                     , money, "debit".equalsIgnoreCase(details.type) ? 0 : 1, details.otherParty, null,
                     null, null, message, Utils.getDeviceID(context), null, null);
+            if (showNotification) {
+                createNotificationChannel(context);
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, TRANSACTION_ADDED)
+                        .setSmallIcon(R.mipmap.ic_launcher) // notification icon
+                        .setContentTitle("Transaction Added!") // title for notification
+                        .setContentText(String.format("%s %s %s %s", details.type, details.amount, "debit".equalsIgnoreCase(details.type) ? "to" : "from", details.otherParty)) // message for notification
+                        .setAutoCancel(true) // clear notification after click
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                //Intent intent = new Intent(context, MainActivity.class);
+                long insertedId = Long.parseLong(insertedUri.getLastPathSegment());
+                Intent intent = getIntent(context, insertedId);
+                PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                mBuilder.setContentIntent(pi);
+                NotificationManagerCompat manager = NotificationManagerCompat.from(context);
+                manager.notify(200, mBuilder.build());
+//                NotificationManager mNotificationManager =
+//                        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//                mNotificationManager.notify(200, mBuilder.build());
+            }
         }
+    }
+
+    private Intent getIntent(Context context, long id) {
+        Intent intent = new Intent(LocalAction.ACTION_ITEM_CLICK);
+        intent.putExtra(Message.ITEM_ID, id);
+        intent.putExtra(Message.ITEM_TYPE, Message.TYPE_TRANSACTION);
+        return intent;
     }
 
     @Nullable

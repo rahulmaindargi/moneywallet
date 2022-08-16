@@ -1,8 +1,8 @@
 {
   "repository": {
-    "code_url": "https://github.com/AndreAle94/moneywallet",
-    "issue_url": "https://github.com/AndreAle94/moneywallet/issues",
-    "donation_url": "https://github.com/AndreAle94/moneywallet#donations"
+    "code_url": "https://github.com/rahulmaindargi/moneywallet",
+    "issue_url": "https://github.com/rahulmaindargi/moneywallet/issues",
+    "donation_url": "https://github.com/rahulmaindargi/moneywallet#donations"
   },
   "other_info": [
     {
@@ -10,21 +10,38 @@
       "items": [
         {
           "icon": "ic_perm_identity_black_24dp",
-          "title": "Andrea Alemani",
-          "link": "https://github.com/AndreAle94"
-        },{
+          "title": "Rahul Maindargi",
+          "link": "https://github.com/rahulmaindargi"
+        },
+        {
           "icon": "ic_github_circle_black_24dp",
           "title_resource": "about_hint_fork",
+          "link": "https://github.com/rahulmaindargi/moneywallet"
+        }
+      ]
+    },
+    {
+      "name_resource": "about_hint_original_developer",
+      "items": [
+        {
+          "icon": "ic_perm_identity_black_24dp",
+          "title": "Andrea Alemani"
+        },
+        {
+          "icon": "ic_public_black_24dp",
+          "title": "Original code link",
           "link": "https://github.com/AndreAle94/moneywallet"
         }
       ]
-    },{
+    },
+    {
       "name_resource": "about_hint_logo_designer",
       "items": [
         {
           "icon": "ic_perm_identity_black_24dp",
           "title": "Adam Lapinski"
-        },{
+        },
+        {
           "icon": "ic_public_black_24dp",
           "title_resource": "about_hint_website",
           "link": "http://www.yeti-designs.com"

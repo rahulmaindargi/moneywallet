@@ -25,8 +25,8 @@ public class SMSDataImporter extends AbstractDataImporter {
     }
 
     @Override
-    public void insertTransaction(String wallet, CurrencyUnit currencyUnit, String category, Date datetime, Long money, int direction,
-                                  String description, String event, String place, String people, String note, String deviceSourceId, String syncedSideId, String syncedWithList) {
+    public Uri insertTransaction(String wallet, CurrencyUnit currencyUnit, String category, Date datetime, Long money, int direction,
+                                 String description, String event, String place, String people, String note, String deviceSourceId, String syncedSideId, String syncedWithList) {
         Uri uri = DataContentProvider.CONTENT_TRANSACTIONS;
         String[] projection = new String[]{Contract.Transaction.CATEGORY_NAME};
         String selection = Contract.Transaction.DESCRIPTION + " =? AND " + Contract.Transaction.DIRECTION + " =? ";
@@ -40,9 +40,10 @@ public class SMSDataImporter extends AbstractDataImporter {
                 }
             }
         }
-        super.insertTransaction(wallet, currencyUnit, category, datetime, money, direction, description, event, place, people, note, deviceSourceId, syncedSideId, syncedWithList);
+        uri = super.insertTransaction(wallet, currencyUnit, category, datetime, money, direction, description, event, place, people, note, deviceSourceId, syncedSideId, syncedWithList);
 
         Log.d("SMSDataImporter", "Transaction Inserted ");
+        return uri;
     }
 
     @Override

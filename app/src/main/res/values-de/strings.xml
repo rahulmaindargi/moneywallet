@@ -239,6 +239,7 @@
     <string name="about_hint_icon_licenses">Bilder und Symbole</string>
     <string name="about_hint_icon_pack">Symbolpaket</string>
     <string name="about_hint_logo_designer">Logo-Designer</string>
+    <string name="about_hint_original_developer">Original-Designer</string>
     <string name="about_hint_md_icons">Material-Design-Symbole</string>
     <string name="about_hint_open_source_libraries">Open-Source-Bibliotheken</string>
     <string name="about_hint_rate_app">Bewerte diese App</string>

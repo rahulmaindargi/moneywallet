@@ -32,7 +32,7 @@ public class SmsListener extends BroadcastReceiver {
                         // Toast.makeText(context, originatingAddress + " " + displayOriginatingAddress + " " + messageBody, Toast.LENGTH_LONG)
                         // .show();
                         Log.d("SmsListenerNew", "SMS Received Toast Done");
-                        smsHandler.handleSMS(context, originatingAddress, displayOriginatingAddress, messageBody, timestampMillis);
+                        smsHandler.handleSMS(context, originatingAddress, displayOriginatingAddress, messageBody, timestampMillis, true);
                     }
                 } catch (Exception e) {
                     Log.d("SmsListenerNew", e.getMessage());

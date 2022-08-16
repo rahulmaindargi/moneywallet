@@ -5,6 +5,7 @@ import static com.rahul.moneywallet.storage.database.SyncContentProvider.CONTENT
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 public class ServerWorker extends Worker {
 
@@ -90,10 +92,11 @@ public class ServerWorker extends Worker {
             super(context);
         }
 
-        public void insertTransaction(String wallet, CurrencyUnit currencyUnit, String category, java.util.Date datetime, Long money, int direction,
-                                      String description, String event, String place, String people, String note, String deviceSourceId, String syncedSideId,
-                                      String syncedWithList) {
+        public Uri insertTransaction(String wallet, CurrencyUnit currencyUnit, String category, Date datetime, Long money, int direction,
+                                     String description, String event, String place, String people, String note, String deviceSourceId, String syncedSideId,
+                                     String syncedWithList) {
             super.insertTransaction(wallet, currencyUnit, category, datetime, money, direction, description, event, place, people, note, deviceSourceId, syncedSideId, syncedWithList);
+            return null;
         }
 
         @Override

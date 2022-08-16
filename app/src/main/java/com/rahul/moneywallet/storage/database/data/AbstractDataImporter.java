@@ -40,9 +40,9 @@ public abstract class AbstractDataImporter {
 
     public abstract void importData() throws IOException;
 
-    protected void insertTransaction(String wallet, CurrencyUnit currencyUnit, String category,
-                                     Date datetime, Long money, int direction, String description,
-                                     String event, String place, String people, String note, String deviceSourceId, String syncedSideId, String syncedWithList) {
+    protected Uri insertTransaction(String wallet, CurrencyUnit currencyUnit, String category,
+                                    Date datetime, Long money, int direction, String description,
+                                    String event, String place, String people, String note, String deviceSourceId, String syncedSideId, String syncedWithList) {
         ContentResolver contentResolver = getContext().getContentResolver();
         ContentValues contentValues = new ContentValues();
         // the first step consists in checking if a wallet with the same name and currency already
@@ -74,7 +74,7 @@ public abstract class AbstractDataImporter {
         contentValues.put(Contract.Transaction.DEVICE_SOURCE_ID, deviceSourceId);
         contentValues.put(Contract.Transaction.SYNC_SIDE_ID, syncedSideId);
         contentValues.put(Contract.Transaction.SYNCED_WITH_LIST, syncedWithList);
-        contentResolver.insert(DataContentProvider.CONTENT_TRANSACTIONS, contentValues);
+        return contentResolver.insert(DataContentProvider.CONTENT_TRANSACTIONS, contentValues);
     }
 
     protected long getOrCreateWallet(ContentResolver contentResolver, String name, CurrencyUnit currencyUnit) {

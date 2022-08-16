@@ -24,6 +24,8 @@ import static com.rahul.moneywallet.service.syncworkers.devicesync.NSDClientHelp
 import static com.rahul.moneywallet.service.syncworkers.devicesync.NSDServiceRegistrationHelper.SERVER_WORKER_NAME;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -46,6 +48,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -137,6 +141,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
 
     private final static int ID_ACTION_NEW_WALLET = 1;
     private final static int ID_ACTION_MANAGE_WALLET = 2;
+    private static final String WORK_COMPLETED = "WORK_COMPLETED";
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -191,19 +196,19 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                         createDrawerItem(ID_SECTION_TRANSACTIONS, R.drawable.ic_shopping_cart_24dp, R.string.menu_transaction),
                         createDrawerItem(ID_SECTION_CATEGORIES, R.drawable.ic_table_large_24dp, R.string.menu_category),
                         createDrawerItem(ID_SECTION_OVERVIEW, R.drawable.ic_equalizer_24dp, R.string.menu_overview),
-                        createDrawerItem(ID_SECTION_DEBTS, R.drawable.ic_debt_24dp, R.string.menu_debt),
+                        //createDrawerItem(ID_SECTION_DEBTS, R.drawable.ic_debt_24dp, R.string.menu_debt),
                         createDrawerItem(ID_SECTION_BUDGETS, R.drawable.ic_budget_24dp, R.string.menu_budget),
                         createDrawerItem(ID_SECTION_SAVINGS, R.drawable.ic_saving_24dp, R.string.menu_saving),
                         createDrawerItem(ID_SECTION_EVENTS, R.drawable.ic_assistant_photo_24dp, R.string.menu_event),
                         createDrawerItem(ID_SECTION_RECURRENCES, R.drawable.ic_restore_24dp, R.string.menu_recurrences),
-                        createDrawerItem(ID_SECTION_MODELS, R.drawable.ic_bookmark_black_24dp, R.string.menu_models),
+                        //createDrawerItem(ID_SECTION_MODELS, R.drawable.ic_bookmark_black_24dp, R.string.menu_models),
                         createDrawerItem(ID_SECTION_PLACES, R.drawable.ic_place_24dp, R.string.menu_place),
                         createDrawerItem(ID_SECTION_PEOPLE, R.drawable.ic_people_black_24dp, R.string.menu_people),
                         new DividerDrawerItem(),
                         createDrawerItem(ID_SECTION_CALCULATOR, R.drawable.ic_calculator_24dp, R.string.menu_calculator),
-                        createDrawerItem(ID_SECTION_CONVERTER, R.drawable.ic_converter_24dp, R.string.menu_converter),
-                        createDrawerItem(ID_SECTION_ATM, R.drawable.ic_credit_card_24dp, R.string.menu_search_atm),
-                        createDrawerItem(ID_SECTION_BANK, R.drawable.ic_account_balance_24dp, R.string.menu_search_bank),
+                        //createDrawerItem(ID_SECTION_CONVERTER, R.drawable.ic_converter_24dp, R.string.menu_converter),
+                        //createDrawerItem(ID_SECTION_ATM, R.drawable.ic_credit_card_24dp, R.string.menu_search_atm),
+                        //createDrawerItem(ID_SECTION_BANK, R.drawable.ic_account_balance_24dp, R.string.menu_search_bank),
                         new DividerDrawerItem(),
                         createDrawerItem(ID_SECTION_SETTING, R.drawable.ic_settings_24dp, R.string.menu_setting),
                         createDrawerItem(ID_SECTION_REFRESH_SMS_FORMATS, R.drawable.ic_refresh_black_24dp, R.string.menu_refresh_sms_formats),
@@ -412,6 +417,7 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
     }
 
     private void workerCompletionToast(String serverWorkerName, String successMessage, String failMessage, Runnable extraHandler) {
+        createNotificationChannel();
         WorkManager.getInstance(this)
                 .getWorkInfosForUniqueWorkLiveData(serverWorkerName)
                 .observe(this, infos -> infos.stream()
@@ -422,10 +428,40 @@ public class MainActivity extends BaseActivity implements DrawerController, Acco
                             }
                             if (info.getState() == WorkInfo.State.SUCCEEDED) {
                                 Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
+                                showNotification(serverWorkerName, successMessage);
                             } else {
                                 Toast.makeText(this, failMessage, Toast.LENGTH_SHORT).show();
+                                showNotification(serverWorkerName, failMessage);
                             }
                         }));
+    }
+
+    private void showNotification(String serverWorkerName, String message) {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), WORK_COMPLETED)
+                .setSmallIcon(R.mipmap.ic_launcher) // notification icon
+                .setContentTitle("Action Completed!") // title for notification
+                .setContentText(message) // message for notification
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);// clear notification after click
+        NotificationManagerCompat manager = NotificationManagerCompat.from(getApplicationContext());
+        manager.cancel(100);
+        manager.notify(100, mBuilder.build());
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        CharSequence name = "WorkManager Notification Channel";
+        String description = "Notification about Background work";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(WORK_COMPLETED, name, importance);
+        channel.setDescription(description);
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        NotificationManager notificationManager = getApplicationContext().getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
     }
 
     private void handleRefreshState(Operation.State state, String successMessage, String failureMessage, String operation, String workName) {

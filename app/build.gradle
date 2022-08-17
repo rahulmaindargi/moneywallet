@@ -23,7 +23,7 @@ android {
     compileSdk 32
     packagingOptions {
         resources {
-            excludes += ['**/SMS_Transaction_Format.json']
+            excludes += ['**/SMS_Transaction_Format.json', '**/sms_formats/**']
         }
     }
     defaultConfig {
@@ -32,7 +32,7 @@ android {
         minSdkVersion 30
         targetSdk 33
         versionCode 75
-        versionName '1.0.1.1'
+        versionName '1.0.1.2'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
         multiDexEnabled true

@@ -19,14 +19,10 @@
 
 package com.rahul.moneywallet.utils;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,15 +33,16 @@ import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.model.IFile;
 import com.rahul.moneywallet.storage.database.backup.BackupManager;
 
-import org.apache.commons.lang3.StringUtils;
-
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 /**
  * Created by andrea on 03/02/18.
@@ -95,16 +92,12 @@ public class Utils {
     }
 
     public static boolean isAtLeastLollipop() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+        return true;
     }
 
     public static void setBackgroundCompat(View view, Drawable drawable) {
         if (view != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                view.setBackground(drawable);
-            } else {
-                view.setBackgroundDrawable(drawable);
-            }
+            view.setBackground(drawable);
         }
     }
 
@@ -169,26 +162,31 @@ public class Utils {
     public static String DEVICE_ID;
 
     public static String getDeviceID(Context context) {
-
         if (DEVICE_ID == null) {
             synchronized (Utils.class) {
                 if (DEVICE_ID == null) {
-                    Account[] accountsByType = context.getSystemService(AccountManager.class).getAccountsByType("com.google");
-                    Optional<Account> googleAccount = Stream.of(accountsByType).filter(account -> account.type.equals("com.google")).findFirst();
-                    String androidId = null;
-
-                    if (googleAccount.isPresent()) {
-                        androidId = googleAccount.get().name;
-                        Log.d("Android Google name", androidId);
+                    File filesDir = context.getFilesDir();
+                    Path file = filesDir.toPath().resolve("install_id.txt");
+                    try {
+                        if (Files.exists(file)) {
+                            byte[] bytes = Files.readAllBytes(file);
+                            if (bytes != null && bytes.length > 0) {
+                                DEVICE_ID = new String(bytes);
+                                return DEVICE_ID;
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Log.e("DeviceID", "Failed to read install_id", e);
                     }
-                    if (StringUtils.isEmpty(androidId)) {
-                        androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    DEVICE_ID = UUID.randomUUID().toString();
+                    try {
+                        Files.write(file, DEVICE_ID.getBytes(),
+                                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Log.e("DeviceID", "Failed to write install_id", e);
                     }
-                    if (StringUtils.isEmpty(androidId)) {
-                        androidId = Settings.Global.getString(context.getContentResolver(), Settings.Global.DEVICE_NAME);
-                    }
-                    Log.d("AndroidID", androidId);
-                    DEVICE_ID = UUID.nameUUIDFromBytes(androidId.getBytes()).toString();
                 }
             }
         }

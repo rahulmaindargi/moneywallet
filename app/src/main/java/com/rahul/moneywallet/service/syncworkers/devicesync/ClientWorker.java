@@ -56,6 +56,9 @@ public class ClientWorker extends Worker {
                         String peopleNames = null;
                         String peopleIds = query.getString(query.getColumnIndexOrThrow(Contract.Transaction.PEOPLE_IDS));
                         if (!StringUtils.isEmpty(peopleIds)) {
+                            peopleIds = peopleIds.replaceAll("<", "");
+                            peopleIds = peopleIds.replaceAll(">", "");
+                            Log.d("SyncDeviceActivityWriter", "PeopleIDS : (" + peopleIds + ")");
                             String select = Contract.Person.ID + " in (" + peopleIds + ")";
                             try (Cursor peopleCur = getContentResolver().query(SyncContentProvider.CONTENT_PEOPLE, new String[]{Contract.Person.NAME}, select, null, null)) {
                                 if (peopleCur != null && peopleCur.moveToFirst()) {
@@ -106,6 +109,7 @@ public class ClientWorker extends Worker {
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("SyncDeviceActivityWriter", "Exception", e);
+            return Result.failure();
         } finally {
             if (printWriter != null) {
                 printWriter.println(SyncDeviceHelper.END_OF_DATA);

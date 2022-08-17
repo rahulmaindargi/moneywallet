@@ -27,6 +27,7 @@ android {
         }
     }
     defaultConfig {
+
         applicationId "com.rahul.moneywallet"
         minSdkVersion 30
         targetSdk 33
@@ -41,6 +42,9 @@ android {
         ]
         buildConfigField('String', 'API_KEY_DROPBOX', ApiKey_Dropbox)
         buildConfigField('String', 'API_KEY_OPEN_EXCHANGE_RATES', ApiKey_OpenExchangeRates)
+
+        archivesBaseName = "moneywallet.v" + versionName
+
     }
     buildTypes {
         release {

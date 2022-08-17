@@ -73,10 +73,12 @@ public class ServerWorker extends Worker {
                 }
             } catch (IOException e) {
                 Log.e("SyncDeviceActivityListener", "Socket connection failed", e);
+                return Result.failure();
             }
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("SyncDeviceActivityListener", "Server Socket failed", e);
+            return Result.failure();
         }
 
         return Result.success();
@@ -95,8 +97,7 @@ public class ServerWorker extends Worker {
         public Uri insertTransaction(String wallet, CurrencyUnit currencyUnit, String category, Date datetime, Long money, int direction,
                                      String description, String event, String place, String people, String note, String deviceSourceId, String syncedSideId,
                                      String syncedWithList) {
-            super.insertTransaction(wallet, currencyUnit, category, datetime, money, direction, description, event, place, people, note, deviceSourceId, syncedSideId, syncedWithList);
-            return null;
+            return super.insertTransaction(wallet, currencyUnit, category, datetime, money, direction, description, event, place, people, note, deviceSourceId, syncedSideId, syncedWithList);
         }
 
         @Override

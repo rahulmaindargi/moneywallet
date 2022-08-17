@@ -1,0 +1,44 @@
+{
+  "smsFormat": [
+    {
+      "sender": "CITIBA",
+      "type": "debit",
+      "regex_Format": "(?i)Your [[account]] A\/c has been debited with INR [[amount]] on [[date]] at [[time]] and account [[to]] has been credited..*"
+    },
+    {
+      "sender": "CITIBA",
+      "type": "credit",
+      "regex_Format": "(?i)Your [[account]] A\/c has been credited with INR [[amount]] on [[date]] at [[time]] received from [[to]]. UPI Ref.*"
+    },
+    {
+      "sender": "CITIBA",
+      "type": "credit",
+      "regex_Format": "(?i)Your Citibank account [[account]] has been credited with [[to]] of Rs. [[amount]] on [[date]]. .*"
+    },
+    {
+      "sender": "CITIBA",
+      "type": "debit",
+      "regex_Format": "(?i)Your a\/c no.[[account]] is debited for Rs.[[amount]] on [[date]] and a\/c [[to]] credited.*"
+    },
+    {
+      "sender": "CITIBA",
+      "type": "debit",
+      "regex_Format": "(?i)Rs. [[amount]] spent on card [[account]] on [[date]] at [[to]]. Limit.*"
+    },
+    {
+      "sender": "CITIBA",
+      "type": "credit",
+      "regex_Format": "(?i)Rs.[[amount]] is credited to your a\/c [[account]] from Citi Account of [[to]] on [[date]] [[time]] \\(Ref no..*"
+    },
+    {
+      "sender": "CITIBA",
+      "type": "credit",
+      "regex_Format": "(?i)Payment of Rs.[[amount]] received for card [[account]] on [[date]]..*"
+    },
+    {
+      "sender": "CITIBN",
+      "type": "debit",
+      "regex_Format": "(?i)Your Citi A\/c [[account]] is debited for Rs.[[amount]] on [[date]] [[time]] for fund transfer request to [[to]] \\(Ref. No.*"
+    }
+  ]
+}

@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.rahul.moneywallet.storage.database.Contract;
+import com.rahul.moneywallet.storage.database.SyncContentProvider;
 import com.rahul.moneywallet.storage.database.data.sms.SMSHandler;
 
 import java.io.File;
@@ -51,6 +53,17 @@ public class RefreshAllSMSListWorker extends Worker {
                 e.printStackTrace();
                 Log.e("RefreshAllSMSListWorker", "Failed to Reset No format matched file", e);
             }
+
+            ContentResolver contentResolver = getApplicationContext().getContentResolver();
+            List<String> knownSenders = new ArrayList<>();
+            try (Cursor cursor = contentResolver.query(SyncContentProvider.CONTENT_SMS_FORMAT, new String[]{"DISTINCT " + Contract.SMSFormat.SENDER}, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    do {
+                        knownSenders.add(cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.SENDER)));
+                    } while (cursor.moveToNext());
+                }
+            }
+
             String[] projections = new String[]{Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY,
                     Telephony.Sms.Inbox.DATE_SENT};
             try (Cursor cursor = contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, projections, null, null, null)) {
@@ -65,7 +78,7 @@ public class RefreshAllSMSListWorker extends Worker {
                             Log.d("RefreshAllSMSListWorker", "date_sent : " + date_sent);
                             Log.d("RefreshAllSMSListWorker", "address : " + address);
                             Log.d("RefreshAllSMSListWorker", "body : " + body);
-                            if (checkSenderIsValid(address)) {
+                            if (checkSenderIsValid(knownSenders, address)) {
                                 long dateVal = Long.parseLong(date_sent);
                                 Runnable runnable = () -> {
                                     long finalDate = (dateVal / 1000) * 1000;
@@ -109,8 +122,11 @@ public class RefreshAllSMSListWorker extends Worker {
         return Result.success();
     }
 
-    private boolean checkSenderIsValid(String sender) {
-
+    private boolean checkSenderIsValid(List<String> knownSenders, String sender) {
+        if (!knownSenders.isEmpty()) {
+            return knownSenders.stream().anyMatch(sender::contains);
+        }
+        // If above working then remove
         return (sender.trim().contains("+918586980859")
                 || sender.contains("08586980869")
                 || sender.contains("085869")

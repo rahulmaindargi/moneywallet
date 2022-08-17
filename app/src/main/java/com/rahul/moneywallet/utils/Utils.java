@@ -159,29 +159,33 @@ public class Utils {
         }
     }
 
-    public static String DEVICE_ID;
+    private static volatile String DEVICE_ID;
 
     public static String getDeviceID(Context context) {
-        if (DEVICE_ID == null) {
+        String deviceId = DEVICE_ID;
+        if (deviceId == null) {
             synchronized (Utils.class) {
-                if (DEVICE_ID == null) {
+                deviceId = DEVICE_ID;
+                if (deviceId == null) {
                     File filesDir = context.getFilesDir();
                     Path file = filesDir.toPath().resolve("install_id.txt");
                     try {
                         if (Files.exists(file)) {
                             byte[] bytes = Files.readAllBytes(file);
                             if (bytes != null && bytes.length > 0) {
-                                DEVICE_ID = new String(bytes);
-                                return DEVICE_ID;
+                                deviceId = new String(bytes);
+                                DEVICE_ID = deviceId;
+                                return deviceId;
                             }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                         Log.e("DeviceID", "Failed to read install_id", e);
                     }
-                    DEVICE_ID = UUID.randomUUID().toString();
+                    deviceId = UUID.randomUUID().toString();
+                    DEVICE_ID = deviceId;
                     try {
-                        Files.write(file, DEVICE_ID.getBytes(),
+                        Files.write(file, deviceId.getBytes(),
                                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -190,7 +194,7 @@ public class Utils {
                 }
             }
         }
-        return DEVICE_ID;
+        return deviceId;
     }
 
 }

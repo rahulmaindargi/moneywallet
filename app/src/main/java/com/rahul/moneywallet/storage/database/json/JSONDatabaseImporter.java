@@ -559,16 +559,27 @@ public class JSONDatabaseImporter implements DatabaseImporter {
         }
     }
 
-    public void importSMSFormats(ContentResolver contentResolver) throws ImportException{
+    private static volatile int formatId = 0;
+
+    private synchronized static int getNextFormatId() {
+        formatId += 1;
+        return formatId;
+    }
+
+    public static synchronized void resetFormatId() {
+        formatId = 0;
+    }
+
+    public void importSMSFormats(ContentResolver contentResolver) throws ImportException {
         try {
             if (JSONDatabase.SMSFormat.ARRAY.equals(mReader.readName())) {
                 mReader.beginArray();
-                int msgId = 1;
+                //int msgId = 1;
                 while (mReader.hasArrayAnotherObject()) {
                     JSONObject object = mReader.readObject();
-                    SMSFormat transferAttachment = mFactory.getSMSFormat(object, msgId);
+                    SMSFormat transferAttachment = mFactory.getSMSFormat(object, getNextFormatId());
                     long id = SQLDatabaseImporter.insert(contentResolver, transferAttachment);
-                    msgId += 1;
+                    // msgId += 1;
                 }
                 mReader.endArray();
             } else {

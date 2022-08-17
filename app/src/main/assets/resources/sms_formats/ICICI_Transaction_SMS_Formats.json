@@ -1,0 +1,34 @@
+{
+  "smsFormat": [
+    {
+      "sender": "ICICIB",
+      "type": "debit",
+      "regex_Format": "(?i)INR [[amount]] spent on ICICI Bank Card [[account]] on [[date]] at [[to]]. Avl Lmt.*"
+    },
+    {
+      "sender": "ICICIB",
+      "type": "debit",
+      "regex_Format": "(?i)Dear Customer, ICICI Bank Account [[account]] is debited with INR [[amount]] on [[date]]. Info: [[to]]. The Available.*"
+    },
+    {
+      "sender": "ICICIB",
+      "type": "debit",
+      "regex_Format": "(?i)ICICI Bank Acct [[account]] debited (?:for Rs|with INR) [[amount]] on [[date]][;|\\.] [[to]] credited..*"
+    },
+    {
+      "sender": "ICICIB",
+      "type": "credit",
+      "regex_Format": "(?i)Dear Customer, Payment of INR [[amount]] has been received towards your ICICI Bank Credit Card [[account]] on [[date]] through UPI..*"
+    },
+    {
+      "sender": "ICICIB",
+      "type": "credit",
+      "regex_Format": "(?i)Dear Customer, your ICICI Bank Account [[account]] has been credited with INR [[amount]] on [[date]]. Info:[[to]]. The Available.*"
+    },
+    {
+      "sender": "ICICIB",
+      "type": "credit",
+      "regex_Format": "(?i)ICICI Bank Account [[account]] is credited with Rs [[amount]] on [[date]] by Account linked to mobile number [[to]]. IMPS Ref.*"
+    }
+  ]
+}

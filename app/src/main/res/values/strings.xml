@@ -567,7 +567,7 @@
     <string name="about_hint_md_icons">"Material design icons"</string>
     <string name="about_hint_icon_pack">"Icon pack"</string>
     <string name="about_hint_translators">"Translators"</string>
-
+    <string name="about_hint_original_developer">Original-Designer</string>
     <string name="activity_launcher_legacy_edition_upgrade_title">"Upgrading…"</string>
     <string name="activity_launcher_first_start_title">"Welcome to MoneyWallet"</string>
     <string name="activity_launcher_first_start_content">"Is it the first time you use this application or do you want to restore a previous backup?"</string>

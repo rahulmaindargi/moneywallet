@@ -24,12 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import androidx.annotation.MenuRes;
-import androidx.annotation.NonNull;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -38,7 +32,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+import androidx.annotation.MenuRes;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.api.disk.DiskBackendServiceAPI;
 import com.rahul.moneywallet.broadcast.LocalAction;
@@ -155,20 +154,18 @@ public class BackendExplorerActivity extends SinglePanelActivity implements Swip
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_select_folder:
-                if (mActivityMode == MODE_FOLDER_PICKER) {
-                    IFile folder = getCurrentFolder();
-                    if (folder == null) {
-                        // return the root folder of the device instead of null
-                        folder = DiskBackendServiceAPI.getRootFolder();
-                    }
-                    Intent intent = new Intent();
-                    intent.putExtra(RESULT_FILE, folder);
-                    setResult(RESULT_OK, intent);
-                    finish();
+        if (item.getItemId() == R.id.action_select_folder) {
+            if (mActivityMode == MODE_FOLDER_PICKER) {
+                IFile folder = getCurrentFolder();
+                if (folder == null) {
+                    // return the root folder of the device instead of null
+                    folder = DiskBackendServiceAPI.getRootFolder();
                 }
-                break;
+                Intent intent = new Intent();
+                intent.putExtra(RESULT_FILE, folder);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
         }
         return false;
     }
@@ -226,23 +223,18 @@ public class BackendExplorerActivity extends SinglePanelActivity implements Swip
                 .positiveText(android.R.string.ok)
                 .negativeText(android.R.string.cancel)
                 .inputType(InputType.TYPE_CLASS_TEXT)
-                .input(R.string.hint_new_folder, 0, false, new MaterialDialog.InputCallback() {
-
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        Intent intent = new Intent(BackendExplorerActivity.this, BackendHandlerIntentService.class);
-                        intent.putExtra(BackendHandlerIntentService.BACKEND_ID, mBackendId);
-                        intent.putExtra(BackendHandlerIntentService.ACTION, BackendHandlerIntentService.ACTION_CREATE_FOLDER);
-                        intent.putExtra(BackendHandlerIntentService.PARENT_FOLDER, getCurrentFolder());
-                        intent.putExtra(BackendHandlerIntentService.FOLDER_NAME, input.toString());
-                        startService(intent);
-                    }
-
+                .input(R.string.hint_new_folder, 0, false, (dialog, input) -> {
+                    Intent intent = new Intent(BackendExplorerActivity.this, BackendHandlerIntentService.class);
+                    intent.putExtra(BackendHandlerIntentService.BACKEND_ID, mBackendId);
+                    intent.putExtra(BackendHandlerIntentService.ACTION, BackendHandlerIntentService.ACTION_CREATE_FOLDER);
+                    intent.putExtra(BackendHandlerIntentService.PARENT_FOLDER, getCurrentFolder());
+                    intent.putExtra(BackendHandlerIntentService.FOLDER_NAME, input.toString());
+                    startService(intent);
                 })
                 .show();
     }
 
-    private BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mLocalBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {

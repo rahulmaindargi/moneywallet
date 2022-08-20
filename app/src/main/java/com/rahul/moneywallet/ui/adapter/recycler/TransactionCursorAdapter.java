@@ -76,12 +76,23 @@ public class TransactionCursorAdapter extends AbstractCursorAdapter<RecyclerView
 
     @Override
     protected void onLoadColumnIndices(@NonNull Cursor cursor) {
-        mIndexType = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_ITEM_TYPE);
-        mIndexHeaderStartDate = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_START_DATE);
-        mIndexHeaderEndDate = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_END_DATE);
-        mIndexHeaderMoney = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_MONEY);
-        mIndexHeaderGroupType = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_GROUP_TYPE);
-        mIndexHeaderExpense = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_EXPENSE);
+        try {
+            mIndexType = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_ITEM_TYPE);
+
+            mIndexHeaderStartDate = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_START_DATE);
+            mIndexHeaderEndDate = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_END_DATE);
+            mIndexHeaderMoney = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_MONEY);
+            mIndexHeaderGroupType = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_GROUP_TYPE);
+            mIndexHeaderExpense = cursor.getColumnIndexOrThrow(TransactionHeaderCursor.COLUMN_HEADER_EXPENSE);
+        } catch (Exception e) {
+            mIndexType = -1;
+            mIndexHeaderStartDate = -1;
+            mIndexHeaderEndDate = -1;
+            mIndexHeaderMoney = 1;
+            mIndexHeaderGroupType = 1;
+            mIndexHeaderExpense = -1;
+            Log.e("Error", "Exception", e);
+        }
         mIndexCategoryName = cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_NAME);
         mIndexCategoryIcon = cursor.getColumnIndexOrThrow(Contract.Transaction.CATEGORY_ICON);
         mIndexTransactionId = cursor.getColumnIndexOrThrow(Contract.Transaction.ID);

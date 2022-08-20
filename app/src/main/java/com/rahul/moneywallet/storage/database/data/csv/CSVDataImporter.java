@@ -10,9 +10,11 @@ import com.rahul.moneywallet.storage.database.data.AbstractDataImporter;
 import com.rahul.moneywallet.utils.CurrencyManager;
 import com.rahul.moneywallet.utils.DateUtils;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
@@ -20,13 +22,18 @@ import java.util.Map;
 /**
  * Created by andrea on 23/12/18.
  */
-public class CSVDataImporter extends AbstractDataImporter {
+public class CSVDataImporter extends AbstractDataImporter implements Closeable {
 
     private final CSVReaderHeaderAware mReader;
 
     public CSVDataImporter(Context context, File file) throws IOException {
         super(context);
         mReader = new CSVReaderHeaderAware(new FileReader(file));
+    }
+
+    public CSVDataImporter(Context context, Reader file) throws IOException {
+        super(context);
+        mReader = new CSVReaderHeaderAware(file);
     }
 
     @Override

@@ -80,8 +80,8 @@ public abstract class AbstractDataImporter {
     protected long getOrCreateWallet(ContentResolver contentResolver, String name, CurrencyUnit currencyUnit) {
         Uri uri = DataContentProvider.CONTENT_WALLETS;
         String[] projection = new String[]{Contract.Wallet.ID};
-        String selection = Contract.Wallet.NAME + " = ? AND " + Contract.Wallet.CURRENCY + " = ?";
-        String[] selectionArgs = new String[]{name, currencyUnit.getIso()};
+        String selection = "( " + Contract.Wallet.NOTE + " LIKE '%'|| ?||'%' OR " + Contract.Wallet.NAME + " = ? ) AND " + Contract.Wallet.CURRENCY + " = ?";
+        String[] selectionArgs = new String[]{name, name, currencyUnit.getIso()};
         String sortOrder = Contract.Wallet.ID + " DESC";
         Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder);
         if (cursor != null) {

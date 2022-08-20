@@ -2,6 +2,7 @@ package com.rahul.moneywallet.storage.database.data;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
 import androidx.collection.LongSparseArray;
 
@@ -9,7 +10,6 @@ import com.rahul.moneywallet.model.Wallet;
 import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.utils.DateUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
@@ -27,7 +27,7 @@ public abstract class AbstractDataExporter {
     private final Context mContext;
     private final LongSparseArray<String> mPeopleCache;
 
-    public AbstractDataExporter(Context context, File folder) throws IOException {
+    public AbstractDataExporter(Context context) {
         mContext = context;
         mPeopleCache = new LongSparseArray<>();
     }
@@ -63,7 +63,7 @@ public abstract class AbstractDataExporter {
 
     public abstract void close() throws IOException;
 
-    public abstract File getOutputFile();
+    public abstract Uri getOutputFileUri();
 
     public abstract String getResultType();
 }

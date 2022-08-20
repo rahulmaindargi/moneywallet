@@ -2,7 +2,12 @@ package com.rahul.moneywallet.storage.database.data.pdf;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chapter;
@@ -24,31 +29,37 @@ import com.rahul.moneywallet.storage.database.data.AbstractDataExporter;
 import com.rahul.moneywallet.utils.CurrencyManager;
 import com.rahul.moneywallet.utils.MoneyFormatter;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by andrea on 22/12/18.
  */
 public class PDFDataExporter extends AbstractDataExporter {
 
-    private final File mOutputFile;
     private final Document mDocument;
     private final MoneyFormatter mMoneyFormatter;
+    private final Uri mFileUri;
 
     private boolean mShouldLoadPeople = false;
     private int mChapterCount = 0;
 
-    public PDFDataExporter(Context context, File folder) throws IOException {
-        super(context, folder);
-        mOutputFile = new File(folder, getDefaultFileName(".pdf"));
+    public PDFDataExporter(Context context, @NonNull Uri folder) throws IOException {
+        super(context);
+
+        DocumentFile documentFile = DocumentFile.fromTreeUri(context, folder);
+        DocumentFile file = Objects.requireNonNull(documentFile).createFile("application/pdf", getDefaultFileName(".pdf"));
+        mFileUri = Objects.requireNonNull(file).getUri();
+        ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(mFileUri, "w");
+        FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
+
         mMoneyFormatter = MoneyFormatter.getInstance();
         mDocument = new Document(PageSize.A4);
         try {
-            PdfWriter.getInstance(mDocument, new FileOutputStream(mOutputFile));
+            PdfWriter.getInstance(mDocument, fileOutputStream);
         } catch (DocumentException e) {
             throw new IOException(e);
         }
@@ -90,7 +101,7 @@ public class PDFDataExporter extends AbstractDataExporter {
                 }
             }
         }
-        return contractColumns.toArray(new String[contractColumns.size()]);
+        return contractColumns.toArray(new String[0]);
     }
 
     @Override
@@ -175,8 +186,6 @@ public class PDFDataExporter extends AbstractDataExporter {
                                 }
                             }
                             label = builder.toString();
-                        } else {
-                            label = null;
                         }
                         break;
                     case Constants.COLUMN_PLACE:
@@ -192,7 +201,7 @@ public class PDFDataExporter extends AbstractDataExporter {
         return table;
     }
 
-    private PdfPTable createTable(String[] columns) throws DocumentException {
+    private PdfPTable createTable(String[] columns) {
         // create the table with a fixed number of columns
         PdfPTable table = new PdfPTable(columns.length);
         table.setWidthPercentage(100f);
@@ -243,8 +252,8 @@ public class PDFDataExporter extends AbstractDataExporter {
     }
 
     @Override
-    public File getOutputFile() {
-        return mOutputFile;
+    public Uri getOutputFileUri() {
+        return mFileUri;
     }
 
     @Override

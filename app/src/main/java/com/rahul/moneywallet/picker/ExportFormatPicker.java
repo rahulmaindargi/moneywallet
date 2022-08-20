@@ -21,6 +21,7 @@ package com.rahul.moneywallet.picker;
 
 import android.content.Context;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -32,9 +33,9 @@ import com.rahul.moneywallet.ui.fragment.dialog.DataFormatPickerDialog;
 /**
  * Created by andrea on 12/03/18.
  */
-public class ImportExportFormatPicker extends Fragment implements DataFormatPickerDialog.Callback {
+public class ExportFormatPicker extends Fragment implements DataFormatPickerDialog.Callback {
 
-    private static final String SS_CURRENT_FORMAT = "ImportExportFormatPicker::SavedState::CurrentFormat";
+    private static final String SS_CURRENT_FORMAT = "ExportFormatPicker::SavedState::CurrentFormat";
 
     private Controller mController;
 
@@ -42,17 +43,17 @@ public class ImportExportFormatPicker extends Fragment implements DataFormatPick
 
     private DataFormatPickerDialog mDataFormatPickerDialog;
 
-    public static ImportExportFormatPicker createPicker(FragmentManager fragmentManager, String tag) {
-        ImportExportFormatPicker budgetTypePicker = (ImportExportFormatPicker) fragmentManager.findFragmentByTag(tag);
+    public static ExportFormatPicker createPicker(FragmentManager fragmentManager, String tag) {
+        ExportFormatPicker budgetTypePicker = (ExportFormatPicker) fragmentManager.findFragmentByTag(tag);
         if (budgetTypePicker == null) {
-            budgetTypePicker = new ImportExportFormatPicker();
+            budgetTypePicker = new ExportFormatPicker();
             fragmentManager.beginTransaction().add(budgetTypePicker, tag).commit();
         }
         return budgetTypePicker;
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Controller) {
             mController = (Controller) context;

@@ -35,7 +35,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.hardware.fingerprint.FingerprintManagerCompat;
+import androidx.biometric.BiometricManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -95,11 +95,11 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings_utility);
-        mDailyReminderPreference = (ThemedListPreference) findPreference("daily_reminder");
-        mSecurityModeListPreference = (ThemedListPreference) findPreference("security_mode");
+        mDailyReminderPreference = findPreference("daily_reminder");
+        mSecurityModeListPreference = findPreference("security_mode");
         mSecurityModeChangeKeyPreference = findPreference("security_change_key");
-        mExchangeRateServiceListPreference = (ThemedListPreference) findPreference("exchange_rate_source");
-        mExchangeRateCustomApiKey = (ThemedInputPreference) findPreference("exchange_rate_api_key");
+        mExchangeRateServiceListPreference = findPreference("exchange_rate_source");
+        mExchangeRateCustomApiKey = findPreference("exchange_rate_api_key");
         mExchangeRateUpdatePreference = findPreference("exchange_rate_update");
         mCurrencyManagementPreference = findPreference("currency_management");
     }
@@ -238,7 +238,8 @@ public class UtilitySettingFragment extends PreferenceFragmentCompat {
     }
 
     private boolean isFingerprintAuthSupported(Context context) {
-        return FingerprintManagerCompat.from(context).isHardwareDetected();
+
+        return BiometricManager.BIOMETRIC_SUCCESS == BiometricManager.from(context).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK);
     }
 
     private void setupCurrentDailyReminder() {

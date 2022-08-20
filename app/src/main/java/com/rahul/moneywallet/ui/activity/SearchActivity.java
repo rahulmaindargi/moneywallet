@@ -19,18 +19,11 @@
 
 package com.rahul.moneywallet.ui.activity;
 
-import android.app.LoaderManager;
-import android.content.CursorLoader;
+
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.MenuRes;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -39,7 +32,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.storage.database.Contract;
 import com.rahul.moneywallet.storage.database.DataContentProvider;
@@ -55,7 +58,7 @@ import java.util.List;
 /**
  * Created by andrea on 04/04/18.
  */
-public class SearchActivity extends SinglePanelActivity implements LoaderManager.LoaderCallbacks<Cursor>,TransactionCursorAdapter.ActionListener, SwipeRefreshLayout.OnRefreshListener {
+public class SearchActivity extends SinglePanelActivity implements TransactionCursorAdapter.ActionListener, SwipeRefreshLayout.OnRefreshListener {
 
     private static final String SS_SEARCH_FLAGS = "SearchActivity::SavedState::SearchFlags";
 
@@ -124,7 +127,55 @@ public class SearchActivity extends SinglePanelActivity implements LoaderManager
     private void loadTransactionAsync(String query) {
         Bundle args = new Bundle();
         args.putString(ARG_QUERY, query);
-        getLoaderManager().restartLoader(LOADER_ID, args, SearchActivity.this);
+        LoaderManager.getInstance(this).restartLoader(LOADER_ID, args, new LoaderManager.LoaderCallbacks<Cursor>() {
+
+            @NonNull
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+                String query = args.getString(ARG_QUERY);
+                Uri uri = DataContentProvider.CONTENT_TRANSACTIONS;
+                StringBuilder selection = new StringBuilder();
+                if (mSearchFlags[0]) {
+                    appendSelection(selection, Contract.Transaction.DESCRIPTION);
+                }
+                if (mSearchFlags[1]) {
+                    appendSelection(selection, Contract.Transaction.CATEGORY_NAME);
+                }
+                if (mSearchFlags[2]) {
+                    appendSelection(selection, Contract.Transaction.DATE);
+                }
+                if (mSearchFlags[3]) {
+                    appendSelection(selection, Contract.Transaction.MONEY);
+                }
+                if (mSearchFlags[4]) {
+                    appendSelection(selection, Contract.Transaction.NOTE);
+                }
+                if (mSearchFlags[5]) {
+                    appendSelection(selection, Contract.Transaction.EVENT_NAME);
+                }
+                if (mSearchFlags[6]) {
+                    appendSelection(selection, Contract.Transaction.PLACE_NAME);
+                }
+                String[] selectionArgs = getSelectionArguments(query);
+                String sortOrder = Contract.Transaction.DATE + " DESC";
+                return new CursorLoader(SearchActivity.this, uri, null, selection.toString(), selectionArgs, sortOrder);
+            }
+
+            @Override
+            public void onLoadFinished(@NonNull Loader loader, Cursor cursor) {
+                mCursorAdapter.changeCursor(cursor);
+                if (cursor != null && cursor.getCount() > 0) {
+                    mAdvancedRecyclerView.setState(AdvancedRecyclerView.State.READY);
+                } else {
+                    mAdvancedRecyclerView.setState(AdvancedRecyclerView.State.EMPTY);
+                }
+            }
+
+            @Override
+            public void onLoaderReset(@NonNull Loader loader) {
+                mCursorAdapter.changeCursor(null);
+            }
+        });
     }
 
     @Override
@@ -149,10 +200,8 @@ public class SearchActivity extends SinglePanelActivity implements LoaderManager
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_filter:
-                showFilterDialog();
-                break;
+        if (item.getItemId() == R.id.action_filter) {
+            showFilterDialog();
         }
         return false;
     }
@@ -170,24 +219,19 @@ public class SearchActivity extends SinglePanelActivity implements LoaderManager
         ThemedDialog.buildMaterialDialog(this)
                 .title(R.string.dialog_filter_search_title)
                 .items(items)
-                .itemsCallbackMultiChoice(getSelectedIndices(), new MaterialDialog.ListCallbackMultiChoice() {
-
-                    @Override
-                    public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
-                        mSearchFlags = new boolean[] {
-                                isChecked(0, which),
-                                isChecked(1, which),
-                                isChecked(2, which),
-                                isChecked(3, which),
-                                isChecked(4, which),
-                                isChecked(5, which),
-                                isChecked(6, which)
-                        };
-                        mAdvancedRecyclerView.setState(AdvancedRecyclerView.State.LOADING);
-                        loadTransactionAsync(mSearchEditText.getText().toString());
-                        return true;
-                    }
-
+                .itemsCallbackMultiChoice(getSelectedIndices(), (dialog, which, text) -> {
+                    mSearchFlags = new boolean[]{
+                            isChecked(0, which),
+                            isChecked(1, which),
+                            isChecked(2, which),
+                            isChecked(3, which),
+                            isChecked(4, which),
+                            isChecked(5, which),
+                            isChecked(6, which)
+                    };
+                    mAdvancedRecyclerView.setState(AdvancedRecyclerView.State.LOADING);
+                    loadTransactionAsync(mSearchEditText.getText().toString());
+                    return true;
                 })
                 .positiveText(android.R.string.ok)
                 .negativeText(android.R.string.cancel)
@@ -201,7 +245,7 @@ public class SearchActivity extends SinglePanelActivity implements LoaderManager
                 indices.add(i);
             }
         }
-        return indices.toArray(new Integer[indices.size()]);
+        return indices.toArray(new Integer[0]);
     }
 
     private boolean isChecked(int index, Integer[] which) {
@@ -213,22 +257,6 @@ public class SearchActivity extends SinglePanelActivity implements LoaderManager
         return false;
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String query = args.getString(ARG_QUERY);
-        Uri uri = DataContentProvider.CONTENT_TRANSACTIONS;
-        StringBuilder selection = new StringBuilder();
-        if (mSearchFlags[0]) {appendSelection(selection, Contract.Transaction.DESCRIPTION);}
-        if (mSearchFlags[1]) {appendSelection(selection, Contract.Transaction.CATEGORY_NAME);}
-        if (mSearchFlags[2]) {appendSelection(selection, Contract.Transaction.DATE);}
-        if (mSearchFlags[3]) {appendSelection(selection, Contract.Transaction.MONEY);}
-        if (mSearchFlags[4]) {appendSelection(selection, Contract.Transaction.NOTE);}
-        if (mSearchFlags[5]) {appendSelection(selection, Contract.Transaction.EVENT_NAME);}
-        if (mSearchFlags[6]) {appendSelection(selection, Contract.Transaction.PLACE_NAME);}
-        String[] selectionArgs = getSelectionArguments(query);
-        String sortOrder = Contract.Transaction.DATE + " DESC";
-        return new CursorLoader(this, uri, null, selection.toString(), selectionArgs, sortOrder);
-    }
 
     private void appendSelection(StringBuilder builder, String column) {
         if (builder.length() != 0) {
@@ -245,23 +273,9 @@ public class SearchActivity extends SinglePanelActivity implements LoaderManager
                 arguments.add(query);
             }
         }
-        return arguments.toArray(new String[arguments.size()]);
+        return arguments.toArray(new String[0]);
     }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        mCursorAdapter.changeCursor(cursor);
-        if (cursor != null && cursor.getCount() > 0) {
-            mAdvancedRecyclerView.setState(AdvancedRecyclerView.State.READY);
-        } else {
-            mAdvancedRecyclerView.setState(AdvancedRecyclerView.State.EMPTY);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mCursorAdapter.changeCursor(null);
-    }
 
     @Override
     public void onHeaderClick(Date startDate, Date endDate) {
@@ -283,7 +297,7 @@ public class SearchActivity extends SinglePanelActivity implements LoaderManager
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBooleanArray(SS_SEARCH_FLAGS, mSearchFlags);
     }

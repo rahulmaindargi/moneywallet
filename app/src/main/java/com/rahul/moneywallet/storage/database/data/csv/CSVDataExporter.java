@@ -2,7 +2,11 @@ package com.rahul.moneywallet.storage.database.data.csv;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
+
+import androidx.documentfile.provider.DocumentFile;
 
 import com.opencsv.CSVWriter;
 import com.rahul.moneywallet.model.CurrencyUnit;
@@ -12,9 +16,9 @@ import com.rahul.moneywallet.storage.database.data.AbstractDataExporter;
 import com.rahul.moneywallet.utils.CurrencyManager;
 import com.rahul.moneywallet.utils.MoneyFormatter;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +27,22 @@ import java.util.List;
  */
 public class CSVDataExporter extends AbstractDataExporter {
 
-    private final File mOutputFile;
     private final CSVWriter mWriter;
     private final MoneyFormatter mMoneyFormatter;
+    private final Uri mFileUri;
 
     private boolean mShouldLoadPeople = false;
 
-    public CSVDataExporter(Context context, File folder) throws IOException {
-        super(context, folder);
-        mOutputFile = new File(folder, getDefaultFileName(".csv"));
-        mWriter = new CSVWriter(new FileWriter(mOutputFile));
+    public CSVDataExporter(Context context, Uri folder) throws IOException {
+        super(context);
+        DocumentFile documentFile = DocumentFile.fromTreeUri(context, folder);
+        DocumentFile file = documentFile.createFile("text/csv", getDefaultFileName(".csv"));
+        mFileUri = file.getUri();
+        ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(mFileUri, "w");
+        FileOutputStream fileOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(pfd);
+        // FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
+
+        mWriter = new CSVWriter(new OutputStreamWriter(fileOutputStream));
         mMoneyFormatter = MoneyFormatter.getInstance();
         mMoneyFormatter.setCurrencyEnabled(false);
         mMoneyFormatter.setRoundDecimalsEnabled(false);
@@ -77,7 +87,7 @@ public class CSVDataExporter extends AbstractDataExporter {
                 }
             }
         }
-        return contractColumns.toArray(new String[contractColumns.size()]);
+        return contractColumns.toArray(new String[0]);
     }
 
     @Override
@@ -86,7 +96,7 @@ public class CSVDataExporter extends AbstractDataExporter {
     }
 
     @Override
-    public void exportData(Cursor cursor, String[] columns, Wallet... wallets) throws IOException {
+    public void exportData(Cursor cursor, String[] columns, Wallet... wallets) {
         // initialize the header line
         mWriter.writeNext(columns);
         // export all the rows
@@ -170,8 +180,8 @@ public class CSVDataExporter extends AbstractDataExporter {
     }
 
     @Override
-    public File getOutputFile() {
-        return mOutputFile;
+    public Uri getOutputFileUri() {
+        return mFileUri;
     }
 
     @Override

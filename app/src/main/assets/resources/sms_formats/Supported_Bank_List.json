@@ -7,6 +7,10 @@
     {
       "bankName": "CITI Bank",
       "formatsLink": "https://raw.githubusercontent.com/rahulmaindargi/moneywallet/master/app/src/main/assets/resources/sms_formats/CITIBANK_Transaction_SMS_Formats.json"
+    },
+    {
+      "bankName": "JIO Bank",
+      "formatsLink": "https://raw.githubusercontent.com/rahulmaindargi/moneywallet/master/app/src/main/assets/resources/sms_formats/JIOBANK_Transaction_SMS_Formats.json"
     }
   ]
 }

@@ -147,6 +147,7 @@ public class SMSHandler {
                     do {
                         String regex = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.REGEX));
                         String type = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.TYPE));
+                        String sender = cursor.getString(cursor.getColumnIndexOrThrow(Contract.SMSFormat.SENDER));
 
                         regex = regex.replaceAll("\\[\\[account]]", "(?<account>(?:[a-z]|[0-9]|\\\\*)+)");
                         regex = regex.replaceAll("\\[\\[amount]]", "(?<amount>(?:[0-9]|,)*.?[0-9]{2})");
@@ -159,7 +160,12 @@ public class SMSHandler {
                         Log.d("SMSHandler", "Matcher Check");
                         if (matcher.find()) {
                             Log.d("SMSHandler", "Matcher Find");
-                            String account = matcher.group("account");
+                            String account;
+                            try {
+                                account = matcher.group("account");
+                            } catch (IllegalArgumentException iae) {
+                                account = sender;
+                            }
                             String amount = matcher.group("amount");
                             String date;
                             try {

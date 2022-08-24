@@ -20,7 +20,6 @@
 package com.rahul.moneywallet.api;
 
 import android.content.Context;
-import android.os.Build;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.api.disk.DiskBackendService;
@@ -51,12 +50,12 @@ public class BackendServiceFactory {
     public static final String SERVICE_ID_EXTERNAL_MEMORY = "external_memory";
     public static final String SERVICE_ID_SAF = "storage_access_framework";
 
-    public static AbstractBackendServiceDelegate getServiceById(String backendId, AbstractBackendServiceDelegate.BackendServiceStatusListener listener) {
+    public static AbstractBackendServiceDelegate getServiceById(Context context, String backendId, AbstractBackendServiceDelegate.BackendServiceStatusListener listener) {
         switch (backendId) {
             case SERVICE_ID_DROPBOX:
                 return new DropboxBackendService(listener);
             case SERVICE_ID_GOOGLE_DRIVE:
-                return new GoogleDriveBackendService(listener);
+                return new GoogleDriveBackendService(context, listener);
             case SERVICE_ID_EXTERNAL_MEMORY:
                 return new DiskBackendService(listener);
             case SERVICE_ID_SAF:
@@ -85,9 +84,7 @@ public class BackendServiceFactory {
         services.add(new BackupService(SERVICE_ID_DROPBOX, R.drawable.ic_dropbox_24dp, R.string.service_backup_drop_box));
         services.add(new BackupService(SERVICE_ID_GOOGLE_DRIVE, R.drawable.ic_google_drive_24dp, R.string.service_backup_google_drive));
         services.add(new BackupService(SERVICE_ID_EXTERNAL_MEMORY, R.drawable.ic_sd_24dp, R.string.service_backup_external_memory));
-        if (Build.VERSION.SDK_INT >= 21) {
-            services.add(new BackupService(SERVICE_ID_SAF, R.drawable.ic_storage_black_24dp, R.string.service_backup_storage_access_framework));
-        }
+        services.add(new BackupService(SERVICE_ID_SAF, R.drawable.ic_storage_black_24dp, R.string.service_backup_storage_access_framework));
         return services;
     }
 

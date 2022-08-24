@@ -20,8 +20,9 @@
 package com.rahul.moneywallet.storage.database.backup;
 
 import android.content.ContentResolver;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
 
 import com.rahul.moneywallet.storage.database.DatabaseExporter;
 import com.rahul.moneywallet.storage.database.ExportException;
@@ -49,7 +50,7 @@ public class DefaultBackupExporter extends AbstractBackupExporter {
     
     private final String mPassword;
 
-    public DefaultBackupExporter(ContentResolver contentResolver, File backupFile, String password) throws ExportException {
+    public DefaultBackupExporter(ContentResolver contentResolver, File backupFile, String password) {
         super(contentResolver, backupFile);
         mPassword = password;
     }
@@ -96,8 +97,8 @@ public class DefaultBackupExporter extends AbstractBackupExporter {
             if (exporter != null) {
                 try {
                     exporter.close();
-                } catch (Exception ignore) {
-                    ignore.printStackTrace();
+                } catch (Exception print) {
+                    print.printStackTrace();
                 }
             }
         }

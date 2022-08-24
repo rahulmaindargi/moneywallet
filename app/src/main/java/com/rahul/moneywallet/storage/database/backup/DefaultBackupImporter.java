@@ -34,7 +34,6 @@ import net.lingala.zip4j.io.ZipInputStream;
 import net.lingala.zip4j.model.FileHeader;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by andrea on 25/10/18.
@@ -107,7 +106,7 @@ public class DefaultBackupImporter extends AbstractBackupImporter {
     }
 
     @Override
-    public void importAttachmentFiles(@NonNull File attachmentFolder) throws IOException, ImportException {
+    public void importAttachmentFiles(@NonNull File attachmentFolder) throws ImportException {
         try {
             ZipFile zipFile = new ZipFile(getBackupFile());
             if (!zipFile.isValidZipFile()) {

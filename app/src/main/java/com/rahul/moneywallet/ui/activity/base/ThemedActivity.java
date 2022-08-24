@@ -20,25 +20,21 @@
 package com.rahul.moneywallet.ui.activity.base;
 
 import android.app.ActivityManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.CallSuper;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.core.view.LayoutInflaterCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowInsetsController;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.LayoutInflaterCompat;
 
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.ui.view.theme.ITheme;
 import com.rahul.moneywallet.ui.view.theme.ThemeEngine;
 import com.rahul.moneywallet.ui.view.theme.ThemedLayoutInflater;
 import com.rahul.moneywallet.utils.Utils;
-
-import java.lang.reflect.Field;
 
 /**
  * This activity is used as base activity for all the application activities.
@@ -75,15 +71,9 @@ public abstract class ThemedActivity extends AppCompatActivity implements ThemeE
         LayoutInflater inflater = getLayoutInflater();
         final LayoutInflater.Factory2 baseFactory = inflater.getFactory2();
         try {
-            Field field = LayoutInflater.class.getDeclaredField("mFactorySet");
-            field.setAccessible(true);
-            field.setBoolean(inflater, false);
-            LayoutInflaterCompat.setFactory2(getLayoutInflater(), new ThemedLayoutInflater(baseFactory));
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            LayoutInflaterCompat.setFactory2(getLayoutInflater().cloneInContext(getApplicationContext()),
+                    new ThemedLayoutInflater(baseFactory));
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }
@@ -113,37 +103,29 @@ public abstract class ThemedActivity extends AppCompatActivity implements ThemeE
     private void setupActivityBaseTheme(ITheme theme) {
         onThemeStatusBar(theme);
         onThemeStatusBarIcons(theme);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            onThemeTaskDescription(theme);
-        }
+        onThemeTaskDescription(theme);
         onThemeWindowBackground(theme);
     }
 
     protected void onThemeStatusBar(ITheme theme) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(theme.getColorPrimaryDark());
-        }
+        getWindow().setStatusBarColor(theme.getColorPrimaryDark());
     }
 
     protected void onThemeStatusBarIcons(ITheme theme) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            View decorView = getWindow().getDecorView();
-            int systemUiVisibility = decorView.getSystemUiVisibility();
-            int statusBarColor = theme.getColorPrimaryDark();
-            boolean isStatusBarLight = Utils.isColorLight(statusBarColor);
-            if (isStatusBarLight) {
-                decorView.setSystemUiVisibility(systemUiVisibility | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            } else {
-                decorView.setSystemUiVisibility(systemUiVisibility & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            }
+        WindowInsetsController insetsController = getWindow().getInsetsController();
+        //int systemUiVisibility = insetsController.getSystemBarsAppearance();
+        int statusBarColor = theme.getColorPrimaryDark();
+        boolean isStatusBarLight = Utils.isColorLight(statusBarColor);
+        if (isStatusBarLight) {
+            insetsController.setSystemBarsAppearance(WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+        } else {
+            insetsController.setSystemBarsAppearance(~WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     protected void onThemeTaskDescription(ITheme theme) {
         String name = getString(R.string.app_name);
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        setTaskDescription(new ActivityManager.TaskDescription(name, icon, theme.getColorPrimary()));
+        setTaskDescription(new ActivityManager.TaskDescription(name, R.mipmap.ic_launcher, theme.getColorPrimary()));
     }
 
     protected void onThemeWindowBackground(ITheme theme) {

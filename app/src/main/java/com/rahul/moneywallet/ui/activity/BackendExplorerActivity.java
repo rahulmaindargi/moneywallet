@@ -141,8 +141,6 @@ public class BackendExplorerActivity extends SinglePanelActivity implements Swip
     protected void onMenuCreated(Menu menu) {
         switch (mActivityMode) {
             case MODE_EXPLORER:
-                menu.findItem(R.id.action_select_folder).setVisible(false);
-                break;
             case MODE_FILE_PICKER:
                 menu.findItem(R.id.action_select_folder).setVisible(false);
                 break;

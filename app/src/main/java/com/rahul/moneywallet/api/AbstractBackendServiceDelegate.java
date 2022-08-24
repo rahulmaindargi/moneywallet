@@ -19,12 +19,12 @@
 
 package com.rahul.moneywallet.api;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 
 import androidx.activity.ComponentActivity;
-import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.fragment.app.Fragment;
 
 /**
  * Created by andrea on 21/11/18.
@@ -54,19 +54,14 @@ public abstract class AbstractBackendServiceDelegate {
 
     public abstract void teardown(ComponentActivity activity) throws BackendException;
 
-    public boolean handlePermissionsResult(Context context, int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        return false;
-    }
-
-    public boolean handleActivityResult(Context context, int requestCode, int resultCode, Intent data) {
-        return false;
-    }
-
     protected void setBackendServiceEnabled(boolean enabled) {
         if (mListener != null) {
             mListener.onBackendStatusChange(enabled);
         }
     }
+
+    // TO BE CALLED in ONCreate only
+    public abstract void registerForActivityResult(Fragment fragment, Activity activity);
 
     public interface BackendServiceStatusListener {
 

@@ -22,13 +22,12 @@ package com.rahul.moneywallet.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.android.gms.drive.DriveFile;
-import com.google.android.gms.drive.DriveFolder;
-import com.google.android.gms.drive.DriveId;
-import com.google.android.gms.drive.Metadata;
+import com.google.api.services.drive.model.File;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Optional;
 
 /**
  * Created by andre on 21/03/2018.
@@ -40,40 +39,7 @@ public class GoogleDriveFile implements IFile, Parcelable {
     private static final String SIZE = "size";
     private static final String DIRECTORY = "directory";
 
-    private final DriveId mDriveId;
-    private final String mName;
-    private final long mSize;
-
-    private final boolean mIsDirectory;
-
-    private GoogleDriveFile(Parcel in) {
-        mDriveId = in.readParcelable(DriveId.class.getClassLoader());
-        mName = in.readString();
-        mSize = in.readLong();
-        mIsDirectory = in.readByte() != 0;
-    }
-
-    public GoogleDriveFile(Metadata metadata) {
-        mDriveId = metadata.getDriveId();
-        mName = metadata.getTitle();
-        mSize = metadata.getFileSize();
-        mIsDirectory = metadata.isFolder();
-    }
-
-    public GoogleDriveFile(String encoded) {
-        try {
-            JSONObject object = new JSONObject(encoded);
-            mDriveId = DriveId.decodeFromString(object.getString(ID));
-            mName = object.optString(NAME);
-            mSize = object.optLong(SIZE);
-            mIsDirectory = object.getBoolean(DIRECTORY);
-        } catch (JSONException e) {
-            throw new RuntimeException("Cannot decode file from string: " + e.getMessage());
-        }
-    }
-
     public static final Creator<GoogleDriveFile> CREATOR = new Creator<GoogleDriveFile>() {
-
         @Override
         public GoogleDriveFile createFromParcel(Parcel in) {
             return new GoogleDriveFile(in);
@@ -83,8 +49,45 @@ public class GoogleDriveFile implements IFile, Parcelable {
         public GoogleDriveFile[] newArray(int size) {
             return new GoogleDriveFile[size];
         }
-
     };
+    private final String mDriveId;
+    private final String mName;
+    private final long mSize;
+    private final boolean mIsDirectory;
+
+    protected GoogleDriveFile(Parcel in) {
+        mDriveId = in.readString();
+        mName = in.readString();
+        mSize = in.readLong();
+        mIsDirectory = in.readByte() != 0;
+    }
+
+    public GoogleDriveFile(String encoded) {
+        try {
+            JSONObject object = new JSONObject(encoded);
+            mDriveId = object.getString(ID);
+            mName = object.optString(NAME);
+            mSize = object.optLong(SIZE);
+            mIsDirectory = object.getBoolean(DIRECTORY);
+        } catch (JSONException e) {
+            throw new RuntimeException("Cannot decode file from string: " + e.getMessage());
+        }
+    }
+
+    public GoogleDriveFile(File file) {
+        mDriveId = file.getId();
+        mName = file.getName();
+        if (file.getSize() != null) {
+            mSize = file.getSize();
+        } else {
+            mSize = 0;
+        }
+        mIsDirectory = Optional.ofNullable(file.getCapabilities().getCanListChildren()).orElse(false);
+    }
+
+    public String getDriveId() {
+        return mDriveId;
+    }
 
     @Override
     public String getName() {
@@ -111,7 +114,7 @@ public class GoogleDriveFile implements IFile, Parcelable {
     public String encodeToString() {
         try {
             JSONObject object = new JSONObject();
-            object.put(ID, mDriveId.encodeToString());
+            object.put(ID, mDriveId);
             object.put(NAME, mName);
             object.put(SIZE, mSize);
             object.put(DIRECTORY, mIsDirectory);
@@ -121,14 +124,6 @@ public class GoogleDriveFile implements IFile, Parcelable {
         }
     }
 
-    public DriveFolder getDriveFolder() {
-        return mDriveId.asDriveFolder();
-    }
-
-    public DriveFile getDriveFile() {
-        return mDriveId.asDriveFile();
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -136,9 +131,10 @@ public class GoogleDriveFile implements IFile, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mDriveId, flags);
+        dest.writeString(mDriveId);
         dest.writeString(mName);
         dest.writeLong(mSize);
         dest.writeByte((byte) (mIsDirectory ? 1 : 0));
     }
+
 }

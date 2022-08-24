@@ -54,11 +54,11 @@ ext {
             constraintlayout : 'androidx.constraintlayout:constraintlayout:1.1.3'
     ]
     googlePlayServices = [
-            auth: "com.google.android.gms:play-services-auth:15.0.1",
-            signin: "com.google.android.gms:play-services-identity:15.0.1",
-            location: "com.google.android.gms:play-services-location:15.0.1",
-            places: "com.google.android.gms:play-services-places:15.0.1",
-            drive: "com.google.android.gms:play-services-drive:15.0.1"
+            auth: "com.google.android.gms:play-services-auth:20.2.0",
+            signin: "com.google.android.gms:play-services-identity:20.2.0",
+            location: "com.google.android.gms:play-services-location:20.2.0",
+            places: "com.google.android.gms:play-services-places:20.2.0",
+            drive: "com.google.android.gms:play-services-drive:20.2.0"
     ]
 }
 

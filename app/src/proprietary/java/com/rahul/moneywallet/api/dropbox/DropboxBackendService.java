@@ -24,15 +24,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.activity.ComponentActivity;
-import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.dropbox.core.android.Auth;
 import com.rahul.moneywallet.BuildConfig;
 import com.rahul.moneywallet.R;
-import com.rahul.moneywallet.api.BackendException;
 import com.rahul.moneywallet.api.AbstractBackendServiceDelegate;
+import com.rahul.moneywallet.api.BackendException;
 import com.rahul.moneywallet.api.BackendServiceFactory;
 import com.rahul.moneywallet.ui.view.theme.ThemedDialog;
 
@@ -78,31 +76,8 @@ public class DropboxBackendService extends AbstractBackendServiceDelegate {
         Auth.startOAuth2Authentication(activity, BuildConfig.API_KEY_DROPBOX);
     }
 
-    @Override
-    public void teardown(final ComponentActivity activity) throws BackendException {
-        ThemedDialog.buildMaterialDialog(activity)
-                .title(R.string.title_warning)
-                .content(R.string.message_backup_service_dropbox_disconnect)
-                .positiveText(android.R.string.yes)
-                .negativeText(android.R.string.no)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        destroyAccountInformation(activity);
-                    }
-
-                })
-                .show();
-    }
-
-    private void destroyAccountInformation(Activity activity) {
-        SharedPreferences preferences = activity.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE);
-        preferences.edit().clear().apply();
-        setBackendServiceEnabled(false);
-    }
-
-    /*package-local*/ static String getAccessToken(Context context) {
+    /*package-local*/
+    static String getAccessToken(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE);
         String accessToken = preferences.getString(ACCESS_TOKEN, null);
         if (accessToken == null) {
@@ -112,5 +87,27 @@ public class DropboxBackendService extends AbstractBackendServiceDelegate {
             }
         }
         return accessToken;
+    }
+
+    @Override
+    public void teardown(final ComponentActivity activity) {
+        ThemedDialog.buildMaterialDialog(activity)
+                .title(R.string.title_warning)
+                .content(R.string.message_backup_service_dropbox_disconnect)
+                .positiveText(android.R.string.yes)
+                .negativeText(android.R.string.no)
+                .onPositive((dialog, which) -> destroyAccountInformation(activity))
+                .show();
+    }
+
+    private void destroyAccountInformation(Activity activity) {
+        SharedPreferences preferences = activity.getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE);
+        preferences.edit().clear().apply();
+        setBackendServiceEnabled(false);
+    }
+
+    @Override
+    public void registerForActivityResult(Fragment fragment, Activity activity) {
+
     }
 }

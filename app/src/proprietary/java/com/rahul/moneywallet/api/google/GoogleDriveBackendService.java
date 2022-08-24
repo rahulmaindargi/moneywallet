@@ -22,16 +22,19 @@ package com.rahul.moneywallet.api.google;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
+import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.fragment.app.Fragment;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.drive.Drive;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.api.AbstractBackendServiceDelegate;
@@ -39,24 +42,21 @@ import com.rahul.moneywallet.api.BackendException;
 import com.rahul.moneywallet.api.BackendServiceFactory;
 import com.rahul.moneywallet.ui.view.theme.ThemedDialog;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import androidx.activity.ComponentActivity;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-
 /**
  * Created by andrea on 21/11/18.
  */
 public class GoogleDriveBackendService extends AbstractBackendServiceDelegate {
 
-    private static final int REQUEST_CODE_SIGN_IN = 8393;
+    private final GoogleSignInClient googleSignInClient;
+    private ActivityResultLauncher<Intent> launcher;
 
-    public GoogleDriveBackendService(BackendServiceStatusListener listener) {
+    public GoogleDriveBackendService(Context context, BackendServiceStatusListener listener) {
         super(listener);
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope(Scopes.DRIVE_APPFOLDER), new Scope(Scopes.DRIVE_FILE))
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(context, signInOptions);
     }
 
     @Override
@@ -81,75 +81,55 @@ public class GoogleDriveBackendService extends AbstractBackendServiceDelegate {
 
     @Override
     public boolean isServiceEnabled(Context context) {
-        Set<Scope> requiredScopes = new HashSet<>(2);
-        requiredScopes.add(Drive.SCOPE_FILE);
-        requiredScopes.add(Drive.SCOPE_APPFOLDER);
+
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(context);
-        return signInAccount != null && signInAccount.getGrantedScopes().containsAll(requiredScopes);
+        return signInAccount != null && GoogleSignIn.hasPermissions(signInAccount, new Scope(Scopes.DRIVE_APPFOLDER), new Scope(Scopes.DRIVE_FILE));
     }
 
     @Override
     public void setup(ComponentActivity activity) throws BackendException {
-        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(Drive.SCOPE_FILE)
-                .requestScopes(Drive.SCOPE_APPFOLDER)
-                .build();
-        GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(activity, signInOptions);
-        activity.registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
-                        Task<GoogleSignInAccount> getAccountTask = GoogleSignIn
-                                .getSignedInAccountFromIntent(result.getData());
-                        if (getAccountTask.isSuccessful()) {
-                            setBackendServiceEnabled(true);
-                        } else {
-                            setBackendServiceEnabled(false);
-                        }
-                    }
-                }
-        ).launch(googleSignInClient.getSignInIntent());
+        Intent signInIntent = googleSignInClient.getSignInIntent();
+        launcher.launch(signInIntent);
     }
 
     @Override
-    public void teardown(final ComponentActivity activity) throws BackendException {
+    public void teardown(final ComponentActivity activity) {
         ThemedDialog.buildMaterialDialog(activity)
                 .title(R.string.title_warning)
                 .content(R.string.message_backup_service_google_drive_disconnect)
                 .positiveText(android.R.string.yes)
                 .negativeText(android.R.string.no)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        signOutFromGoogle(activity);
-                    }
-
-                })
+                .onPositive((dialog, which) -> signOutFromGoogle(activity))
                 .show();
     }
 
     private void signOutFromGoogle(Activity activity) {
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(Drive.SCOPE_FILE)
-                .requestScopes(Drive.SCOPE_APPFOLDER)
+                .requestScopes(new Scope(Scopes.DRIVE_APPFOLDER), new Scope(Scopes.DRIVE_FILE))
                 .build();
         GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(activity, signInOptions);
         Task<Void> signOutTask = googleSignInClient.signOut();
-        signOutTask.addOnCompleteListener(new OnCompleteListener<Void>() {
-
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                setBackendServiceEnabled(false);
-            }
-
-        });
+        signOutTask.addOnCompleteListener(task -> setBackendServiceEnabled(false));
     }
 
+
     @Override
-    public boolean handleActivityResult(Context context, int requestCode, int resultCode, Intent data) {
-        // Do nothing. This is handled by the ActivityResultCallback.
-        return false;
+    public void registerForActivityResult(Fragment fragment, Activity activity) {
+        launcher = fragment.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    try {
+
+                        Task<GoogleSignInAccount> getAccountTask = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
+                        setBackendServiceEnabled(getAccountTask.isSuccessful());
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.e("GoogleAuth", " Sign in failed " + e.getMessage(), e);
+                        setBackendServiceEnabled(false);
+                    }
+
+                }
+        );
     }
 }

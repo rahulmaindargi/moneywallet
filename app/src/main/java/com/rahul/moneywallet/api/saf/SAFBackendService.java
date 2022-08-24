@@ -1,22 +1,22 @@
 package com.rahul.moneywallet.api.saf;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
+import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.api.AbstractBackendServiceDelegate;
 import com.rahul.moneywallet.api.BackendServiceFactory;
 import com.rahul.moneywallet.ui.view.theme.ThemedDialog;
-
-import androidx.activity.ComponentActivity;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 /**
  * Backend service used to access files over the android storage access framework.
@@ -34,6 +34,7 @@ public class SAFBackendService extends AbstractBackendServiceDelegate {
      * Preference key were the root uri is stored.
      */
     private static final String URI = "uri";
+    private ActivityResultLauncher<Uri> launcher;
 
     public SAFBackendService(BackendServiceStatusListener listener) {
         super(listener);
@@ -82,23 +83,7 @@ public class SAFBackendService extends AbstractBackendServiceDelegate {
 
     @Override
     public void setup(final ComponentActivity activity) {
-        activity.registerForActivityResult(
-            new DocumentTreeContract(),
-            new ActivityResultCallback<Uri>() {
-                @Override
-                public void onActivityResult(Uri uri) {
-                    boolean enabled = false;
-                    if (uri != null) {
-                        activity.getContentResolver().takePersistableUriPermission(
-                                uri,
-                                FLAG_URI_READ_WRITE
-                        );
-                        storeUri(activity, uri);
-                        enabled = true;
-                    }
-                    setBackendServiceEnabled(enabled);
-                }
-            }).launch(null);
+        launcher.launch(null);
     }
 
     @Override
@@ -112,16 +97,11 @@ public class SAFBackendService extends AbstractBackendServiceDelegate {
                 .content(R.string.message_backup_service_storage_access_framework_disconnect)
                 .positiveText(android.R.string.yes)
                 .negativeText(android.R.string.no)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        activity.getContentResolver()
-                                .releasePersistableUriPermission(uri, FLAG_URI_READ_WRITE);
-                        clearUri(activity);
-                        setBackendServiceEnabled(false);
-                    }
-
+                .onPositive((dialog, which) -> {
+                    activity.getContentResolver()
+                            .releasePersistableUriPermission(uri, FLAG_URI_READ_WRITE);
+                    clearUri(activity);
+                    setBackendServiceEnabled(false);
                 })
                 .show();
     }
@@ -152,8 +132,20 @@ public class SAFBackendService extends AbstractBackendServiceDelegate {
     }
 
     @Override
-    public boolean handleActivityResult(Context context, int requestCode, int resultCode, Intent data) {
-        // Do nothing. This is handled by the ActivityResultCallback.
-        return false;
+    public void registerForActivityResult(Fragment fragment, Activity activity) {
+        launcher = fragment.registerForActivityResult(
+                new DocumentTreeContract(),
+                uri -> {
+                    boolean enabled = false;
+                    if (uri != null) {
+                        activity.getContentResolver().takePersistableUriPermission(
+                                uri,
+                                FLAG_URI_READ_WRITE
+                        );
+                        storeUri(activity, uri);
+                        enabled = true;
+                    }
+                    setBackendServiceEnabled(enabled);
+                });
     }
 }

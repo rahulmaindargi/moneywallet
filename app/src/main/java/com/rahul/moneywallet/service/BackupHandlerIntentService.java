@@ -24,8 +24,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -35,6 +35,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.rahul.moneywallet.BuildConfig;
 import com.rahul.moneywallet.R;
 import com.rahul.moneywallet.api.BackendException;
 import com.rahul.moneywallet.api.BackendServiceFactory;
@@ -59,8 +60,6 @@ import com.rahul.moneywallet.storage.preference.PreferenceManager;
 import com.rahul.moneywallet.ui.notification.NotificationContract;
 import com.rahul.moneywallet.utils.CurrencyManager;
 import com.rahul.moneywallet.utils.DateUtils;
-import com.rahul.moneywallet.utils.ProgressInputStream;
-import com.rahul.moneywallet.utils.ProgressOutputStream;
 import com.rahul.moneywallet.utils.Utils;
 
 import org.apache.commons.io.FileUtils;
@@ -101,7 +100,7 @@ public class BackupHandlerIntentService extends IntentService {
     private static final String BACKUP_CACHE_FOLDER = "backups";
     private static final String TEMP_FOLDER = "temp";
     private static final String FILE_DATETIME_PATTERN = "yyyy-MM-dd_HH-mm-ss";
-    private static final String OUTPUT_FILE = "backup_%s%s";
+    private static final String OUTPUT_FILE = "backup_%s_%s%s";
     private static final int ACTION_NONE = 0;
     private static final boolean DEFAULT_AUTO_BACKUP = false;
     private static final boolean DEFAULT_ONLY_ON_WIFI = false;
@@ -121,11 +120,7 @@ public class BackupHandlerIntentService extends IntentService {
 
     public static void startInForeground(Context context, Intent intent) {
         intent.putExtra(BackupHandlerIntentService.RUN_FOREGROUND, true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
-        } else {
-            context.startService(intent);
-        }
+        context.startForegroundService(intent);
     }
 
     @Override
@@ -161,9 +156,12 @@ public class BackupHandlerIntentService extends IntentService {
                 if (onlyOnWiFi && (action == ACTION_BACKUP || action == ACTION_RESTORE)) {
                     ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                     if (connectivityManager != null) {
-                        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                        if (!networkInfo.isConnected()) {
-                            throw new WiFiNotConnectedException();
+                        Network activeNetwork = connectivityManager.getActiveNetwork();
+                        NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork);
+                        if (networkCapabilities != null) {
+                            if (!networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                                throw new WiFiNotConnectedException();
+                            }
                         }
                     }
                 }
@@ -216,14 +214,9 @@ public class BackupHandlerIntentService extends IntentService {
             notifyTaskProgress(ACTION_BACKUP, STATUS_BACKUP_CREATION, 0);
             File backup = prepareLocalBackupFile(revision, password);
             notifyTaskProgress(ACTION_BACKUP, STATUS_BACKUP_UPLOADING, 30);
-            IFile uploaded = mBackendServiceAPI.uploadFile(remoteFolder, backup, new ProgressInputStream.UploadProgressListener() {
-
-                @Override
-                public void onUploadProgressUpdate(int percentage) {
-                    int realProgress = 30 + (percentage * 70 / 100);
-                    notifyTaskProgress(ACTION_BACKUP, STATUS_BACKUP_UPLOADING, realProgress);
-                }
-
+            IFile uploaded = mBackendServiceAPI.uploadFile(remoteFolder, backup, percentage -> {
+                int realProgress = 30 + (percentage * 70 / 100);
+                notifyTaskProgress(ACTION_BACKUP, STATUS_BACKUP_UPLOADING, realProgress);
             });
             notifyTaskProgress(ACTION_BACKUP, STATUS_BACKUP_UPLOADING, 100);
             notifyUploadTaskFinished(uploaded);
@@ -250,7 +243,7 @@ public class BackupHandlerIntentService extends IntentService {
 
     private File createBackupFile(@NonNull File folder, @NonNull String extension) {
         String datetime = DateUtils.getDateTimeString(new Date(), FILE_DATETIME_PATTERN);
-        String name = String.format(Locale.ENGLISH, OUTPUT_FILE, datetime, extension);
+        String name = String.format(Locale.ENGLISH, OUTPUT_FILE, datetime, BuildConfig.BUILD_TYPE, extension);
         return new File(folder, name);
     }
 
@@ -270,14 +263,9 @@ public class BackupHandlerIntentService extends IntentService {
             try {
                 FileUtils.forceMkdir(revision);
                 notifyTaskProgress(ACTION_RESTORE, STATUS_BACKUP_DOWNLOADING, 0);
-                File backup = mBackendServiceAPI.downloadFile(revision, remoteFile, new ProgressOutputStream.DownloadProgressListener() {
-
-                    @Override
-                    public void onDownloadProgressUpdate(int percentage) {
-                        int realProgress = (percentage * 70 / 100);
-                        notifyTaskProgress(ACTION_RESTORE, STATUS_BACKUP_DOWNLOADING, realProgress);
-                    }
-
+                File backup = mBackendServiceAPI.downloadFile(revision, remoteFile, percentage -> {
+                    int realProgress = (percentage * 70 / 100);
+                    notifyTaskProgress(ACTION_RESTORE, STATUS_BACKUP_DOWNLOADING, realProgress);
                 });
                 notifyTaskProgress(ACTION_RESTORE, STATUS_BACKUP_RESTORING, 75);
                 String password = intent.getStringExtra(PASSWORD);
@@ -288,7 +276,7 @@ public class BackupHandlerIntentService extends IntentService {
                 CurrencyManager.invalidateCache(this);
                 RecurrenceBroadcastReceiver.scheduleRecurrenceTask(this);
                 AutoBackupBroadcastReceiver.scheduleAutoBackupTask(this);
-                notifyTaskFinished(ACTION_RESTORE);
+                notifyTaskFinished();
             } finally {
                 FileUtils.deleteQuietly(revision);
             }
@@ -373,11 +361,11 @@ public class BackupHandlerIntentService extends IntentService {
         }
     }
 
-    private void notifyTaskFinished(int action) {
+    private void notifyTaskFinished() {
         // notify only the local broadcast manager: it is not required to update
         // the notification because it is removed when everything is gone right
         Intent intent = new Intent(LocalAction.ACTION_BACKUP_SERVICE_FINISHED);
-        intent.putExtra(ACTION, action);
+        intent.putExtra(ACTION, BackupHandlerIntentService.ACTION_RESTORE);
         intent.putExtra(CALLER_ID, mCallerId);
         mBroadcastManager.sendBroadcast(intent);
     }
@@ -475,7 +463,7 @@ public class BackupHandlerIntentService extends IntentService {
         }
     }
 
-    private class WiFiNotConnectedException extends Exception {
+    private static class WiFiNotConnectedException extends Exception {
 
         private WiFiNotConnectedException() {
             super("the device is not connected to a WiFi network");

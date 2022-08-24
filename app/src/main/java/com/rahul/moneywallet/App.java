@@ -33,8 +33,6 @@ import com.rahul.moneywallet.ui.notification.NotificationContract;
 import com.rahul.moneywallet.ui.view.theme.ThemeEngine;
 import com.rahul.moneywallet.utils.CurrencyManager;
 
-import me.weishu.reflection.Reflection;
-
 /**
  * Created by andrea on 17/01/18.
  */
@@ -65,6 +63,6 @@ public class App extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
-        Reflection.unseal(base);
+        //Reflection.unseal(base);
     }
 }

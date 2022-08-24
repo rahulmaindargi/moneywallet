@@ -20,13 +20,14 @@
 package com.rahul.moneywallet.ui.adapter.recycler;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.rahul.moneywallet.R;
@@ -34,7 +35,6 @@ import com.rahul.moneywallet.model.IFile;
 import com.rahul.moneywallet.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class BackupFileAdapter extends RecyclerView.Adapter<BackupFileAdapter.Vi
         mFileList = fileList;
         mCanNavigateBack = canNavigateBack;
         if (mFileList != null) {
-            Collections.sort(mFileList, this);
+            mFileList.sort(this);
         }
         notifyDataSetChanged();
     }
@@ -66,7 +66,7 @@ public class BackupFileAdapter extends RecyclerView.Adapter<BackupFileAdapter.Vi
     public void addFileToList(IFile file) {
         if (mFileList != null) {
             mFileList.add(file);
-            Collections.sort(mFileList, this);
+            mFileList.sort(this);
         } else {
             mFileList = new ArrayList<>();
             mFileList.add(file);
@@ -135,9 +135,9 @@ public class BackupFileAdapter extends RecyclerView.Adapter<BackupFileAdapter.Vi
 
     /*package-local*/ class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private ImageView mAvatarImageView;
-        private TextView mPrimaryTextView;
-        private TextView mSecondaryTextView;
+        private final ImageView mAvatarImageView;
+        private final TextView mPrimaryTextView;
+        private final TextView mSecondaryTextView;
 
         /*package-local*/ ViewHolder(View itemView) {
             super(itemView);
@@ -150,7 +150,7 @@ public class BackupFileAdapter extends RecyclerView.Adapter<BackupFileAdapter.Vi
         @Override
         public void onClick(View v) {
             if (mController != null) {
-                int position = getAdapterPosition();
+                int position = getBindingAdapterPosition();
                 if (mCanNavigateBack) {
                     if (position == 0) {
                         mController.navigateBack();

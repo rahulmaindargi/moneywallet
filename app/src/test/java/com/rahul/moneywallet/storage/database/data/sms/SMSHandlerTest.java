@@ -71,6 +71,12 @@ class SMSHandlerTest {
         Assertions.assertTrue(matcher.find());
         // Assertions.assertEquals("INF*IWISH Con", matcher.group("to"));
 
+        preRegex = "(?i)ICICI Bank Acct [[account]] debited (?:for|with) (?:Rs|INR) [[amount]] on [[date]](;|\\.| &) [[to]] credited..*";
+        regex = getRegex(preRegex);
+        System.out.println(regex);
+        pattern = Pattern.compile(regex);
+        matcher = pattern.matcher("ICICI Bank Acct XX591 debited with Rs 49,000.00 on 25-Aug-22 & Acct XX704 credited.IMPS:");
+        Assertions.assertTrue(matcher.find());
 
     }
 

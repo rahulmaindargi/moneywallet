@@ -42,9 +42,11 @@ public class NSDServiceRegistrationHelper {
     }
 
     private int getAvailablePort() {
+        serverSocketPort = 0;
         try (ServerSocket serverSocket = new ServerSocket(0)) {
             Log.i("SyncDeviceActivity", "Local port" + serverSocket.getLocalPort());
-            return serverSocket.getLocalPort();
+            serverSocketPort = serverSocket.getLocalPort();
+            return serverSocketPort;
         } catch (IOException e) {
             e.printStackTrace();
         }
